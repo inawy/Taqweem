@@ -148,7 +148,8 @@ await session('phone-tall-ar', { viewport: { width: 390, height: 1500 }, locale:
 // Text at 200% (the design system's delivery check): the root font size doubled, as a browser's
 // text-size setting does. Prints what overflows sideways and what is cut off, then screenshots.
 await session('phone-zoom-ar', { viewport: { width: 390, height: 844 }, locale: 'ar-SA', hasTouch: true, isMobile: true, deviceScaleFactor: 1 }, async (page, shot) => {
-  await page.addStyleTag({ content: 'html { font-size: 200% !important; }' });
+  // The page's policy forbids a <style> tag; a script setting the element's own style is allowed.
+  await page.evaluate(() => document.documentElement.style.setProperty('font-size', '200%', 'important'));
   const audit = async (label) => {
     const r = await page.evaluate(() => ({
       sideways: document.documentElement.scrollWidth - document.documentElement.clientWidth,

@@ -273,8 +273,11 @@
     clip-path: inset(50%);
     white-space: nowrap;
   }
+  /* Fixed at 16px: it is a decorative copy of the button's name (aria-hidden), and at 200% text
+     its box outgrew the 46px button and pushed the page sideways (D-082). */
   .tb-today-day {
     display: inline-block;
+    font-size: 16px;
     min-inline-size: 1.6em;
     padding-block: 1px;
     border: 2px solid currentcolor;

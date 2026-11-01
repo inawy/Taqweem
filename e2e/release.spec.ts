@@ -228,6 +228,28 @@ test.describe('automated accessibility checks (axe, WCAG 2.0/2.1 A and AA)', () 
     await expectNoViolations(page, 'agenda, past event');
   });
 
+  test('the year view and the quick-add card, light and dark', async ({ page }) => {
+    await page.goto('/');
+    await addEvent(page, 'Dentist');
+    await page.keyboard.press('KeyY');
+    await expect(page.locator('.year')).toBeVisible();
+    await expectNoViolations(page, 'year, light');
+
+    await page.keyboard.press('KeyW');
+    await page.locator('.tg-col').nth(2).click({ position: { x: 20, y: 400 } });
+    await expect(page.locator('.modal.quick')).toBeVisible();
+    await expectNoViolations(page, 'quick card, light');
+    await page.keyboard.press('Escape');
+
+    await page.getByLabel('Theme').selectOption('dark');
+    await page.keyboard.press('KeyY');
+    await expectNoViolations(page, 'year, dark');
+    await page.keyboard.press('KeyW');
+    await page.locator('.tg-col').nth(2).click({ position: { x: 20, y: 400 } });
+    await expect(page.locator('.modal.quick')).toBeVisible();
+    await expectNoViolations(page, 'quick card, dark');
+  });
+
   test('dark theme', async ({ page }) => {
     await page.goto('/');
     await addEvent(page, 'Dentist');
@@ -249,6 +271,25 @@ test.describe('automated accessibility checks (axe, WCAG 2.0/2.1 A and AA)', () 
     test('the agenda and its menu', async ({ page }) => {
       await page.goto('/');
       await expectNoViolations(page, 'phone agenda');
+    });
+
+    test('the view menu, open, in both themes', async ({ page }) => {
+      await page.goto('/');
+      await page.getByRole('button', { name: 'Change view' }).click();
+      await expect(page.getByRole('group', { name: 'View', exact: true })).toBeVisible();
+      await expectNoViolations(page, 'phone view menu, light');
+      await page.keyboard.press('Escape');
+      await page.emulateMedia({ colorScheme: 'dark' });
+      await page.getByRole('button', { name: 'Change view' }).click();
+      await expectNoViolations(page, 'phone view menu, dark');
+    });
+
+    test('the notices, dark and light (they now sit on a grey surface)', async ({ page }) => {
+      await page.goto('/');
+      await expect(page.locator('.banner').first()).toBeVisible();
+      await expectNoViolations(page, 'phone notice, light');
+      await page.emulateMedia({ colorScheme: 'dark' });
+      await expectNoViolations(page, 'phone notice, dark');
     });
   });
 });

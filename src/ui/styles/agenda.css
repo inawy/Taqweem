@@ -1,6 +1,8 @@
 /* Today / agenda list. Logical properties only; 44px touch targets. */
 .agenda {
   container-type: inline-size;
+  /* A size container no longer takes its width from its content: ask for the room explicitly. */
+  inline-size: 100%;
   max-inline-size: 640px;
   margin-inline: auto;
   padding: 8px 12px 96px;

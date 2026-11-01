@@ -1,5 +1,6 @@
 .tg {
-  --gutter: 56px;
+  /* 56px at normal size; grows with the text so "12:00 م" is not pushed off the screen (D-082). */
+  --gutter: calc(2.2rem + 20px);
   flex: 1;
   display: flex;
   flex-direction: column;

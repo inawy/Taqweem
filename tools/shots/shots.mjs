@@ -159,6 +159,11 @@ await session('phone-zoom-ar', { viewport: { width: 390, height: 844 }, locale: 
         .filter((el) => { const b = el.getBoundingClientRect(); return b.width > 0 && (b.right > innerWidth + 1 || b.left < -1); })
         .slice(0, 8)
         .map((el) => `${el.tagName}.${el.className} l=${Math.round(el.getBoundingClientRect().left)} r=${Math.round(el.getBoundingClientRect().right)}`),
+      wide: [...document.querySelectorAll('body *')]
+        .filter((el) => el.offsetParent !== null && el.scrollWidth > el.clientWidth + 2 && getComputedStyle(el).overflowX === 'visible' && el.clientWidth > 0)
+        .slice(0, 6)
+        .map((el) => `${el.tagName}.${el.className} sw=${el.scrollWidth} cw=${el.clientWidth}`),
+      viewport: [innerWidth, document.documentElement.clientWidth, document.documentElement.scrollWidth],
       cut: [...document.querySelectorAll('button, h1, h2, label')]
         .filter((el) => el.offsetParent !== null && el.scrollWidth > el.clientWidth + 2 && getComputedStyle(el).overflow !== 'visible' && getComputedStyle(el).textOverflow === 'ellipsis')
         .slice(0, 6)

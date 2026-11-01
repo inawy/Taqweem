@@ -289,7 +289,8 @@ test.describe('automated accessibility checks (axe, WCAG 2.0/2.1 A and AA)', () 
         storage['persist'] = () => Promise.resolve(false);
       });
       await page.goto('/');
-      await addEvent(page, 'Dentist');
+      // The notice only appears once there is enough to lose (a few events).
+      for (const title of ['One', 'Two', 'Three', 'Four', 'Five']) await addEvent(page, title);
       await expect(page.locator('.banner').first()).toBeVisible();
       await expectNoViolations(page, 'phone notice, light');
       await page.emulateMedia({ colorScheme: 'dark' });

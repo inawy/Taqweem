@@ -228,33 +228,24 @@ test.describe('automated accessibility checks (axe, WCAG 2.0/2.1 A and AA)', () 
     await expectNoViolations(page, 'agenda, past event');
   });
 
-  test('the year view and the quick-add card, light and dark', async ({ page }) => {
-    await page.goto('/');
-    await addEvent(page, 'Dentist');
-    await page.keyboard.press('KeyY');
-    await expect(page.locator('.year')).toBeVisible();
-    await expectNoViolations(page, 'year, light');
+  for (const scheme of ['light', 'dark'] as const) {
+    test(`the year view and the quick-add card, ${scheme}`, async ({ page }) => {
+      await page.emulateMedia({ colorScheme: scheme });
+      await page.goto('/');
+      await addEvent(page, 'Dentist');
+      await page.keyboard.press('KeyY');
+      await expect(page.locator('.year')).toBeVisible();
+      await expectNoViolations(page, `year, ${scheme}`);
 
-    await page.keyboard.press('KeyW');
-    await page
-      .locator('.tg-col')
-      .nth(2)
-      .click({ position: { x: 20, y: 400 } });
-    await expect(page.locator('.modal.quick')).toBeVisible();
-    await expectNoViolations(page, 'quick card, light');
-    await page.keyboard.press('Escape');
-
-    await page.getByLabel('Theme').selectOption('dark');
-    await page.keyboard.press('KeyY');
-    await expectNoViolations(page, 'year, dark');
-    await page.keyboard.press('KeyW');
-    await page
-      .locator('.tg-col')
-      .nth(2)
-      .click({ position: { x: 20, y: 400 } });
-    await expect(page.locator('.modal.quick')).toBeVisible();
-    await expectNoViolations(page, 'quick card, dark');
-  });
+      await page.keyboard.press('KeyW');
+      await page
+        .locator('.tg-col')
+        .nth(2)
+        .click({ position: { x: 20, y: 400 } });
+      await expect(page.locator('.modal.quick')).toBeVisible();
+      await expectNoViolations(page, `quick card, ${scheme}`);
+    });
+  }
 
   test('dark theme', async ({ page }) => {
     await page.goto('/');
@@ -291,7 +282,14 @@ test.describe('automated accessibility checks (axe, WCAG 2.0/2.1 A and AA)', () 
     });
 
     test('the notices, dark and light (they now sit on a grey surface)', async ({ page }) => {
+      // A browser that will not promise to keep the data: the "not guaranteed" notice appears.
+      await page.addInitScript(() => {
+        const storage = navigator.storage as unknown as Record<string, unknown>;
+        storage['persisted'] = () => Promise.resolve(false);
+        storage['persist'] = () => Promise.resolve(false);
+      });
       await page.goto('/');
+      await addEvent(page, 'Dentist');
       await expect(page.locator('.banner').first()).toBeVisible();
       await expectNoViolations(page, 'phone notice, light');
       await page.emulateMedia({ colorScheme: 'dark' });

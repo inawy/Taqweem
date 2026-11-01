@@ -184,28 +184,6 @@ test.describe('the whole cycle in a real browser', () => {
 });
 
 test.describe('the quick card on a wide screen', () => {
-  test('DEBUG focus trail', async ({ page }) => {
-    await page.addInitScript(() => {
-      const w = window as unknown as { __log: string[] };
-      w.__log = [];
-      const orig = HTMLElement.prototype.focus;
-      HTMLElement.prototype.focus = function (this: HTMLElement, ...a: []) {
-        const ok = (orig as () => void).apply(this, a);
-        w.__log.push(`focus ${this.tagName}.${this.className} -> active ${document.activeElement?.tagName}.${document.activeElement?.className} vis=${getComputedStyle(this).visibility}`);
-        return ok;
-      } as typeof orig;
-      document.addEventListener('focusin', (e) => w.__log.push(`focusin ${(e.target as HTMLElement).tagName}.${(e.target as HTMLElement).className}`), true);
-      document.addEventListener('focusout', (e) => w.__log.push(`focusout ${(e.target as HTMLElement).tagName}.${(e.target as HTMLElement).className}`), true);
-    });
-    await page.goto('/');
-    await page.keyboard.press('KeyW');
-    await page.locator('.tg-col').nth(2).click({ position: { x: 20, y: 400 } });
-    await expect(page.locator('.modal.quick')).toBeVisible();
-    await page.waitForTimeout(500);
-    const log = await page.evaluate(() => (window as unknown as { __log: string[] }).__log);
-    console.log('FOCUSLOG ' + JSON.stringify(log));
-  });
-
   test('Escape closes a card opened by a click, and the shortcuts work again', async ({ page }) => {
     await page.goto('/');
     await page.keyboard.press('KeyW');

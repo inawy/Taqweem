@@ -236,7 +236,10 @@ test.describe('automated accessibility checks (axe, WCAG 2.0/2.1 A and AA)', () 
     await expectNoViolations(page, 'year, light');
 
     await page.keyboard.press('KeyW');
-    await page.locator('.tg-col').nth(2).click({ position: { x: 20, y: 400 } });
+    await page
+      .locator('.tg-col')
+      .nth(2)
+      .click({ position: { x: 20, y: 400 } });
     await expect(page.locator('.modal.quick')).toBeVisible();
     await expectNoViolations(page, 'quick card, light');
     await page.keyboard.press('Escape');
@@ -245,7 +248,10 @@ test.describe('automated accessibility checks (axe, WCAG 2.0/2.1 A and AA)', () 
     await page.keyboard.press('KeyY');
     await expectNoViolations(page, 'year, dark');
     await page.keyboard.press('KeyW');
-    await page.locator('.tg-col').nth(2).click({ position: { x: 20, y: 400 } });
+    await page
+      .locator('.tg-col')
+      .nth(2)
+      .click({ position: { x: 20, y: 400 } });
     await expect(page.locator('.modal.quick')).toBeVisible();
     await expectNoViolations(page, 'quick card, dark');
   });

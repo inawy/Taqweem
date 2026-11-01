@@ -195,4 +195,24 @@ await session('phone-zoom-ar', { viewport: { width: 390, height: 844 }, locale: 
   await page.getByRole('button', { name: 'إضافة حدث' }).click(); await audit('editor'); await shot('editor');
 });
 
+// Focus trail for the quick card opened by a click (D-084 diagnosis).
+await session('focus-trail', { viewport: { width: 1280, height: 800 }, locale: 'en-US' }, async (page) => {
+  await page.addInitScript(() => {
+    window.__log = [];
+    const orig = HTMLElement.prototype.focus;
+    HTMLElement.prototype.focus = function (...a) {
+      const r = orig.apply(this, a);
+      window.__log.push(`focus() ${this.tagName}.${this.className} vis=${getComputedStyle(this).visibility} -> active ${document.activeElement?.tagName}.${document.activeElement?.className}`);
+      return r;
+    };
+    for (const t of ['focusin', 'focusout']) document.addEventListener(t, (e) => window.__log.push(`${t} ${e.target.tagName}.${e.target.className}`), true);
+  });
+  await page.reload();
+  await page.keyboard.press('KeyW');
+  await page.locator('.tg-col').nth(2).click({ position: { x: 20, y: 400 } });
+  await page.waitForTimeout(800);
+  console.log('FOCUSLOG ' + JSON.stringify(await page.evaluate(() => window.__log)));
+  console.log('ACTIVE ' + (await page.evaluate(() => document.activeElement?.tagName + '.' + document.activeElement?.className)));
+});
+
 await browser.close();

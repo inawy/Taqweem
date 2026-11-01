@@ -183,6 +183,27 @@ test.describe('the whole cycle in a real browser', () => {
   });
 });
 
+test.describe('the quick card on a wide screen', () => {
+  test('Escape closes a card opened by a click, and the shortcuts work again', async ({ page }) => {
+    await page.goto('/');
+    await page.keyboard.press('KeyW');
+    await page
+      .locator('.tg-col')
+      .nth(2)
+      .click({ position: { x: 20, y: 400 } });
+    const card = page.locator('.modal.quick');
+    await expect(card).toBeVisible();
+    await expect(card.getByRole('textbox')).toBeFocused();
+    await page.keyboard.press('Escape');
+    await expect(card).toBeHidden();
+    await page.keyboard.press('KeyD');
+    await expect(page.getByRole('button', { name: 'Day', exact: true })).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    );
+  });
+});
+
 test.describe('offline (the app is cached by its service worker)', () => {
   test('after the first visit the app and its data open with the network cut', async ({
     page,

@@ -45,6 +45,9 @@ button.tg-headcell:hover {
 }
 
 .tg-weekday {
+  max-inline-size: 100%;
+  overflow: hidden;
+  white-space: nowrap;
   font-size: 0.75rem;
   color: var(--nawy-color-text-muted);
 }

@@ -153,11 +153,12 @@ await session('phone-zoom-ar', { viewport: { width: 390, height: 844 }, locale: 
   const audit = async (label) => {
     const r = await page.evaluate(() => ({
       sideways: document.documentElement.scrollWidth - document.documentElement.clientWidth,
-      offscreen: [...document.querySelectorAll('button, a, input, select, h1, h2')]
-        .filter((el) => el.offsetParent !== null)
+      // Anything past the screen edge, ignoring the closed drawer (parked off-screen on purpose).
+      offscreen: [...document.querySelectorAll('body *')]
+        .filter((el) => el.offsetParent !== null && !el.closest('.sidebar, .toast'))
         .filter((el) => { const b = el.getBoundingClientRect(); return b.width > 0 && (b.right > innerWidth + 1 || b.left < -1); })
-        .slice(0, 6)
-        .map((el) => `${el.tagName}.${el.className} "${(el.getAttribute('aria-label') ?? el.textContent ?? '').trim().slice(0, 24)}"`),
+        .slice(0, 8)
+        .map((el) => `${el.tagName}.${el.className} l=${Math.round(el.getBoundingClientRect().left)} r=${Math.round(el.getBoundingClientRect().right)}`),
       cut: [...document.querySelectorAll('button, h1, h2, label')]
         .filter((el) => el.offsetParent !== null && el.scrollWidth > el.clientWidth + 2 && getComputedStyle(el).overflow !== 'visible' && getComputedStyle(el).textOverflow === 'ellipsis')
         .slice(0, 6)

@@ -7,12 +7,20 @@
 
 .month-weekdays {
   display: grid;
-  grid-template-columns: repeat(7, 1fr);
+  grid-template-columns: repeat(7, minmax(0, 1fr));
   text-align: center;
   font-size: 0.8125rem;
   color: var(--nawy-color-text-muted);
   padding-block: 6px;
   border-block-end: 1px solid var(--nawy-color-border);
+}
+
+/* Big text (D-082): a day name that does not fit is cut at the cell, never allowed to push the
+   page sideways or run into its neighbour. */
+.month-weekdays > * {
+  min-inline-size: 0;
+  overflow: hidden;
+  white-space: nowrap;
 }
 
 /* One grid per week: row 1 = day numbers, rows 2… = lanes of event bars. */

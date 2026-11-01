@@ -1,5 +1,6 @@
 /* Today / agenda list. Logical properties only; 44px touch targets. */
 .agenda {
+  container-type: inline-size;
   max-inline-size: 640px;
   margin-inline: auto;
   padding: 8px 12px 96px;
@@ -77,6 +78,25 @@
   border-radius: 999px;
   font-size: 0.8125rem;
   white-space: nowrap;
+}
+
+/* Big text or a narrow screen (D-082): the time column, the title and the "in 20 minutes" pill no
+   longer fit side by side (at 200% the title got one letter per line), so the pill drops under the
+   title and the time column shrinks to what it needs. 21rem is where, at normal size, a 360px phone
+   still keeps the row; at larger text the same rem is wider than the screen and this applies. */
+@container (max-width: 21rem) {
+  .agenda-item {
+    grid-template-columns: max-content minmax(0, 1fr);
+    grid-template-areas:
+      'when title'
+      'when where'
+      'when until';
+  }
+
+  .agenda-until {
+    justify-self: start;
+    margin-block-start: 4px;
+  }
 }
 
 /* The one to get ready for: larger, with an accent ring. */

@@ -218,13 +218,14 @@ input:not([type='checkbox']) {
     line-height: 1.4;
   }
 
+  /* Words beside the buttons while there is room; with big text (rem doubles) the buttons drop
+     under the words instead of squeezing them into a column (D-082). */
   .banner-action {
-    flex-wrap: nowrap;
     gap: 8px;
   }
 
   .banner-action > span:first-child {
-    flex: 1 1 0;
+    flex: 1 1 14rem;
   }
 
   .banner-buttons {

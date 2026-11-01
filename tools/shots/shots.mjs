@@ -145,4 +145,31 @@ await session('phone-tall-ar', { viewport: { width: 390, height: 1500 }, locale:
   await page.getByRole('button', { name: 'إضافة تقويم' }).click(); await shot('calendar');
 });
 
+// Text at 200% (the design system's delivery check): the root font size doubled, as a browser's
+// text-size setting does. Prints what overflows sideways and what is cut off, then screenshots.
+await session('phone-zoom-ar', { viewport: { width: 390, height: 844 }, locale: 'ar-SA', hasTouch: true, isMobile: true, deviceScaleFactor: 1 }, async (page, shot) => {
+  await page.addStyleTag({ content: 'html { font-size: 200% !important; }' });
+  const audit = async (label) => {
+    const r = await page.evaluate(() => ({
+      sideways: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+      offscreen: [...document.querySelectorAll('button, a, input, select, h1, h2')]
+        .filter((el) => el.offsetParent !== null)
+        .filter((el) => { const b = el.getBoundingClientRect(); return b.width > 0 && (b.right > innerWidth + 1 || b.left < -1); })
+        .slice(0, 6)
+        .map((el) => `${el.tagName}.${el.className} "${(el.getAttribute('aria-label') ?? el.textContent ?? '').trim().slice(0, 24)}"`),
+      cut: [...document.querySelectorAll('button, h1, h2, label')]
+        .filter((el) => el.offsetParent !== null && el.scrollWidth > el.clientWidth + 2 && getComputedStyle(el).overflow !== 'visible' && getComputedStyle(el).textOverflow === 'ellipsis')
+        .slice(0, 6)
+        .map((el) => `${el.tagName}.${el.className} "${(el.textContent ?? '').trim().slice(0, 24)}"`),
+    }));
+    console.log(`zoom200 ${label}: ${JSON.stringify(r)}`);
+  };
+  await audit('agenda'); await shot('agenda');
+  await chooseView(page, 'شهر'); await audit('month'); await shot('month');
+  await chooseView(page, 'أسبوع'); await audit('week'); await shot('week');
+  await page.getByRole('button', { name: 'القائمة' }).click(); await audit('drawer'); await shot('drawer');
+  await page.getByRole('button', { name: 'إغلاق القائمة' }).click();
+  await page.getByRole('button', { name: 'إضافة حدث' }).click(); await audit('editor'); await shot('editor');
+});
+
 await browser.close();

@@ -108,7 +108,23 @@ await session('desktop-ar', { viewport: { width: 1280, height: 800 }, locale: 'a
   await key(page, 'KeyA'); await shot('agenda');
   await key(page, 'KeyC'); await shot('editor');
   await key(page, 'Escape');
-  await page.getByRole('button', { name: 'البيانات والنسخ الاحتياطي' }).click();
+  // Diagnosis (the click below used to hang at "scrolling into view" here).
+  const dataBtn = page.getByRole('button', { name: 'البيانات والنسخ الاحتياطي' });
+  console.log('diag', JSON.stringify(await page.evaluate(() => {
+    const side = document.querySelector('.sidebar');
+    const b = [...document.querySelectorAll('button')].find((x) => x.textContent?.includes('البيانات'));
+    const r = b?.getBoundingClientRect();
+    return {
+      active: document.activeElement?.tagName + '.' + document.activeElement?.className,
+      sidebar: side && { sh: side.scrollHeight, ch: side.clientHeight, st: side.scrollTop, overflowY: getComputedStyle(side).overflowY },
+      btn: r && { top: Math.round(r.top), bottom: Math.round(r.bottom), vh: innerHeight },
+      inert: [...document.querySelectorAll('[inert]')].map((e) => e.className),
+      htmlOverflow: getComputedStyle(document.documentElement).overflow + '/' + getComputedStyle(document.body).overflow,
+      dialogs: document.querySelectorAll('[role=dialog]').length,
+    };
+  })));
+  try { await dataBtn.scrollIntoViewIfNeeded({ timeout: 4000 }); console.log('diag scroll ok'); } catch (e) { console.log('diag scroll failed', String(e).slice(0, 200)); }
+  await dataBtn.click({ timeout: 8000 });
   await shot('data');
 });
 

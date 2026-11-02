@@ -707,7 +707,7 @@ button.block:active {
 }
 
 /* Beside the tap: no dimming, the card is placed by script (D-073). Until it is placed it stays
-   invisible so it does not flash in the middle first. */
+   invisible (opacity) so it does not flash in the middle first. */
 .modal-backdrop.quick-anchored {
   display: block;
   padding: 0;
@@ -719,7 +719,10 @@ button.block:active {
 }
 
 .quick-anchored .modal.quick:not([data-placed]) {
-  visibility: hidden;
+  /* Invisible but still focusable: `visibility: hidden` made the browser refuse focus (D-084). */
+  opacity: 0;
+  pointer-events: none;
+  animation: none;
 }
 
 /* On a phone the add button slides away while reading downward and returns on the way up (D-076).

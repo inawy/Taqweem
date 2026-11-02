@@ -70,13 +70,11 @@ export function QuickAdd({
     setPlace({ insetBlockStart: spot.top, insetInlineStart: spot.inlineStart });
   }, [point]);
 
-  // Focus the title once the card can be focused. Until it is placed beside the tap it is hidden
-  // (`visibility`), and a hidden element refuses focus: focusing on mount silently did nothing, so
-  // Escape and typing went to the page behind (found by the e2e "Escape closes a click-opened card").
-  const ready = point === undefined || place !== undefined;
+  // Focus the title on open. The card is hidden by opacity (not `visibility`, which refuses focus)
+  // until it is placed beside the tap (D-084).
   useEffect(() => {
-    if (ready) inputRef.current?.focus();
-  }, [ready]);
+    inputRef.current?.focus();
+  }, []);
 
   const submit = async (event?: FormEvent): Promise<void> => {
     event?.preventDefault();

@@ -108,23 +108,7 @@ await session('desktop-ar', { viewport: { width: 1280, height: 800 }, locale: 'a
   await key(page, 'KeyA'); await shot('agenda');
   await key(page, 'KeyC'); await shot('editor');
   await key(page, 'Escape');
-  // Diagnosis (the click below used to hang at "scrolling into view" here).
-  const dataBtn = page.getByRole('button', { name: 'البيانات والنسخ الاحتياطي' });
-  console.log('diag', JSON.stringify(await page.evaluate(() => {
-    const side = document.querySelector('.sidebar');
-    const b = [...document.querySelectorAll('button')].find((x) => x.textContent?.includes('البيانات'));
-    const r = b?.getBoundingClientRect();
-    return {
-      active: document.activeElement?.tagName + '.' + document.activeElement?.className,
-      sidebar: side && { sh: side.scrollHeight, ch: side.clientHeight, st: side.scrollTop, overflowY: getComputedStyle(side).overflowY },
-      btn: r && { top: Math.round(r.top), bottom: Math.round(r.bottom), vh: innerHeight },
-      inert: [...document.querySelectorAll('[inert]')].map((e) => e.className),
-      htmlOverflow: getComputedStyle(document.documentElement).overflow + '/' + getComputedStyle(document.body).overflow,
-      dialogs: document.querySelectorAll('[role=dialog]').length,
-    };
-  })));
-  try { await dataBtn.scrollIntoViewIfNeeded({ timeout: 4000 }); console.log('diag scroll ok'); } catch (e) { console.log('diag scroll failed', String(e).slice(0, 200)); }
-  await dataBtn.click({ timeout: 8000 });
+  await page.getByRole('button', { name: 'البيانات والنسخ الاحتياطي' }).click();
   await shot('data');
 });
 
@@ -193,26 +177,6 @@ await session('phone-zoom-ar', { viewport: { width: 390, height: 844 }, locale: 
   await page.getByRole('button', { name: 'القائمة' }).click(); await audit('drawer'); await shot('drawer');
   await page.getByRole('button', { name: 'إغلاق القائمة' }).click();
   await page.getByRole('button', { name: 'إضافة حدث' }).click(); await audit('editor'); await shot('editor');
-});
-
-// Focus trail for the quick card opened by a click (D-084 diagnosis).
-await session('focus-trail', { viewport: { width: 1280, height: 800 }, locale: 'en-US' }, async (page) => {
-  await page.addInitScript(() => {
-    window.__log = [];
-    const orig = HTMLElement.prototype.focus;
-    HTMLElement.prototype.focus = function (...a) {
-      const r = orig.apply(this, a);
-      window.__log.push(`focus() ${this.tagName}.${this.className} vis=${getComputedStyle(this).visibility} placed=${this.closest('.modal')?.getAttribute('data-placed')} anchored=${!!this.closest('.quick-anchored')} -> active ${document.activeElement?.tagName}.${document.activeElement?.className} CHAIN ${(() => { const out = []; for (let n = this; n; n = n.parentElement) out.push(`${n.tagName}.${n.className}:${getComputedStyle(n).visibility}`); return out.join(' < '); })()}`);
-      return r;
-    };
-    for (const t of ['focusin', 'focusout']) document.addEventListener(t, (e) => window.__log.push(`${t} ${e.target.tagName}.${e.target.className}`), true);
-  });
-  await page.reload();
-  await page.keyboard.press('KeyW');
-  await page.locator('.tg-col').nth(2).click({ position: { x: 20, y: 400 } });
-  await page.waitForTimeout(800);
-  console.log('FOCUSLOG ' + JSON.stringify(await page.evaluate(() => window.__log)));
-  console.log('ACTIVE ' + (await page.evaluate(() => document.activeElement?.tagName + '.' + document.activeElement?.className)));
 });
 
 await browser.close();

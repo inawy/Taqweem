@@ -202,7 +202,7 @@ await session('focus-trail', { viewport: { width: 1280, height: 800 }, locale: '
     const orig = HTMLElement.prototype.focus;
     HTMLElement.prototype.focus = function (...a) {
       const r = orig.apply(this, a);
-      window.__log.push(`focus() ${this.tagName}.${this.className} vis=${getComputedStyle(this).visibility} placed=${this.closest('.modal')?.getAttribute('data-placed')} anchored=${!!this.closest('.quick-anchored')} -> active ${document.activeElement?.tagName}.${document.activeElement?.className} STACK ${new Error().stack.split('\n').slice(2, 6).join(' | ')}`);
+      window.__log.push(`focus() ${this.tagName}.${this.className} vis=${getComputedStyle(this).visibility} placed=${this.closest('.modal')?.getAttribute('data-placed')} anchored=${!!this.closest('.quick-anchored')} -> active ${document.activeElement?.tagName}.${document.activeElement?.className} CHAIN ${(() => { const out = []; for (let n = this; n; n = n.parentElement) out.push(`${n.tagName}.${n.className}:${getComputedStyle(n).visibility}`); return out.join(' < '); })()}`);
       return r;
     };
     for (const t of ['focusin', 'focusout']) document.addEventListener(t, (e) => window.__log.push(`${t} ${e.target.tagName}.${e.target.className}`), true);

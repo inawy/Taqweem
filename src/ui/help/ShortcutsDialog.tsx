@@ -3,6 +3,7 @@ import type { KeyboardEvent } from 'react';
 import { useT } from '@/features/i18n';
 import { SHORTCUT_GROUPS } from '@/features/view';
 import { trapTab } from '@/lib/focusTrap';
+import { useRestoreFocus } from '@/ui/shell/useRestoreFocus';
 import { CloseIcon } from '../shell/Icons';
 import { useSwipeClose } from '../shell/useSwipeClose';
 
@@ -13,6 +14,7 @@ export interface ShortcutsDialogProps {
 /** The keyboard shortcuts, listed (D-047). Read-only: nothing here changes anything. */
 export function ShortcutsDialog({ onClose }: ShortcutsDialogProps) {
   const t = useT();
+  useRestoreFocus();
   const titleId = useId();
   const ref = useRef<HTMLDivElement>(null);
 

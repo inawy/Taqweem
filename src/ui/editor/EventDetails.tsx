@@ -3,6 +3,7 @@ import type { KeyboardEvent } from 'react';
 import type { Calendar, CalEvent } from '@/core/model';
 import { useT } from '@/features/i18n';
 import { trapTab } from '@/lib/focusTrap';
+import { useRestoreFocus } from '@/ui/shell/useRestoreFocus';
 import { CloseIcon } from '@/ui/shell/Icons';
 import { useSwipeClose } from '@/ui/shell/useSwipeClose';
 import { calendarColorVars } from '@/ui/theme/calendarColor';
@@ -29,6 +30,7 @@ export function EventDetails({
   onClose,
 }: EventDetailsProps) {
   const t = useT();
+  useRestoreFocus();
   const titleId = useId();
   const ref = useRef<HTMLDivElement>(null);
   const editRef = useRef<HTMLButtonElement>(null);

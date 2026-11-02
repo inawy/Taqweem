@@ -4,6 +4,7 @@ import type { Scope } from '@/features/events';
 import { useT } from '@/features/i18n';
 import type { MessageKey } from '@/features/i18n';
 import { trapTab } from '@/lib/focusTrap';
+import { useRestoreFocus } from '@/ui/shell/useRestoreFocus';
 
 export interface ScopeDialogProps {
   readonly kind: 'edit' | 'delete';
@@ -23,6 +24,7 @@ const OPTIONS: readonly { scope: Scope; label: MessageKey }[] = [
 
 export function ScopeDialog({ kind, allowThis, warnReset, onChoose, onCancel }: ScopeDialogProps) {
   const t = useT();
+  useRestoreFocus();
   const titleId = useId();
   const ref = useRef<HTMLDivElement>(null);
   const [scope, setScope] = useState<Scope>(allowThis ? 'this' : 'following');

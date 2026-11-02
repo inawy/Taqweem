@@ -8,6 +8,7 @@ import type { Draft, DraftError } from '@/features/events';
 import { useT } from '@/features/i18n';
 import type { MessageKey } from '@/features/i18n';
 import { trapTab } from '@/lib/focusTrap';
+import { useRestoreFocus } from '@/ui/shell/useRestoreFocus';
 import { useVisualViewport } from '@/lib/useVisualViewport';
 import { CloseIcon } from '@/ui/shell/Icons';
 import { RepeatFields } from './RepeatFields';
@@ -73,6 +74,7 @@ export function EventEditor({
   registerClose,
 }: EventEditorProps) {
   const t = useT();
+  useRestoreFocus();
   const titleId = useId();
   const dialogRef = useRef<HTMLDivElement>(null);
   const titleRef = useRef<HTMLInputElement>(null);

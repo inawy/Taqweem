@@ -8,6 +8,7 @@ import type { SearchIndex, SearchResult } from '@/features/search';
 import { useT } from '@/features/i18n';
 import { useSettings } from '@/features/settings';
 import { trapTab } from '@/lib/focusTrap';
+import { useRestoreFocus } from '@/ui/shell/useRestoreFocus';
 import { calendarColorVars } from '@/ui/theme/calendarColor';
 
 export interface SearchPanelProps {
@@ -34,6 +35,7 @@ export function SearchPanel({
   onClearRecent,
 }: SearchPanelProps) {
   const t = useT();
+  useRestoreFocus();
   const { settings } = useSettings();
   const titleId = useId();
   const dialogRef = useRef<HTMLDivElement>(null);

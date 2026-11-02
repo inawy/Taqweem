@@ -18,6 +18,7 @@ import { useT } from '@/features/i18n';
 import type { MessageKey } from '@/features/i18n';
 import { useSettings } from '@/features/settings';
 import { trapTab } from '@/lib/focusTrap';
+import { useRestoreFocus } from '@/ui/shell/useRestoreFocus';
 import { useSwipeClose } from '../shell/useSwipeClose';
 import { downloadFile } from './download';
 
@@ -70,6 +71,7 @@ export function DataDialog({
   save = downloadFile,
 }: DataDialogProps) {
   const t = useT();
+  useRestoreFocus();
   const { settings } = useSettings();
   const titleId = useId();
   const dialogRef = useRef<HTMLDivElement>(null);

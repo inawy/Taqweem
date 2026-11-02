@@ -3,6 +3,7 @@ import type { KeyboardEvent } from 'react';
 import { useT } from '@/features/i18n';
 import { BUILD_INFO, RELEASE } from '@/lib/buildInfo';
 import { trapTab } from '@/lib/focusTrap';
+import { useRestoreFocus } from '@/ui/shell/useRestoreFocus';
 import { CloseIcon } from '../shell/Icons';
 import { useSwipeClose } from '../shell/useSwipeClose';
 
@@ -24,6 +25,7 @@ const build = [RELEASE, BUILD_INFO.sha, BUILD_INFO.date].filter(Boolean).join(' 
 /** What the app is, where the data lives, and what it cannot do (D-051). Read-only. */
 export function AboutDialog({ onClose }: AboutDialogProps) {
   const t = useT();
+  useRestoreFocus();
   const titleId = useId();
   const ref = useRef<HTMLDivElement>(null);
 

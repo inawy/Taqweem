@@ -5,6 +5,7 @@ import type { Draft } from '@/features/events';
 import { placeBeside } from '@/features/view';
 import { useT } from '@/features/i18n';
 import { trapTab } from '@/lib/focusTrap';
+import { useRestoreFocus } from '@/ui/shell/useRestoreFocus';
 import { calendarColorVars } from '@/ui/theme/calendarColor';
 
 /** Where the person tapped, in viewport pixels. */
@@ -43,6 +44,7 @@ export function QuickAdd({
   point,
 }: QuickAddProps) {
   const t = useT();
+  useRestoreFocus();
   const titleId = useId();
   const ref = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);

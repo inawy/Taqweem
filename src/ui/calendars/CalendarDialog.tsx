@@ -5,6 +5,7 @@ import { cleanCalendarName } from '@/features/calendars';
 import { useT } from '@/features/i18n';
 import type { MessageKey } from '@/features/i18n';
 import { trapTab } from '@/lib/focusTrap';
+import { useRestoreFocus } from '@/ui/shell/useRestoreFocus';
 import { useBackLayer } from '@/lib/useBackLayer';
 import { useVisualViewport } from '@/lib/useVisualViewport';
 import { CloseIcon } from '@/ui/shell/Icons';
@@ -42,6 +43,7 @@ export function CalendarDialog({
   onClose,
 }: CalendarDialogProps) {
   const t = useT();
+  useRestoreFocus();
   const titleId = useId();
   const ref = useRef<HTMLDivElement>(null);
   const nameRef = useRef<HTMLInputElement>(null);

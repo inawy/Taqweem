@@ -150,7 +150,10 @@ test.describe('keyboard and focus', () => {
     }
 
     // An event opened by clicking it.
-    await page.getByRole('button', { name: /Mouse test/ }).first().click();
+    await page
+      .getByRole('button', { name: /Mouse test/ })
+      .first()
+      .click();
     const details = page.getByRole('dialog', { name: 'Mouse test' });
     await expect(details).toBeVisible();
     await expect(details.locator(':focus')).toHaveCount(1);

@@ -143,7 +143,11 @@ test.describe('keyboard and focus', () => {
       await button.click();
       const dialog = page.getByRole('dialog', { name: title });
       await expect(dialog, `${title} opens`).toBeVisible();
-      await expect(dialog.locator(':focus'), `focus is inside ${title}`).toHaveCount(1);
+      // Focus is in the dialog (on it, for those that take focus themselves, or on a field in it).
+      expect(
+        await dialog.evaluate((el) => el.contains(document.activeElement)),
+        `focus is inside ${title}`,
+      ).toBe(true);
       await page.keyboard.press('Escape');
       await expect(dialog, `Escape closes ${title}`).toBeHidden();
       await expect(button, `focus returns to ${opener}`).toBeFocused();
@@ -156,7 +160,7 @@ test.describe('keyboard and focus', () => {
       .click();
     const details = page.getByRole('dialog', { name: 'Mouse test' });
     await expect(details).toBeVisible();
-    await expect(details.locator(':focus')).toHaveCount(1);
+    expect(await details.evaluate((el) => el.contains(document.activeElement))).toBe(true);
     await page.keyboard.press('Escape');
     await expect(details).toBeHidden();
   });

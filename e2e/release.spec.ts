@@ -128,6 +128,36 @@ test.describe('keyboard and focus', () => {
     await expect(search).toBeHidden();
   });
 
+  test('dialogs opened with the mouse take focus, Escape closes them, and focus goes back', async ({
+    page,
+  }) => {
+    await page.goto('/');
+    await addEvent(page, 'Mouse test');
+    const opened: [string, string][] = [
+      ['Add event', 'New event'],
+      ['Search', 'Search'],
+      ['Data & backups', 'Data & backups'],
+    ];
+    for (const [opener, title] of opened) {
+      const button = page.getByRole('button', { name: opener, exact: true });
+      await button.click();
+      const dialog = page.getByRole('dialog', { name: title });
+      await expect(dialog, `${title} opens`).toBeVisible();
+      await expect(dialog.locator(':focus'), `focus is inside ${title}`).toHaveCount(1);
+      await page.keyboard.press('Escape');
+      await expect(dialog, `Escape closes ${title}`).toBeHidden();
+      await expect(button, `focus returns to ${opener}`).toBeFocused();
+    }
+
+    // An event opened by clicking it.
+    await page.getByRole('button', { name: /Mouse test/ }).first().click();
+    const details = page.getByRole('dialog', { name: 'Mouse test' });
+    await expect(details).toBeVisible();
+    await expect(details.locator(':focus')).toHaveCount(1);
+    await page.keyboard.press('Escape');
+    await expect(details).toBeHidden();
+  });
+
   test('view shortcuts and the view buttons agree', async ({ page }) => {
     await page.goto('/');
     for (const [code, name] of [

@@ -4,6 +4,7 @@ import type { Calendar } from '@/core/model';
 import { useT } from '@/features/i18n';
 import type { ViewKind } from '@/features/view';
 import { trapTab } from '@/lib/focusTrap';
+import { focusWhenReady } from '@/lib/focusWhenReady';
 import { CloseIcon } from './Icons';
 import { Sidebar } from './Sidebar';
 import type { SidebarProps } from './Sidebar';
@@ -76,7 +77,8 @@ export function Shell({
   }, [setOpen]);
 
   useEffect(() => {
-    if (open) closeRef.current?.focus();
+    if (open) return focusWhenReady(closeRef.current);
+    return undefined;
   }, [open]);
 
   // The drawer goes back to the side it came from (D-063); on a wide screen it is not a drawer.

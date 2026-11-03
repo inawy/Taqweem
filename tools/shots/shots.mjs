@@ -179,23 +179,4 @@ await session('phone-zoom-ar', { viewport: { width: 390, height: 844 }, locale: 
   await page.getByRole('button', { name: 'إضافة حدث' }).click(); await audit('editor'); await shot('editor');
 });
 
-// Focus trail for the phone drawer (D-086 diagnosis).
-await session('focus-drawer', { viewport: { width: 390, height: 844 }, locale: 'en-US', hasTouch: true, isMobile: true }, async (page) => {
-  await page.addInitScript(() => {
-    window.__log = [];
-    const orig = HTMLElement.prototype.focus;
-    HTMLElement.prototype.focus = function (...a) {
-      const r = orig.apply(this, a);
-      window.__log.push(`focus() ${this.tagName}.${this.className} -> active ${document.activeElement?.tagName}.${document.activeElement?.className} CHAIN ${(() => { const out = []; for (let n = this; n; n = n.parentElement) out.push(`${n.tagName}.${n.className}:${getComputedStyle(n).visibility}/${getComputedStyle(n).display}`); return out.slice(0, 5).join(' < '); })()}`);
-      return r;
-    };
-  });
-  await page.reload();
-  await page.getByRole('button', { name: 'Menu' }).click();
-  await page.waitForTimeout(800);
-  console.log('FOCUSLOG ' + JSON.stringify(await page.evaluate(() => window.__log)));
-  console.log('ACTIVE ' + (await page.evaluate(() => document.activeElement?.tagName + '.' + document.activeElement?.className)));
-  console.log('DRAWER ' + (await page.evaluate(() => document.querySelector('.shell')?.getAttribute('data-drawer'))));
-});
-
 await browser.close();

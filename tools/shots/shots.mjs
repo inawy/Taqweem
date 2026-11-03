@@ -179,4 +179,47 @@ await session('phone-zoom-ar', { viewport: { width: 390, height: 844 }, locale: 
   await page.getByRole('button', { name: 'إضافة حدث' }).click(); await audit('editor'); await shot('editor');
 });
 
+// Smoothness audit (printed, not a test): a phone with a 4x slower CPU. For each action: time to the
+// next painted frame, long tasks (> 50ms), the worst frame gap during the next 600ms, and layout shift.
+await session('perf-phone', { viewport: { width: 390, height: 844 }, locale: 'ar-SA', hasTouch: true, isMobile: true }, async (page) => {
+  const cdp = await page.context().newCDPSession(page);
+  await cdp.send('Emulation.setCPUThrottlingRate', { rate: 4 });
+  await page.evaluate(() => {
+    window.__perf = { long: [], shift: 0 };
+    new PerformanceObserver((l) => l.getEntries().forEach((e) => window.__perf.long.push(Math.round(e.duration)))).observe({ type: 'longtask', buffered: false });
+    new PerformanceObserver((l) => l.getEntries().forEach((e) => { if (!e.hadRecentInput) window.__perf.shift += e.value; })).observe({ type: 'layout-shift', buffered: false });
+  });
+  const measure = async (label, act) => {
+    await page.evaluate(() => { window.__perf.long = []; window.__perf.shift = 0; });
+    const t0 = Date.now();
+    await act();
+    const result = await page.evaluate(() => new Promise((resolve) => {
+      const start = performance.now();
+      let last = start; let worst = 0; let frames = 0; let firstPaint = 0;
+      const tick = (now) => {
+        frames += 1; if (!firstPaint) firstPaint = Math.round(now - start);
+        worst = Math.max(worst, now - last); last = now;
+        if (now - start < 600) requestAnimationFrame(tick);
+        else resolve({ firstPaint, worstGap: Math.round(worst), frames, long: window.__perf.long.slice(), shift: Math.round(window.__perf.shift * 1000) / 1000 });
+      };
+      requestAnimationFrame(tick);
+    }));
+    console.log(`PERF ${label}: act=${Date.now() - t0}ms ${JSON.stringify(result)}`);
+  };
+  const chooseV = async (name) => { await page.getByRole('button', { name: 'تغيير العرض' }).click(); await page.getByRole('button', { name, exact: true }).click(); };
+  await measure('view -> month', () => chooseV('شهر'));
+  await measure('month next x1', () => page.getByRole('button', { name: /الشهر التالي/ }).click());
+  await measure('view -> week', () => chooseV('أسبوع'));
+  await measure('week next', () => page.getByRole('button', { name: /الأسبوع التالي/ }).click());
+  await measure('view -> year', () => chooseV('سنة'));
+  await measure('year next', () => page.getByRole('button', { name: /السنة التالية/ }).click());
+  await measure('view -> day', () => chooseV('يوم'));
+  await measure('open drawer', () => page.getByRole('button', { name: 'القائمة' }).click());
+  await measure('close drawer', () => page.getByRole('button', { name: 'إغلاق القائمة' }).click());
+  await measure('open editor', () => page.getByRole('button', { name: 'إضافة حدث' }).click());
+  await measure('close editor', () => page.getByRole('button', { name: 'إلغاء', exact: true }).click());
+  await measure('scroll day grid', async () => { await page.evaluate(() => document.querySelector('.tg-scroll')?.scrollBy({ top: 400 })); });
+  await measure('today', () => page.getByRole('button', { name: 'اليوم' }).click());
+});
+
 await browser.close();

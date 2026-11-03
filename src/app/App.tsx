@@ -53,6 +53,8 @@ import { YearView } from '@/ui/year/YearView';
 import { useHideOnScroll } from '@/ui/shell/useHideOnScroll';
 
 /** How many event rows fit under a day number before "+N" (responsive tuning comes with Phase 6). */
+/** Stands in for the events of a view that is not on screen, so its model stays empty and cheap. */
+const NO_EVENTS: readonly never[] = [];
 const MAX_LANES = 3;
 /** All-day rows above the day/week grid before "+N". */
 const MAX_ALL_DAY_LANES = 3;
@@ -203,17 +205,26 @@ function Calendar({
     weekStart: settings.weekStart,
   });
 
+  // Only the views on screen are computed: each one scans every event, so building all of them on
+  // every move made thousands of events cost three times over (D-089). An unused view gets no events.
+  const monthOn = view === 'month';
+  const agendaOn = view === 'agenda' || (phone && view === 'month');
+  const gridOn = view === 'day' || view === 'days3' || view === 'week';
+  const monthEvents = monthOn ? calendarData.events : NO_EVENTS;
+  const agendaEvents = agendaOn ? calendarData.events : NO_EVENTS;
+  const gridEvents = gridOn ? calendarData.events : NO_EVENTS;
+
   const monthModel = useMemo(() => {
     const { year, month } = monthOf(anchor);
     return buildMonthModel({
       calendars: calendarData.calendars,
-      events: calendarData.events,
+      events: monthEvents,
       year,
       month,
       weekStart: settings.weekStart,
       maxLanes: MAX_LANES,
     });
-  }, [calendarData.calendars, calendarData.events, anchor, settings.weekStart]);
+  }, [calendarData.calendars, monthEvents, anchor, settings.weekStart]);
 
   // Twelve months are only expanded while the year is on screen.
   const yearModel = useMemo(
@@ -233,25 +244,25 @@ function Calendar({
     () =>
       buildTimeGridModel({
         calendars: calendarData.calendars,
-        events: calendarData.events,
+        events: gridEvents,
         days:
           view === 'day' || view === 'days3' || view === 'week'
             ? visibleDays(view, anchor, settings.weekStart)
             : [],
         maxAllDayLanes: MAX_ALL_DAY_LANES,
       }),
-    [calendarData.calendars, calendarData.events, view, anchor, settings.weekStart],
+    [calendarData.calendars, gridEvents, view, anchor, settings.weekStart],
   );
 
   const agendaModel = useMemo(
     () =>
       buildAgendaModel({
         calendars: calendarData.calendars,
-        events: calendarData.events,
+        events: agendaEvents,
         date: anchor,
         nowLocal,
       }),
-    [calendarData.calendars, calendarData.events, anchor, nowLocal],
+    [calendarData.calendars, agendaEvents, anchor, nowLocal],
   );
 
   // Built when the panel opens (and when data changes under it), not on every render.

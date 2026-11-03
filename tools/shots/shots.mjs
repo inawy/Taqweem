@@ -181,7 +181,30 @@ await session('phone-zoom-ar', { viewport: { width: 390, height: 844 }, locale: 
 
 // Smoothness audit (printed, not a test): a phone with a 4x slower CPU. For each action: time to the
 // next painted frame, long tasks (> 50ms), the worst frame gap during the next 600ms, and layout shift.
-await session('perf-phone', { viewport: { width: 390, height: 844 }, locale: 'ar-SA', hasTouch: true, isMobile: true }, async (page) => {
+for (const many of [0, 5000]) await session(many ? 'perf-phone-5000' : 'perf-phone', { viewport: { width: 390, height: 844 }, locale: 'ar-SA', hasTouch: true, isMobile: true }, async (page) => {
+  if (many) {
+    // Same shape as the release test in e2e/release.spec.ts: events spread over the days around today.
+    await page.evaluate(async (n) => {
+      const db = await new Promise((res, rej) => { const r = indexedDB.open('nawy-today'); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); });
+      const calendarId = await new Promise((res) => { const q = db.transaction('calendars').objectStore('calendars').getAll(); q.onsuccess = () => res(q.result[0].id); });
+      const now = new Date();
+      const tx = db.transaction('events', 'readwrite');
+      const store = tx.objectStore('events');
+      for (let i = 0; i < n; i += 1) {
+        const d = new Date(now.getFullYear(), now.getMonth(), 1 + (i % 28));
+        d.setDate(d.getDate() + (i % 5) - 2);
+        const day = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        const hour = String(8 + (i % 10)).padStart(2, '0');
+        store.put({ id: `perf-${i}`, calendarId, title: `Event ${i}`, allDay: false, start: `${day}T${hour}:00`, end: `${day}T${hour}:45`, tzid: 'Asia/Riyadh', createdAt: 1, updatedAt: 1 });
+      }
+      await new Promise((res, rej) => { tx.oncomplete = () => res(); tx.onerror = () => rej(tx.error); });
+      db.close();
+    }, many);
+    const t = Date.now();
+    await page.reload();
+    await page.locator('.agenda-list li, .bar').first().waitFor({ timeout: 60000 }).catch(() => undefined);
+    console.log(`PERF5000 reload to first event: ${Date.now() - t}ms`);
+  }
   const cdp = await page.context().newCDPSession(page);
   await cdp.send('Emulation.setCPUThrottlingRate', { rate: 4 });
   await page.evaluate(() => {
@@ -204,7 +227,7 @@ await session('perf-phone', { viewport: { width: 390, height: 844 }, locale: 'ar
       };
       requestAnimationFrame(tick);
     }));
-    console.log(`PERF ${label}: act=${Date.now() - t0}ms ${JSON.stringify(result)}`);
+    console.log(`PERF${many || ''} ${label}: act=${Date.now() - t0}ms ${JSON.stringify(result)}`);
   };
   const chooseV = async (name) => { await page.getByRole('button', { name: 'تغيير العرض' }).click(); await page.getByRole('button', { name, exact: true }).click(); };
   await measure('view -> month', () => chooseV('شهر'));

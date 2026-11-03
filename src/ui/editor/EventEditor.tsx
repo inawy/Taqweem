@@ -45,16 +45,28 @@ const ERROR_KEY: Record<DraftError, MessageKey> = {
   'repeat-until': 'errUntil',
 };
 
-function timeZoneOptions(current: string): string[] {
+let allZones: string[] | null = null;
+
+/** Every zone the browser knows, read once (it is a long list, ~420 names). */
+function knownTimeZones(): string[] {
+  if (allZones) return allZones;
   const all = (Intl as unknown as { supportedValuesOf?: (key: string) => string[] })
     .supportedValuesOf;
-  let listed: string[];
   try {
-    listed = all ? all('timeZone') : [];
+    allZones = all ? all('timeZone') : [];
   } catch {
-    listed = [];
+    allZones = [];
   }
-  return [...new Set([current, localTimeZone(), 'UTC', ...listed])];
+  return allZones;
+}
+
+/**
+ * The zones to offer. `full = false` is only the few that matter at first (the event's own, the
+ * device's, UTC) so opening the editor does not build ~420 `<option>`s before the first paint.
+ */
+export function timeZoneOptions(current: string, full: boolean): string[] {
+  const first = [current, localTimeZone(), 'UTC'];
+  return [...new Set(full ? [...first, ...knownTimeZones()] : first)];
 }
 
 /**
@@ -89,7 +101,16 @@ export function EventEditor({
     titleRef.current?.focus();
   }, []);
 
-  const zones = useMemo(() => timeZoneOptions(initial.tzid), [initial.tzid]);
+  // The long zone list is added after the first paint, or as soon as the person reaches the select.
+  const [fullZones, setFullZones] = useState(false);
+  useEffect(() => {
+    const id = window.setTimeout(() => setFullZones(true), 120);
+    return () => window.clearTimeout(id);
+  }, []);
+  const zones = useMemo(
+    () => timeZoneOptions(initial.tzid, fullZones),
+    [initial.tzid, fullZones],
+  );
   const set = <K extends keyof Draft>(key: K, value: Draft[K]): void => {
     setError(null);
     setDraft((d) => ({ ...d, [key]: value }));
@@ -243,7 +264,12 @@ export function EventEditor({
             {!draft.allDay && (
               <label className="ed-field">
                 <span>{t('timeZone')}</span>
-                <select value={draft.tzid} onChange={(e) => set('tzid', e.target.value)}>
+                <select
+                  value={draft.tzid}
+                  onPointerDown={() => setFullZones(true)}
+                  onFocus={() => setFullZones(true)}
+                  onChange={(e) => set('tzid', e.target.value)}
+                >
                   {zones.map((z) => (
                     <option key={z} value={z}>
                       {z}

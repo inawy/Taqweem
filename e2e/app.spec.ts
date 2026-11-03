@@ -549,6 +549,26 @@ test.describe('on a phone', () => {
     expect(box?.height ?? 999).toBeLessThanOrEqual(80);
   });
 
+  test('a sheet takes focus, Back closes it, and focus goes back to what opened it', async ({
+    page,
+  }) => {
+    await page.goto('/');
+    const fab = page.getByRole('button', { name: 'Add event' });
+    await fab.click();
+    const sheet = page.getByRole('dialog', { name: 'New event' });
+    await expect(sheet).toBeVisible();
+    expect(await sheet.evaluate((el) => el.contains(document.activeElement))).toBe(true);
+    await page.goBack();
+    await expect(sheet).toBeHidden();
+    await expect(fab).toBeFocused();
+
+    const menu = page.getByRole('button', { name: 'Menu' });
+    await menu.click();
+    await expect(page.getByRole('button', { name: 'Close menu' })).toBeFocused();
+    await page.keyboard.press('Escape');
+    await expect(menu).toBeFocused();
+  });
+
   test('buttons are at least 44px tall', async ({ page }) => {
     await page.goto('/');
     const small = await page.evaluate(() =>

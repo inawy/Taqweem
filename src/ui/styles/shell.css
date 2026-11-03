@@ -160,9 +160,14 @@
       visibility var(--nawy-duration);
   }
 
+  /* Opening shows it at once (`visibility 0s`): with the delayed visibility of closing, the
+     first frame was still hidden and the browser refused the focus we give the close button (D-086). */
   .shell[data-drawer='open'] .sidebar {
     transform: none;
     visibility: visible;
+    transition:
+      transform var(--nawy-duration) var(--nawy-ease),
+      visibility 0s;
   }
 
   .drawer-close {

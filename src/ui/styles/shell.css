@@ -301,12 +301,16 @@
 
   /* The day number carries its own square; the button around it draws nothing, so it is one
      square and not a box inside a box (D-091). */
-  .tb-today {
+  .topbar .tb-today {
     order: 6;
     inline-size: 46px;
     padding: 0;
     border-color: transparent;
     background: transparent;
+  }
+
+  .topbar .tb-today:hover {
+    background: var(--nawy-color-surface-2);
   }
 
   .view-scrim {

@@ -14,7 +14,7 @@ export interface PreparedData {
  * on import. A damaged record is skipped and counted, never allowed to throw into a view.
  * Events of hidden calendars are left out without counting as damage.
  */
-export function prepareData(
+function prepareUncached(
   rawCalendars: readonly unknown[],
   rawEvents: readonly unknown[],
 ): PreparedData {
@@ -42,4 +42,22 @@ export function prepareData(
 /** The colour token or `#rrggbb` an occurrence is drawn with: its own, else its calendar's. */
 export function colorOf(event: CalEvent, calendars: ReadonlyMap<string, Calendar>): string {
   return event.color ?? calendars.get(event.calendarId)?.color ?? 'gray';
+}
+
+// Validating thousands of records is the same work on every month/week/day move while the data
+// has not changed, so the result is remembered per (calendars, events) pair of arrays (D-090).
+// The arrays come from state and are replaced, never edited in place, when data changes.
+const cache = new WeakMap<readonly unknown[], WeakMap<readonly unknown[], PreparedData>>();
+
+export function prepareData(
+  rawCalendars: readonly unknown[],
+  rawEvents: readonly unknown[],
+): PreparedData {
+  const byEvents = cache.get(rawCalendars) ?? new WeakMap<readonly unknown[], PreparedData>();
+  cache.set(rawCalendars, byEvents);
+  const hit = byEvents.get(rawEvents);
+  if (hit) return hit;
+  const fresh = prepareUncached(rawCalendars, rawEvents);
+  byEvents.set(rawEvents, fresh);
+  return fresh;
 }

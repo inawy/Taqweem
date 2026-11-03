@@ -576,6 +576,29 @@ test.describe('on a phone', () => {
     await expect(menu).toBeFocused();
   });
 
+  test('the today button is one square, and the drawn day in the side month is smaller than its target (D-091)', async ({
+    page,
+  }) => {
+    await page.goto('/');
+    const button = page.locator('.tb-today');
+    const frame = await button.evaluate((el) => {
+      const cs = getComputedStyle(el);
+      return { border: cs.borderTopColor, background: cs.backgroundColor };
+    });
+    expect(frame.border).toBe('rgba(0, 0, 0, 0)');
+    expect(frame.background).toBe('rgba(0, 0, 0, 0)');
+    await page.getByRole('button', { name: 'Menu', exact: true }).click();
+    const today = page.locator('.mini-day[data-today="true"]');
+    await expect(today).toBeVisible();
+    const sizes = await today.evaluate((el) => {
+      const box = el.getBoundingClientRect();
+      const disc = getComputedStyle(el, '::before');
+      return { target: box.height, disc: parseFloat(disc.height) };
+    });
+    expect(sizes.target).toBeGreaterThanOrEqual(44);
+    expect(sizes.disc).toBeLessThanOrEqual(36);
+  });
+
   test('buttons are at least 44px tall', async ({ page }) => {
     await page.goto('/');
     const small = await page.evaluate(() =>

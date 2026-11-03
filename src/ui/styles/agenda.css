@@ -104,7 +104,7 @@
 /* The one to get ready for: larger, with an accent ring. */
 .agenda-item[data-next='true'] {
   min-block-size: 76px;
-  box-shadow: 0 0 0 2px var(--nawy-color-accent-fill);
+  box-shadow: 0 0 0 1px var(--nawy-color-accent-fill);
 }
 
 .agenda-item[data-next='true'] .agenda-title {
@@ -128,7 +128,7 @@
 
 /* Happening now: a ring in the "now" colour and a bar that fills as the event goes by. */
 .agenda-item[data-status='now'] {
-  box-shadow: 0 0 0 2px var(--nawy-color-now);
+  box-shadow: 0 0 0 1px var(--nawy-color-now);
 }
 
 .agenda-item[data-status='now']::after {
@@ -137,7 +137,7 @@
   inset-inline-start: 0;
   inset-block-end: 0;
   inline-size: calc(var(--progress, 0) * 100%);
-  block-size: 4px;
+  block-size: 3px;
   background: var(--nawy-color-now);
 }
 

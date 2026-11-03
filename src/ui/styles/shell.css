@@ -180,7 +180,7 @@
     position: fixed;
     inset: 0;
     z-index: 20;
-    background: rgb(0 0 0 / 0.4);
+    background: rgb(0 0 0 / 0.3);
   }
 }
 
@@ -299,10 +299,14 @@
     order: 5;
   }
 
+  /* The day number carries its own square; the button around it draws nothing, so it is one
+     square and not a box inside a box (D-091). */
   .tb-today {
     order: 6;
     inline-size: 46px;
     padding: 0;
+    border-color: transparent;
+    background: transparent;
   }
 
   .view-scrim {
@@ -379,12 +383,13 @@
 
 /* The small month in the sidebar. */
 .mini {
-  margin-block-end: 20px;
+  margin-block-end: 24px;
 }
 
 .mini-head {
   display: flex;
   align-items: center;
+  margin-block-end: 4px;
 }
 
 .mini-title {
@@ -408,18 +413,37 @@
 }
 
 .mini-day {
+  position: relative;
+  isolation: isolate;
   inline-size: 100%;
   max-inline-size: 44px;
   min-block-size: 44px;
   border: 0;
-  border-radius: 50%;
   background: transparent;
   color: var(--nawy-color-text);
   font-size: 0.8125rem;
   cursor: pointer;
 }
 
-.mini-day:hover {
+/* The 44px box is the touch target; what is drawn (hover, today, selected) is a 34px disc inside
+   it, so the month does not read as a wall of big circles (D-091). */
+.mini-day::before {
+  content: '';
+  position: absolute;
+  inset-block-start: 50%;
+  inset-inline-start: 50%;
+  inline-size: 34px;
+  block-size: 34px;
+  translate: -50% -50%;
+  border-radius: 50%;
+  z-index: -1;
+}
+
+:root[dir='rtl'] .mini-day::before {
+  translate: 50% -50%;
+}
+
+.mini-day:hover::before {
   background: color-mix(in srgb, var(--nawy-color-text) 8%, transparent);
 }
 
@@ -427,14 +451,17 @@
   color: var(--nawy-color-text-muted);
 }
 
-.mini-day[data-selected='true'] {
-  box-shadow: inset 0 0 0 2px var(--nawy-color-accent-fill);
+.mini-day[data-selected='true']::before {
+  box-shadow: inset 0 0 0 1.5px var(--nawy-color-accent-fill);
 }
 
 .mini-day[data-today='true'] {
-  background: var(--nawy-color-accent-fill);
   color: var(--nawy-color-on-accent-fill);
   font-weight: 600;
+}
+
+.mini-day[data-today='true']::before {
+  background: var(--nawy-color-accent-fill);
 }
 
 /* A narrow bar may wrap the title after its comma, never inside "25 أكتوبر 2026". */

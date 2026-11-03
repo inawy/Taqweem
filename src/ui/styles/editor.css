@@ -67,8 +67,8 @@ button.block {
   background: var(--nawy-color-surface);
   color: var(--nawy-color-text);
   box-shadow:
-    0 2px 6px rgb(0 0 0 / 0.08),
-    0 16px 40px rgb(0 0 0 / 0.22);
+    0 2px 6px rgb(0 0 0 / 0.06),
+    0 12px 32px rgb(0 0 0 / 0.16);
   overflow: hidden;
 }
 

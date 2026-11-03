@@ -565,7 +565,7 @@ test.describe('on a phone', () => {
 
   test('the menu takes focus on its close button, and Escape gives it back', async ({ page }) => {
     await page.goto('/');
-    const menu = page.getByRole('button', { name: 'Menu' });
+    const menu = page.getByRole('button', { name: 'Menu', exact: true });
     await menu.click();
     await expect(page.getByRole('button', { name: 'Close menu' })).toBeFocused();
     await page.keyboard.press('Escape');

@@ -561,7 +561,10 @@ test.describe('on a phone', () => {
     await page.goBack();
     await expect(sheet).toBeHidden();
     await expect(fab).toBeFocused();
+  });
 
+  test('the menu takes focus on its close button, and Escape gives it back', async ({ page }) => {
+    await page.goto('/');
     const menu = page.getByRole('button', { name: 'Menu' });
     await menu.click();
     await expect(page.getByRole('button', { name: 'Close menu' })).toBeFocused();

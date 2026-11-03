@@ -216,10 +216,11 @@ await session('perf-phone', { viewport: { width: 390, height: 844 }, locale: 'ar
   await measure('view -> day', () => chooseV('يوم'));
   await measure('open drawer', () => page.getByRole('button', { name: 'القائمة' }).click());
   await measure('close drawer', () => page.getByRole('button', { name: 'إغلاق القائمة' }).click());
-  await measure('open editor', () => page.getByRole('button', { name: 'إضافة حدث' }).click());
+  console.log('FAB before editor: ' + JSON.stringify(await page.evaluate(() => { const f = document.querySelector('.fab'); const r = f?.getBoundingClientRect(); const cs = f && getComputedStyle(f); return { hidden: f?.getAttribute('data-hidden'), vis: cs?.visibility, tf: cs?.transform, top: r && Math.round(r.top), left: r && Math.round(r.left), toast: !!document.querySelector('.toast'), banner: !!document.querySelector('.banner') }; })));
+  await measure('open editor', () => page.getByRole('button', { name: 'إضافة حدث' }).click({ timeout: 20000 }));
   await measure('close editor', () => page.getByRole('button', { name: 'إلغاء', exact: true }).click());
   await measure('scroll day grid', async () => { await page.evaluate(() => document.querySelector('.tg-scroll')?.scrollBy({ top: 400 })); });
-  await measure('today', () => page.getByRole('button', { name: 'اليوم' }).click());
+  await measure('today', () => page.getByRole('button', { name: 'اليوم', exact: true }).first().click());
 });
 
 await browser.close();

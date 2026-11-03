@@ -384,7 +384,8 @@ button.block {
 
   /* A notice is a bar across the screen, not a narrow card that wraps and hides the content. */
   .toast {
-    inset-block-end: calc(16px + env(safe-area-inset-bottom));
+    /* Above the add button (56px at 20px from the edge), never on top of it (D-087). */
+    inset-block-end: calc(88px + env(safe-area-inset-bottom));
     inset-inline: 8px;
     translate: none;
     animation-name: toast-rise-bar;

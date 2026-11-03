@@ -547,6 +547,10 @@ test.describe('on a phone', () => {
     expect(box?.x ?? -1).toBeGreaterThanOrEqual(0);
     expect((box?.x ?? 0) + (box?.width ?? 999)).toBeLessThanOrEqual(390);
     expect(box?.height ?? 999).toBeLessThanOrEqual(80);
+    // The notice never covers the add button (it blocked it for the 12 seconds it stayed).
+    const fab = await page.locator('.fab').boundingBox();
+    expect(fab).not.toBeNull();
+    expect((box?.y ?? 0) + (box?.height ?? 0)).toBeLessThanOrEqual((fab?.y ?? 0) - 4);
   });
 
   test('a sheet takes focus, Back closes it, and focus goes back to what opened it', async ({

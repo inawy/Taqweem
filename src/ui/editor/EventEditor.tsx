@@ -107,10 +107,7 @@ export function EventEditor({
     const id = window.setTimeout(() => setFullZones(true), 120);
     return () => window.clearTimeout(id);
   }, []);
-  const zones = useMemo(
-    () => timeZoneOptions(initial.tzid, fullZones),
-    [initial.tzid, fullZones],
-  );
+  const zones = useMemo(() => timeZoneOptions(initial.tzid, fullZones), [initial.tzid, fullZones]);
   const set = <K extends keyof Draft>(key: K, value: Draft[K]): void => {
     setError(null);
     setDraft((d) => ({ ...d, [key]: value }));

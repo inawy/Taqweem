@@ -249,7 +249,7 @@ for (const many of [0, 5000]) await session(many ? 'perf-phone-5000' : 'perf-pho
 // Diagnostic for the flaky swipe test (D-063): does any finite animation fail to finish after the
 // menu opens? Fresh page each time, as in the test. Printed, not asserted.
 for (let run = 0; run < 25; run += 1) {
-  await session(`flaky-${run}`, { viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true }, async (page) => {
+  await session(`flaky-${run}`, { viewport: { width: 390, height: 844 }, locale: 'ar-SA', hasTouch: true, isMobile: true }, async (page) => {
     await page.getByRole('button', { name: 'القائمة' }).click({ timeout: 20000 });
     const stuck = await page.evaluate(() => {
       const live = document.getAnimations().filter((a) => a.effect?.getComputedTiming().iterations !== Infinity);

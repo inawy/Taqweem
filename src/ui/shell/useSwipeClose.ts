@@ -132,8 +132,19 @@ export function useSwipeClose(
         dy: touch.clientY - g.y,
         ms: e.timeStamp - g.at,
       };
-      const axis = g.axis ?? (direction === 'sheet' ? 'down' : direction);
-      if (g.dragging !== true || settleDrag(move, axis, rtl) !== 'close') {
+      // A touch that never moved (a very quick flick) has no locked way yet: take whichever way
+      // the whole movement closes.
+      const ways: readonly CloseDirection[] =
+        g.axis !== undefined
+          ? [g.axis]
+          : direction === 'sheet'
+            ? g.fromGrip
+              ? ['down', 'side']
+              : ['side']
+            : [direction];
+      const axis =
+        g.dragging === false ? undefined : ways.find((w) => settleDrag(move, w, rtl) === 'close');
+      if (axis === undefined) {
         release(g.panel, g.dragging === true);
         return;
       }

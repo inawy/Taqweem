@@ -1,5 +1,5 @@
 import 'fake-indexeddb/auto';
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 import { App } from '@/app/App';
 import { createDb } from '@/data';
@@ -45,7 +45,28 @@ describe('closing by swiping (D-063)', () => {
     swipe(dialog.querySelector('.sheet-grip') as Element, 0, 40);
     expect(screen.queryByRole('dialog', { name: 'About Nawy Today' })).toBeTruthy();
     swipe(dialog.querySelector('.sheet-grip') as Element, 0, 120);
-    expect(screen.queryByRole('dialog', { name: 'About Nawy Today' })).toBeNull();
+    // It does not vanish: it glides out first (D-099), then it is gone.
+    expect(dialog.style.opacity).toBe('0');
+    expect(dialog.style.transform).toContain('translate(');
+    await waitFor(() =>
+      expect(screen.queryByRole('dialog', { name: 'About Nawy Today' })).toBeNull(),
+    );
+  });
+
+  it('a sheet is thrown away sideways from anywhere on it, either way (D-099)', async () => {
+    open();
+    for (const dx of [-120, 120]) {
+      fireEvent.click(await screen.findByRole('button', { name: 'Menu' }));
+      fireEvent.click(await screen.findByRole('button', { name: 'About and privacy' }));
+      const dialog = await screen.findByRole('dialog', { name: 'About Nawy Today' });
+      swipe(dialog.querySelector('.about-text') as Element, 30, 0); // too short: stays
+      expect(screen.queryByRole('dialog', { name: 'About Nawy Today' })).toBeTruthy();
+      swipe(dialog.querySelector('.about-text') as Element, dx, 4);
+      expect(dialog.style.transform).toContain(dx < 0 ? 'translate(-' : 'translate(');
+      await waitFor(() =>
+        expect(screen.queryByRole('dialog', { name: 'About Nawy Today' })).toBeNull(),
+      );
+    }
   });
 
   it('the editor is not closed by a swipe (it would save a draft by accident)', async () => {

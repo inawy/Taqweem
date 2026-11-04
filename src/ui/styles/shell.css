@@ -80,6 +80,18 @@
   margin-block-start: 8px;
 }
 
+/* Tighter than the editor's fields (D-094): the label sits closer to its box and the rows are
+   nearer each other. Still label over a full-width box, so every select and button of the panel
+   shares one width (D-056) and a long value is not cut. */
+.sidebar-settings .field {
+  gap: 2px;
+  margin-block-end: 8px;
+}
+
+.sidebar-settings .field > span {
+  font-size: 0.9375rem;
+}
+
 .sidebar-settings > .ed-check {
   margin-block-end: 4px;
 }

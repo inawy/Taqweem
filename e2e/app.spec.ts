@@ -599,6 +599,27 @@ test.describe('on a phone', () => {
     expect(sizes.disc).toBeLessThanOrEqual(36);
   });
 
+  test('the next and the current agenda rows have no ring around them (D-093)', async ({
+    page,
+  }) => {
+    await page.goto('/');
+    await expect(page.locator('.agenda-list')).toBeAttached();
+    const shadows = await page.evaluate(() => {
+      const list = document.querySelector('.agenda-list');
+      const make = (attr: string, value: string): string => {
+        const li = document.createElement('li');
+        const item = document.createElement('button');
+        item.className = 'agenda-item';
+        item.setAttribute(attr, value);
+        li.append(item);
+        list?.append(li);
+        return getComputedStyle(item).boxShadow;
+      };
+      return [make('data-next', 'true'), make('data-status', 'now')];
+    });
+    expect(shadows).toEqual(['none', 'none']);
+  });
+
   test('buttons are at least 44px tall', async ({ page }) => {
     await page.goto('/');
     const small = await page.evaluate(() =>

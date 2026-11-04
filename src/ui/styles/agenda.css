@@ -101,10 +101,11 @@
   }
 }
 
-/* The one to get ready for: larger, with an accent ring. */
+/* The one to get ready for: taller and with a larger title. No ring (D-091 thinned it to 1px, but the
+   ring's colour fought the card's own colour: a blue ring on a red card); the "in 20 minutes" pill
+   and the size say it. */
 .agenda-item[data-next='true'] {
   min-block-size: 76px;
-  box-shadow: 0 0 0 1px var(--nawy-color-accent-fill);
 }
 
 .agenda-item[data-next='true'] .agenda-title {
@@ -126,10 +127,7 @@
   font-weight: 400;
 }
 
-/* Happening now: a ring in the "now" colour and a bar that fills as the event goes by. */
-.agenda-item[data-status='now'] {
-  box-shadow: 0 0 0 1px var(--nawy-color-now);
-}
+/* Happening now: a bar that fills as the event goes by, and the "now" dot (no ring, same reason). */
 
 .agenda-item[data-status='now']::after {
   content: '';

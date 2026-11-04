@@ -246,4 +246,21 @@ for (const many of [0, 5000]) await session(many ? 'perf-phone-5000' : 'perf-pho
   await measure('today', () => page.getByRole('button', { name: 'اليوم', exact: true }).first().click());
 });
 
+// Diagnostic for the flaky swipe test (D-063): does any finite animation fail to finish after the
+// menu opens? Fresh page each time, as in the test. Printed, not asserted.
+for (let run = 0; run < 25; run += 1) {
+  await session(`flaky-${run}`, { viewport: { width: 390, height: 844 }, hasTouch: true, isMobile: true }, async (page) => {
+    await page.getByRole('button', { name: 'القائمة' }).click({ timeout: 20000 });
+    const stuck = await page.evaluate(() => {
+      const live = document.getAnimations().filter((a) => a.effect?.getComputedTiming().iterations !== Infinity);
+      const name = (a) => `${a.transitionProperty ?? a.animationName} ${a.playState} on ${a.effect?.target?.className ?? '?'}`;
+      return Promise.race([
+        Promise.all(live.map((a) => a.finished.catch(() => undefined))).then(() => []),
+        new Promise((resolve) => setTimeout(() => resolve(live.map(name)), 4000)),
+      ]);
+    });
+    console.log(`FLAKY ${run}: ${stuck.length ? 'STUCK ' + JSON.stringify(stuck) : 'ok'}`);
+  });
+}
+
 await browser.close();

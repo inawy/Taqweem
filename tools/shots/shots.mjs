@@ -229,10 +229,29 @@ for (const many of [0, 5000]) await session(many ? 'perf-phone-5000' : 'perf-pho
     }));
     console.log(`PERF${many || ''} ${label}: act=${Date.now() - t0}ms ${JSON.stringify(result)}`);
   };
+  // CPU profile of one action (only with the big data set): top self-time by function and file.
+  const profiled = async (label, act) => {
+    await cdp.send('Profiler.enable');
+    await cdp.send('Profiler.setSamplingInterval', { interval: 500 });
+    await cdp.send('Profiler.start');
+    await measure(label, act);
+    const { profile } = await cdp.send('Profiler.stop');
+    const dt = profile.timeDeltas; const self = new Map();
+    const byId = new Map(profile.nodes.map((n) => [n.id, n]));
+    profile.samples.forEach((id, i) => { self.set(id, (self.get(id) ?? 0) + (dt[i] ?? 0)); });
+    const rows = new Map();
+    for (const [id, t] of self) {
+      const n = byId.get(id); const f = n.callFrame;
+      const key = `${f.functionName || '(anon)'} ${f.url.split('/').pop()}:${f.lineNumber}`;
+      rows.set(key, (rows.get(key) ?? 0) + t);
+    }
+    const top = [...rows].sort((a, b) => b[1] - a[1]).slice(0, 14).map(([k, t]) => `${Math.round(t / 1000)}ms ${k}`);
+    console.log(`PROFILE ${label}:\n  ` + top.join('\n  '));
+  };
   const chooseV = async (name) => { await page.getByRole('button', { name: 'تغيير العرض' }).click(); await page.getByRole('button', { name, exact: true }).click(); };
-  await measure('view -> month', () => chooseV('شهر'));
+  await (many ? profiled : measure)('view -> month', () => chooseV('شهر'));
   await measure('month next x1', () => page.getByRole('button', { name: /الشهر التالي/ }).click());
-  await measure('view -> week', () => chooseV('أسبوع'));
+  await (many ? profiled : measure)('view -> week', () => chooseV('أسبوع'));
   await measure('week next', () => page.getByRole('button', { name: /الأسبوع التالي/ }).click());
   await measure('view -> year', () => chooseV('سنة'));
   await measure('year next', () => page.getByRole('button', { name: /السنة التالية/ }).click());

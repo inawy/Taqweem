@@ -165,7 +165,9 @@ describe('app: keyboard shortcuts', () => {
     expect(pressed('Day')).toBe(true);
 
     // In a form control a letter is just a letter.
-    fireEvent.keyDown(screen.getAllByRole('checkbox')[0] as HTMLElement, { code: 'KeyM' });
+    const field = document.body.appendChild(document.createElement('input'));
+    fireEvent.keyDown(field, { code: 'KeyM' });
+    field.remove();
     expect(pressed('Day')).toBe(true);
     // With a modifier it belongs to the browser.
     fireEvent.keyDown(window, { code: 'KeyM', ctrlKey: true });

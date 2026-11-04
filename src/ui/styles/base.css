@@ -47,6 +47,13 @@
   --dir: -1;
 }
 
+/* The page itself carries the theme's colour, not only the body: whatever shows around or above
+   the body (a pull to refresh, an overscroll, a one-pixel gap under the status bar, the moment
+   before the body paints) is then the theme's colour and never the browser's default (D-097). */
+html {
+  background: var(--nawy-color-bg);
+}
+
 body {
   margin: 0;
   background: var(--nawy-color-bg);

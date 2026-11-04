@@ -620,6 +620,21 @@ test.describe('on a phone', () => {
     expect(shadows).toEqual(['none', 'none']);
   });
 
+  test('the page behind the body has the theme colour, light and dark (D-097)', async ({
+    page,
+  }) => {
+    for (const scheme of ['light', 'dark'] as const) {
+      await page.emulateMedia({ colorScheme: scheme });
+      await page.goto('/');
+      const colours = await page.evaluate(() => ({
+        page: getComputedStyle(document.documentElement).backgroundColor,
+        body: getComputedStyle(document.body).backgroundColor,
+      }));
+      expect(colours.page, scheme).toBe(colours.body);
+      expect(colours.page, scheme).not.toBe('rgba(0, 0, 0, 0)');
+    }
+  });
+
   test('buttons are at least 44px tall', async ({ page }) => {
     await page.goto('/');
     const small = await page.evaluate(() =>

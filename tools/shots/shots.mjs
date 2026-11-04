@@ -246,4 +246,31 @@ for (const many of [0, 5000]) await session(many ? 'perf-phone-5000' : 'perf-pho
   await measure('today', () => page.getByRole('button', { name: 'اليوم', exact: true }).first().click());
 });
 
+// Diagnostic: a coloured line at the very top after a reload (blue in dark, black in light).
+// Top 70px of the phone screen right after load and 1.5s later, plus what has focus and any outline.
+for (const scheme of ['light', 'dark']) {
+  await session(`topline-${scheme}`, { viewport: { width: 390, height: 844 }, locale: 'ar-SA', colorScheme: scheme, hasTouch: true, isMobile: true, deviceScaleFactor: 3 }, async (page) => {
+    await page.waitForTimeout(500);
+    const probe = () => page.evaluate(() => {
+      const out = [];
+      for (const el of document.querySelectorAll('*')) {
+        const cs = getComputedStyle(el);
+        const r = el.getBoundingClientRect();
+        if (r.top < 12 && r.bottom > -4 && r.width > 0 && (cs.outlineStyle !== 'none' || cs.borderTopStyle !== 'none' && parseFloat(cs.borderTopWidth) > 0 || cs.boxShadow !== 'none')) {
+          out.push(`${el.tagName}.${String(el.className).slice(0, 30)} outline=${cs.outlineStyle}/${cs.outlineColor} borderTop=${cs.borderTopWidth}/${cs.borderTopColor} shadow=${cs.boxShadow.slice(0, 40)} top=${Math.round(r.top)}`);
+        }
+      }
+      const a = document.activeElement;
+      return { active: a ? `${a.tagName}.${a.className}` : null, focusVisible: document.querySelectorAll(':focus-visible').length, bg: getComputedStyle(document.documentElement).backgroundColor + ' / ' + getComputedStyle(document.body).backgroundColor, topEls: out.slice(0, 12), scrollY: window.scrollY, vv: window.visualViewport ? [window.visualViewport.offsetTop, window.visualViewport.height] : null };
+    });
+    await page.reload({ waitUntil: 'commit' });
+    await page.waitForTimeout(60);
+    await page.screenshot({ path: `${OUT}/topline-${scheme}-early.png`, clip: { x: 0, y: 0, width: 390, height: 70 } });
+    console.log(`TOPLINE ${scheme} early: ` + JSON.stringify(await probe().catch((e) => String(e))));
+    await page.waitForTimeout(1500);
+    await page.screenshot({ path: `${OUT}/topline-${scheme}-late.png`, clip: { x: 0, y: 0, width: 390, height: 70 } });
+    console.log(`TOPLINE ${scheme} late: ` + JSON.stringify(await probe()));
+  });
+}
+
 await browser.close();

@@ -635,6 +635,43 @@ test.describe('on a phone', () => {
     }
   });
 
+  test('a card is thrown away to the left or the right, and has no shadow (D-099)', async ({
+    page,
+  }) => {
+    await page.goto('/');
+    const cdp = await page.context().newCDPSession(page);
+    const swipe = async (from: { x: number; y: number }, to: { x: number; y: number }) => {
+      const point = (p: { x: number; y: number }) => [{ x: p.x, y: p.y, id: 1 }];
+      await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: point(from) });
+      for (const f of [0.25, 0.5, 0.75, 1]) {
+        await cdp.send('Input.dispatchTouchEvent', {
+          type: 'touchMove',
+          touchPoints: point({ x: from.x + (to.x - from.x) * f, y: from.y + (to.y - from.y) * f }),
+        });
+      }
+      await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+    };
+    for (const direction of [-1, 1]) {
+      await page.getByRole('button', { name: 'Menu', exact: true }).click();
+      await page.getByRole('button', { name: 'About and privacy' }).click();
+      const dialog = page.getByRole('dialog', { name: 'About Nawy Today' });
+      await expect(dialog).toBeVisible();
+      await page.waitForTimeout(400); // the sheet has slid in
+      expect(await dialog.evaluate((el) => getComputedStyle(el).boxShadow)).toBe('none');
+      const box = await dialog.boundingBox();
+      const y = (box?.y ?? 0) + 200; // in the text, not on the grip
+      const cx = (box?.x ?? 0) + (box?.width ?? 0) / 2;
+      await swipe({ x: cx, y }, { x: cx + direction * 160, y: y + 4 });
+      // It glides away first (still in the page, moved and fading), then it is gone.
+      const mid = await page.evaluate(() => {
+        const el = document.querySelector<HTMLElement>('.modal');
+        return el ? el.style.transform : null;
+      });
+      expect(mid === null || mid.includes('translate')).toBe(true);
+      await expect(dialog).toBeHidden();
+    }
+  });
+
   test('buttons are at least 44px tall', async ({ page }) => {
     await page.goto('/');
     const small = await page.evaluate(() =>

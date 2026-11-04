@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   closeSwipe,
   dragOffset,
+  exitPlan,
   settleDrag,
   startsDrag,
   swipeIntent,
@@ -97,5 +98,43 @@ describe('verticalSwipeIntent: paging through months on a phone', () => {
     expect(verticalSwipeIntent({ dx: 0, dy: -200, ms: 900 })).toBeNull();
     expect(verticalSwipeIntent({ dx: 80, dy: -100, ms: 200 })).toBeNull();
     expect(verticalSwipeIntent({ dx: 150, dy: 10, ms: 200 })).toBeNull();
+  });
+});
+
+describe('a card thrown to either side (D-099)', () => {
+  it('closes on a clear sideways flick in both directions, in either reading direction', () => {
+    expect(closeSwipe({ dx: 90, dy: 5, ms: 200 }, 'side', false)).toBe(true);
+    expect(closeSwipe({ dx: -90, dy: 5, ms: 200 }, 'side', true)).toBe(true);
+    expect(closeSwipe({ dx: 30, dy: 0, ms: 200 }, 'side', false)).toBe(false);
+    expect(closeSwipe({ dx: 90, dy: 80, ms: 200 }, 'side', false)).toBe(false);
+    expect(closeSwipe({ dx: 90, dy: 0, ms: 900 }, 'side', false)).toBe(false);
+  });
+  it('follows the finger either way and starts only when mostly sideways', () => {
+    expect(startsDrag({ dx: 30, dy: 5 }, 'side', false)).toBe(true);
+    expect(startsDrag({ dx: -30, dy: 5 }, 'side', false)).toBe(true);
+    expect(startsDrag({ dx: 30, dy: 25 }, 'side', false)).toBe(false);
+    expect(dragOffset({ dx: 40, dy: 9 }, 'side', false)).toEqual({ x: 40, y: 0 });
+    expect(dragOffset({ dx: -40, dy: 9 }, 'side', true)).toEqual({ x: -40, y: 0 });
+  });
+  it('settles: a slow carry far enough closes, a short one springs back', () => {
+    expect(settleDrag({ dx: -150, dy: 4, ms: 2000 }, 'side', false)).toBe('close');
+    expect(settleDrag({ dx: 100, dy: 4, ms: 2000 }, 'side', false)).toBe('back');
+  });
+});
+
+describe('exitPlan: the glide that carries a let-go card off the screen', () => {
+  const screen = { width: 390, height: 844 };
+  it('goes the way it was thrown: down, to the left or to the right', () => {
+    const down = exitPlan('down', { dx: 0, dy: 100, ms: 100 }, { x: 0, y: 100 }, screen);
+    expect(down).toMatchObject({ x: 0, y: 844 });
+    expect(exitPlan('side', { dx: -90, dy: 0, ms: 100 }, { x: -90, y: 0 }, screen).x).toBe(-390);
+    expect(exitPlan('side', { dx: 90, dy: 0, ms: 100 }, { x: 90, y: 0 }, screen).x).toBe(390);
+  });
+  it('a quick flick glides fast, a slow carry not slower than the cap', () => {
+    const quick = exitPlan('side', { dx: 200, dy: 0, ms: 60 }, { x: 200, y: 0 }, screen);
+    const slow = exitPlan('side', { dx: 130, dy: 0, ms: 3000 }, { x: 130, y: 0 }, screen);
+    expect(quick.ms).toBe(120);
+    expect(slow.ms).toBeLessThanOrEqual(240);
+    expect(slow.ms).toBeGreaterThanOrEqual(quick.ms);
   });
 });

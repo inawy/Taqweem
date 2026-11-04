@@ -24,8 +24,11 @@ export function swipeIntent(move: SwipeMove, rtl: boolean): SwipeIntent {
   return towardStart ? 'next' : 'previous';
 }
 
-/** Where a panel leaves to: a sheet drops down, a drawer goes back to the side it came from. */
-export type CloseDirection = 'down' | 'inline-start';
+/**
+ * Where a panel leaves to: a sheet drops down (`down`) or is thrown off to either side (`side`),
+ * a drawer goes back to the side it came from (`inline-start`).
+ */
+export type CloseDirection = 'down' | 'side' | 'inline-start';
 
 /**
  * A deliberate swipe that sends a panel away (D-063): long enough, quick enough and clearly in
@@ -37,6 +40,9 @@ export function closeSwipe(move: SwipeMove, direction: CloseDirection, rtl: bool
   if (ms > MAX_MS) return false;
   if (direction === 'down') {
     return dy >= MIN_DISTANCE_PX && dy >= Math.abs(dx) * 1.5;
+  }
+  if (direction === 'side') {
+    return Math.abs(dx) >= MIN_DISTANCE_PX && Math.abs(dx) >= Math.abs(dy) * 2;
   }
   if (Math.abs(dx) < MIN_DISTANCE_PX || Math.abs(dx) < Math.abs(dy) * 2) return false;
   return rtl ? dx > 0 : dx < 0;
@@ -59,6 +65,9 @@ export function settleDrag(move: SwipeMove, direction: CloseDirection, rtl: bool
   if (direction === 'down') {
     return dy >= SLOW_CARRY_PX && dy >= Math.abs(dx) * 1.5 ? 'close' : 'back';
   }
+  if (direction === 'side') {
+    return Math.abs(dx) >= SLOW_CARRY_PX && Math.abs(dx) >= Math.abs(dy) * 2 ? 'close' : 'back';
+  }
   const toward = rtl ? dx > 0 : dx < 0;
   return toward && Math.abs(dx) >= SLOW_CARRY_PX && Math.abs(dx) >= Math.abs(dy) * 2
     ? 'close'
@@ -76,6 +85,7 @@ export function startsDrag(
 ): boolean {
   const { dx, dy } = move;
   if (direction === 'down') return dy > 0 && dy >= Math.abs(dx) * 1.5;
+  if (direction === 'side') return Math.abs(dx) >= Math.abs(dy) * 2;
   const toward = rtl ? dx > 0 : dx < 0;
   return toward && Math.abs(dx) >= Math.abs(dy) * 2;
 }
@@ -87,6 +97,7 @@ export function dragOffset(
   rtl: boolean,
 ): { readonly x: number; readonly y: number } {
   if (direction === 'down') return { x: 0, y: Math.max(0, move.dy) };
+  if (direction === 'side') return { x: move.dx, y: 0 };
   return { x: rtl ? Math.max(0, move.dx) : Math.min(0, move.dx), y: 0 };
 }
 
@@ -101,4 +112,43 @@ export function verticalSwipeIntent(move: SwipeMove): SwipeIntent {
   if (Math.abs(dy) < MIN_DISTANCE_PX) return null;
   if (Math.abs(dy) < Math.abs(dx) * 2) return null;
   return dy < 0 ? 'next' : 'previous';
+}
+
+/** Where a sheet that is let go of leaves to, and how long the glide takes. */
+export interface ExitPlan {
+  readonly x: number;
+  readonly y: number;
+  readonly ms: number;
+}
+
+const EXIT_MIN_MS = 120;
+const EXIT_MAX_MS = 240;
+/** Slowest glide speed, so a slow carry past the threshold does not crawl off the screen. */
+const EXIT_MIN_SPEED = 0.8; // px per ms
+
+/**
+ * The glide that carries a released sheet off the screen from where the finger left it, in the
+ * direction it was thrown, at the speed it was thrown: a quick flick leaves quickly, a slow carry
+ * not slower than `EXIT_MAX_MS`. `offset` is how far it already moved, `viewport` the screen size.
+ */
+export function exitPlan(
+  axis: 'down' | 'side',
+  move: SwipeMove,
+  offset: { readonly x: number; readonly y: number },
+  viewport: { readonly width: number; readonly height: number },
+): ExitPlan {
+  const ms = Math.max(move.ms, 1);
+  if (axis === 'down') {
+    const remaining = Math.max(viewport.height - offset.y, 0);
+    const speed = Math.max(Math.abs(move.dy) / ms, EXIT_MIN_SPEED);
+    return { x: offset.x, y: viewport.height, ms: clampMs(remaining / speed) };
+  }
+  const sign = move.dx < 0 ? -1 : 1;
+  const remaining = Math.max(viewport.width - Math.abs(offset.x), 0);
+  const speed = Math.max(Math.abs(move.dx) / ms, EXIT_MIN_SPEED);
+  return { x: sign * viewport.width, y: offset.y, ms: clampMs(remaining / speed) };
+}
+
+function clampMs(value: number): number {
+  return Math.min(EXIT_MAX_MS, Math.max(EXIT_MIN_MS, Math.round(value)));
 }

@@ -185,7 +185,7 @@ export function DataDialog({
       else setMessage('importMissing');
     }, 'exportFailed');
 
-  const swipe = useSwipeClose('down', onClose, !busy);
+  const swipe = useSwipeClose('sheet', onClose, !busy);
 
   const onKeyDown = (event: KeyboardEvent<HTMLDivElement>): void => {
     if (event.code === 'Escape') {
@@ -210,8 +210,9 @@ export function DataDialog({
         aria-busy={busy}
         tabIndex={-1}
         onKeyDown={onKeyDown}
+        {...swipe}
       >
-        <h2 id={titleId} className="data-title sheet-grip" {...swipe}>
+        <h2 id={titleId} className="data-title sheet-grip">
           {t('dataTitle')}
         </h2>
 

@@ -66,10 +66,11 @@ button.block {
   border-radius: calc(var(--nawy-radius) * 1.5);
   background: var(--nawy-color-surface);
   color: var(--nawy-color-text);
-  box-shadow:
-    0 2px 6px rgb(0 0 0 / 0.06),
-    0 12px 32px rgb(0 0 0 / 0.16);
+  /* No shadow (D-099): the dimmed page behind already separates the card from it. */
+  border: 1px solid var(--nawy-color-border);
   overflow: hidden;
+  /* Sideways swipes belong to the card (they throw it away); vertical ones still scroll it. */
+  touch-action: pan-y pinch-zoom;
 }
 
 .modal form {
@@ -452,7 +453,6 @@ button.block:active {
 @keyframes modal-in {
   from {
     opacity: 0;
-    transform: scale(0.96) translateY(8px);
   }
 }
 
@@ -493,7 +493,7 @@ button.block:active {
     max-block-size: 94%;
     border-end-start-radius: 0;
     border-end-end-radius: 0;
-    animation: sheet-in 260ms var(--nawy-ease) both;
+    animation: sheet-in 220ms var(--nawy-ease) both;
   }
 
   .modal.scope {

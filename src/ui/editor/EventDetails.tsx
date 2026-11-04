@@ -39,7 +39,7 @@ export function EventDetails({
   useEffect(() => {
     editRef.current?.focus();
   }, []);
-  const swipe = useSwipeClose('down', onClose);
+  const swipe = useSwipeClose('sheet', onClose);
 
   const onKeyDown = (e: KeyboardEvent<HTMLDivElement>): void => {
     if (e.code === 'Escape') {
@@ -64,8 +64,9 @@ export function EventDetails({
         aria-modal="true"
         aria-labelledby={titleId}
         onKeyDown={onKeyDown}
+        {...swipe}
       >
-        <div className="ed-head sheet-grip" {...swipe}>
+        <div className="ed-head sheet-grip">
           <span
             className="details-bar"
             style={{ background: calendarColorVars(calendar?.color ?? 'gray').bar }}

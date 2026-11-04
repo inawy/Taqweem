@@ -45,7 +45,7 @@ export function SettingsDialog({ onClose }: SettingsDialogProps) {
   useEffect(() => {
     ref.current?.focus();
   }, []);
-  const swipe = useSwipeClose('down', onClose);
+  const swipe = useSwipeClose('sheet', onClose);
 
   const onKeyDown = (event: KeyboardEvent<HTMLDivElement>): void => {
     if (event.code === 'Escape') {
@@ -66,8 +66,9 @@ export function SettingsDialog({ onClose }: SettingsDialogProps) {
         aria-labelledby={titleId}
         tabIndex={-1}
         onKeyDown={onKeyDown}
+        {...swipe}
       >
-        <header className="ed-head sheet-grip" {...swipe}>
+        <header className="ed-head sheet-grip">
           <h2 id={titleId}>{t('settings')}</h2>
           <button type="button" className="icon-btn" aria-label={t('close')} onClick={onClose}>
             <CloseIcon />

@@ -1,10 +1,6 @@
 import type { Calendar } from '@/core/model';
-import type { IsoWeekday, Numerals } from '@/core/time';
 import { useT } from '@/features/i18n';
-import type { MessageKey } from '@/features/i18n';
 import { useSettings } from '@/features/settings';
-import { DEFAULT_VIEWS } from '@/features/settings';
-import type { DefaultView, Locale, ThemePreference } from '@/features/settings';
 import { calendarColorVars } from '@/ui/theme/calendarColor';
 import type { FormatOptions, PlainDate } from '@/core/time';
 import { EditIcon, PlusIcon } from './Icons';
@@ -15,6 +11,7 @@ export interface SidebarProps {
   readonly onToggleCalendar: (id: string, visible: boolean) => void;
   /** Present only when the browser can install the app right now. */
   readonly onInstall?: (() => void) | undefined;
+  readonly onOpenSettings?: (() => void) | undefined;
   readonly onOpenData?: (() => void) | undefined;
   readonly onOpenShortcuts?: (() => void) | undefined;
   readonly onOpenAbout?: (() => void) | undefined;
@@ -33,26 +30,11 @@ export interface SidebarProps {
   readonly installHelp?: 'ios' | 'android' | 'desktop' | null | undefined;
 }
 
-const VIEW_LABELS: Record<DefaultView, MessageKey> = {
-  auto: 'defaultViewAuto',
-  agenda: 'viewAgenda',
-  day: 'viewDay',
-  days3: 'viewDays3',
-  week: 'viewWeek',
-  month: 'viewMonth',
-  year: 'viewYear',
-};
-
-const THEMES: readonly [ThemePreference, MessageKey][] = [
-  ['auto', 'themeAuto'],
-  ['light', 'themeLight'],
-  ['dark', 'themeDark'],
-];
-
 export function Sidebar({
   calendars,
   onToggleCalendar,
   onInstall,
+  onOpenSettings,
   onOpenData,
   onOpenShortcuts,
   onOpenAbout,
@@ -62,7 +44,7 @@ export function Sidebar({
   installHelp,
 }: SidebarProps) {
   const t = useT();
-  const { settings, update, persisted } = useSettings();
+  const { settings, persisted } = useSettings();
 
   return (
     <div className="sidebar-body">
@@ -111,89 +93,12 @@ export function Sidebar({
         )}
       </section>
 
-      <section aria-labelledby="settings-heading" className="sidebar-settings">
-        <h2 id="settings-heading" className="sidebar-heading">
-          {t('settings')}
-        </h2>
-        <label className="field">
-          <span>{t('language')}</span>
-          <select
-            value={settings.locale}
-            onChange={(e) => {
-              const locale = e.currentTarget.value as Locale;
-              // Week start follows the language until the user has a setting of their own for it.
-              update({ locale, weekStart: locale === 'ar' ? 6 : 1 });
-            }}
-          >
-            <option value="ar">العربية</option>
-            <option value="en">English</option>
-          </select>
-        </label>
-        <label className="field">
-          <span>{t('theme')}</span>
-          <select
-            value={settings.theme}
-            onChange={(e) => update({ theme: e.currentTarget.value as ThemePreference })}
-          >
-            {THEMES.map(([value, key]) => (
-              <option key={value} value={value}>
-                {t(key)}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className="field">
-          <span>{t('weekStartLabel')}</span>
-          <select
-            value={settings.weekStart}
-            onChange={(e) => update({ weekStart: Number(e.currentTarget.value) as IsoWeekday })}
-          >
-            <option value={6}>{t('daySaturday')}</option>
-            <option value={7}>{t('daySunday')}</option>
-            <option value={1}>{t('dayMonday')}</option>
-          </select>
-        </label>
-        <label className="field">
-          <span>{t('defaultViewLabel')}</span>
-          <select
-            value={settings.defaultView}
-            onChange={(e) => update({ defaultView: e.currentTarget.value as DefaultView })}
-          >
-            {DEFAULT_VIEWS.map((value) => (
-              <option key={value} value={value}>
-                {t(VIEW_LABELS[value])}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label className="field">
-          <span>{t('timeFormat')}</span>
-          <select
-            value={settings.hour12 ? '12' : '24'}
-            onChange={(e) => update({ hour12: e.currentTarget.value === '12' })}
-          >
-            <option value="12">{t('time12')}</option>
-            <option value="24">{t('time24')}</option>
-          </select>
-        </label>
-        <label className="field">
-          <span>{t('numeralsLabel')}</span>
-          <select
-            value={settings.numerals}
-            onChange={(e) => update({ numerals: e.currentTarget.value as Numerals })}
-          >
-            <option value="latn">{t('numeralsLatin')}</option>
-            <option value="arab">{t('numeralsArabic')}</option>
-          </select>
-        </label>
-        <label className="ed-check">
-          <input
-            type="checkbox"
-            checked={settings.hijri}
-            onChange={(e) => update({ hijri: e.currentTarget.checked })}
-          />
-          <span>{t('hijriLabel')}</span>
-        </label>
+      <section className="sidebar-settings">
+        {onOpenSettings && (
+          <button type="button" className="btn" onClick={onOpenSettings}>
+            {t('settings')}
+          </button>
+        )}
         {onOpenData && (
           <button type="button" className="btn" onClick={onOpenData}>
             {t('dataTitle')}

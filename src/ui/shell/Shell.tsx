@@ -27,6 +27,7 @@ export interface ShellProps {
   readonly onNext: () => void;
   readonly onSearch: () => void;
   readonly onInstall?: (() => void) | undefined;
+  readonly onOpenSettings?: (() => void) | undefined;
   readonly onOpenData?: (() => void) | undefined;
   readonly onOpenShortcuts?: (() => void) | undefined;
   readonly onOpenAbout?: (() => void) | undefined;
@@ -57,6 +58,7 @@ export function Shell({
   onNext,
   onSearch,
   onInstall,
+  onOpenSettings,
   onOpenData,
   onOpenShortcuts,
   onOpenAbout,
@@ -136,6 +138,7 @@ export function Shell({
           calendars={calendars}
           onToggleCalendar={onToggleCalendar}
           onInstall={onInstall}
+          onOpenSettings={onOpenSettings}
           onOpenData={onOpenData}
           onOpenShortcuts={onOpenShortcuts}
           onOpenAbout={onOpenAbout}

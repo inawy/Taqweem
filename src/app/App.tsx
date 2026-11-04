@@ -44,6 +44,7 @@ import { ViewMotion } from '@/ui/shell/ViewMotion';
 import { AgendaView } from '@/ui/agenda/AgendaView';
 import { DataDialog } from '@/ui/backup/DataDialog';
 import { AboutDialog } from '@/ui/help/AboutDialog';
+import { SettingsDialog } from '@/ui/settings/SettingsDialog';
 import { ShortcutsDialog } from '@/ui/help/ShortcutsDialog';
 import { CalendarDialog } from '@/ui/calendars/CalendarDialog';
 import { CALENDAR_COLOR_IDS } from '@/ui/theme/tokens';
@@ -168,6 +169,7 @@ function Calendar({
   const [dataOpen, setDataOpen] = useState(false);
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
   const [aboutOpen, setAboutOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const installer = useInstallPrompt();
   const [installHelp] = useState(() => installHelpFor(readInstallEnvironment()));
   const [failed, setFailed] = useState(false);
@@ -310,16 +312,18 @@ function Calendar({
       !dataOpen &&
       !shortcutsOpen &&
       !aboutOpen &&
+      !settingsOpen &&
       calendarDialog === null,
     onShortcut,
   );
 
   // One history entry for "some dialog is open" (so search → editor never pops and re-pushes).
   useBackLayer(
-    flow.dialogOpen || searchOpen || dataOpen || shortcutsOpen || aboutOpen,
+    flow.dialogOpen || searchOpen || dataOpen || shortcutsOpen || aboutOpen || settingsOpen,
     async () => {
       if (flow.dialogOpen) return flow.back();
-      if (aboutOpen) setAboutOpen(false);
+      if (settingsOpen) setSettingsOpen(false);
+      else if (aboutOpen) setAboutOpen(false);
       else if (shortcutsOpen) setShortcutsOpen(false);
       else if (dataOpen) setDataOpen(false);
       else setSearchOpen(false);
@@ -398,6 +402,10 @@ function Calendar({
       onOpenShortcuts={() => {
         setDrawerOpen(false);
         setShortcutsOpen(true);
+      }}
+      onOpenSettings={() => {
+        setDrawerOpen(false);
+        setSettingsOpen(true);
       }}
       onOpenAbout={() => {
         setDrawerOpen(false);
@@ -562,6 +570,7 @@ function Calendar({
       )}
       {shortcutsOpen && <ShortcutsDialog onClose={() => setShortcutsOpen(false)} />}
       {aboutOpen && <AboutDialog onClose={() => setAboutOpen(false)} />}
+      {settingsOpen && <SettingsDialog onClose={() => setSettingsOpen(false)} />}
       {dataOpen && tools && data.status === 'ready' && (
         <DataDialog
           tools={tools}

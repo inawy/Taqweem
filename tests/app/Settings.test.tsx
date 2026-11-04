@@ -30,6 +30,7 @@ describe('display settings', () => {
     render(
       <App create={() => createDb(name)} now={() => Date.UTC(2026, 9, 13, 12)} storage={storage} />,
     );
+    fireEvent.click(await screen.findByRole('button', { name: 'Settings' }));
     fireEvent.change(await screen.findByLabelText('Week starts on'), { target: { value: '7' } });
     fireEvent.change(screen.getByLabelText('Time format'), { target: { value: '24' } });
     fireEvent.change(screen.getByLabelText('Numerals'), { target: { value: 'arab' } });
@@ -49,6 +50,7 @@ describe('display settings', () => {
     );
     const heading = await screen.findByRole('heading', { level: 1 });
     expect(heading.textContent).toBe('October 2026');
+    fireEvent.click(screen.getByRole('button', { name: 'Settings' }));
     fireEvent.click(screen.getByLabelText('Show Hijri date'));
     expect(heading.textContent).toContain('1448');
     expect(heading.textContent).toContain('October 2026');
@@ -68,6 +70,7 @@ describe('the view the app opens on (D-054)', () => {
   it('is remembered when changed', async () => {
     const { m, storage } = memory();
     open(storage);
+    fireEvent.click(await screen.findByRole('button', { name: 'Settings' }));
     fireEvent.change(await screen.findByLabelText('View when the app opens'), {
       target: { value: 'week' },
     });
@@ -87,6 +90,7 @@ describe('the view the app opens on (D-054)', () => {
     open(memory({ locale: 'en', defaultView: 'year' }).storage);
     expect((await screen.findAllByRole('button', { name: 'Year', pressed: true })).length).toBe(1);
     expect(screen.getByRole('heading', { level: 1 }).textContent).toMatch(/^\d{4}$/);
+    fireEvent.click(screen.getByRole('button', { name: 'Settings' }));
     const choice = screen.getByLabelText('View when the app opens');
     expect(within(choice).getByRole('option', { name: 'Year' })).toBeTruthy();
   });

@@ -287,7 +287,9 @@ test.describe('automated accessibility checks (axe, WCAG 2.0/2.1 A and AA)', () 
   test('dark theme', async ({ page }) => {
     await page.goto('/');
     await addEvent(page, 'Dentist');
+    await page.getByRole('button', { name: 'Settings' }).click();
     await page.getByLabel('Theme').selectOption('dark');
+    await page.keyboard.press('Escape');
     await expectNoViolations(page, 'month, dark');
   });
 

@@ -165,7 +165,7 @@ describe('app: keyboard shortcuts', () => {
     expect(pressed('Day')).toBe(true);
 
     // In a form control a letter is just a letter.
-    fireEvent.keyDown(screen.getByLabelText('Language'), { code: 'KeyM' });
+    fireEvent.keyDown(screen.getAllByRole('checkbox')[0] as HTMLElement, { code: 'KeyM' });
     expect(pressed('Day')).toBe(true);
     // With a modifier it belongs to the browser.
     fireEvent.keyDown(window, { code: 'KeyM', ctrlKey: true });
@@ -187,6 +187,7 @@ describe('app: language and theme', () => {
     await screen.findByRole('heading', { level: 1 });
     expect([document.documentElement.lang, document.documentElement.dir]).toEqual(['en', 'ltr']);
 
+    fireEvent.click(screen.getByRole('button', { name: 'Settings' }));
     fireEvent.change(screen.getByLabelText('Language'), { target: { value: 'ar' } });
     await waitFor(() => expect(document.documentElement.dir).toBe('rtl'));
     expect(document.documentElement.lang).toBe('ar');
@@ -200,6 +201,7 @@ describe('app: language and theme', () => {
   it('applies an explicit theme to the document', async () => {
     open();
     await screen.findByRole('heading', { level: 1 });
+    fireEvent.click(screen.getByRole('button', { name: 'Settings' }));
     fireEvent.change(screen.getByLabelText('Theme'), { target: { value: 'dark' } });
     await waitFor(() => expect(document.documentElement.getAttribute('data-theme')).toBe('dark'));
   });
@@ -213,6 +215,7 @@ describe('app: language and theme', () => {
     };
     open(refusing as never);
     await screen.findByRole('heading', { level: 1 });
+    fireEvent.click(screen.getByRole('button', { name: 'Settings' }));
     fireEvent.change(screen.getByLabelText('Theme'), { target: { value: 'light' } });
     expect(await screen.findByText(/apply to this session only/)).toBeTruthy();
   });

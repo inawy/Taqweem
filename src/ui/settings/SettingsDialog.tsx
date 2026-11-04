@@ -37,7 +37,7 @@ const THEMES: readonly [ThemePreference, MessageKey][] = [
  */
 export function SettingsDialog({ onClose }: SettingsDialogProps) {
   const t = useT();
-  const { settings, update } = useSettings();
+  const { settings, update, persisted } = useSettings();
   useRestoreFocus();
   const titleId = useId();
   const ref = useRef<HTMLDivElement>(null);
@@ -153,6 +153,11 @@ export function SettingsDialog({ onClose }: SettingsDialogProps) {
             />
             <span>{t('hijriLabel')}</span>
           </label>
+          {!persisted && (
+            <p role="status" className="muted">
+              {t('notSaved')}
+            </p>
+          )}
         </div>
       </div>
     </div>

@@ -219,7 +219,12 @@ describe('app: language and theme', () => {
     await screen.findByRole('heading', { level: 1 });
     fireEvent.click(screen.getByRole('button', { name: 'Settings' }));
     fireEvent.change(screen.getByLabelText('Theme'), { target: { value: 'light' } });
-    expect(await screen.findByText(/apply to this session only/)).toBeTruthy();
+    // The warning is next to the settings it is about, not in the side panel (D-096).
+    const dialog = screen.getByRole('dialog', { name: 'Settings' });
+    expect(await within(dialog).findByText(/apply to this session only/)).toBeTruthy();
+    expect(
+      within(document.querySelector('.sidebar') as HTMLElement).queryByText(/apply to this session/),
+    ).toBeNull();
   });
 });
 

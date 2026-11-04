@@ -44,7 +44,7 @@ export function Sidebar({
   installHelp,
 }: SidebarProps) {
   const t = useT();
-  const { settings, persisted } = useSettings();
+  const { settings } = useSettings();
 
   return (
     <div className="sidebar-body">
@@ -132,11 +132,6 @@ export function Sidebar({
               )}
             </p>
           </details>
-        )}
-        {!persisted && (
-          <p role="status" className="muted">
-            {t('notSaved')}
-          </p>
         )}
       </section>
     </div>

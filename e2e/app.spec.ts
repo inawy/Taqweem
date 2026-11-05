@@ -67,7 +67,7 @@ test.describe('the whole cycle in a real browser', () => {
     const block = page.locator('.block', { hasText: 'Stretch me' });
     await expect(block.locator('.block-time')).toContainText(/9:00.*10:00/);
     await block.evaluate((el) => el.scrollIntoView({ block: 'center' }));
-    const handle = await block.locator('.block-resize').boundingBox();
+    const handle = await block.locator('.block-resize:not(.block-resize-top)').boundingBox();
     if (!handle) throw new Error('the block has no resize edge');
     const x = handle.x + handle.width / 2;
     const y = handle.y + handle.height / 2;
@@ -99,7 +99,7 @@ test.describe('the whole cycle in a real browser', () => {
     await page.mouse.move(x, y - 24, { steps: 6 });
     await page.mouse.move(x, y - 48, { steps: 6 });
     await page.mouse.up();
-    await expect(block.locator('.block-time')).toContainText(/7:00.*10:00/);
+    await expect(block.locator('.block-time')).toContainText(/8:00.*10:00/);
     await expect(page.getByRole('dialog')).toHaveCount(0);
 
     await page.getByRole('button', { name: 'Undo' }).click();

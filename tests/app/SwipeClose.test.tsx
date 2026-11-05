@@ -122,7 +122,8 @@ describe('closing by swiping (D-063)', () => {
     expect(dialog.style.transform).toBe('translate(0px, 50px)');
     fireEvent.touchMove(grip, at(60)); // above where it started: it never rises past its place
     expect(dialog.style.transform).toBe('translate(0px, 0px)');
-    fireEvent.touchEnd(grip, { changedTouches: [{ clientX: 200, clientY: 130 }] });
+    // Let go after only 15 px: too short to count as a throw, however quick the test is.
+    fireEvent.touchEnd(grip, { changedTouches: [{ clientX: 200, clientY: 115 }] });
     expect(dialog.style.transform).toBe('');
     expect(screen.queryByRole('dialog', { name: 'About Nawy Today' })).toBeTruthy();
   });

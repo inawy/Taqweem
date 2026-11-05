@@ -41,7 +41,7 @@ describe('closing by swiping (D-063)', () => {
       fireEvent.click(await screen.findByRole('button', { name: 'Menu' }));
       fireEvent.click(await screen.findByRole('button', { name: 'About and privacy' }));
       const dialog = await screen.findByRole('dialog', { name: 'About Nawy Today' });
-      swipe(dialog.querySelector(where) as Element, 0, 40); // too short: it stays
+      swipe(dialog.querySelector(where) as Element, 0, 15); // too short, even as a flick: it stays
       expect(screen.queryByRole('dialog', { name: 'About Nawy Today' })).toBeTruthy();
       swipe(dialog.querySelector(where) as Element, 0, 120);
       // It does not vanish: it glides out first (D-099), then it is gone.
@@ -75,7 +75,7 @@ describe('closing by swiping (D-063)', () => {
       fireEvent.click(await screen.findByRole('button', { name: 'Menu' }));
       fireEvent.click(await screen.findByRole('button', { name: 'About and privacy' }));
       const dialog = await screen.findByRole('dialog', { name: 'About Nawy Today' });
-      swipe(dialog.querySelector('.about-text') as Element, 30, 0); // too short: stays
+      swipe(dialog.querySelector('.about-text') as Element, 15, 0); // too short, even as a flick: stays
       expect(screen.queryByRole('dialog', { name: 'About Nawy Today' })).toBeTruthy();
       swipe(dialog.querySelector('.about-text') as Element, dx, 4);
       expect(dialog.style.transform).toContain(dx < 0 ? 'translate(-' : 'translate(');

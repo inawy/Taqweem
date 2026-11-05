@@ -389,7 +389,7 @@ const en: Record<MessageKey, string> = {
   occHijriNewYear: 'Islamic New Year',
   occAshura: 'Ashura',
   occMawlid: 'Mawlid',
-  occIsra: 'Isra and Mi\'raj',
+  occIsra: "Isra and Mi'raj",
   occRamadan: 'First of Ramadan',
   occEidFitr: 'Eid al-Fitr',
   occArafah: 'Day of Arafah',

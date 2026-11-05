@@ -3,6 +3,8 @@ import {
   closeSwipe,
   dragOffset,
   exitPlan,
+  flings,
+  releaseVelocity,
   settleDrag,
   startsDrag,
   swipeIntent,
@@ -62,7 +64,7 @@ describe('settleDrag: a panel that followed the finger', () => {
     expect(settleDrag({ dx: 150, dy: 5, ms: 2000 }, 'inline-start', true)).toBe('close');
   });
   it('springs back when it was not carried far, or was carried the wrong way', () => {
-    expect(settleDrag({ dx: 0, dy: 100, ms: 2000 }, 'down', false)).toBe('back');
+    expect(settleDrag({ dx: 0, dy: 60, ms: 2000 }, 'down', false)).toBe('back');
     expect(settleDrag({ dx: 0, dy: -200, ms: 300 }, 'down', false)).toBe('back');
     expect(settleDrag({ dx: 200, dy: 0, ms: 2000 }, 'inline-start', false)).toBe('back');
     expect(settleDrag({ dx: 150, dy: 140, ms: 2000 }, 'down', false)).toBe('back');
@@ -118,7 +120,7 @@ describe('a card thrown to either side (D-099)', () => {
   });
   it('settles: a slow carry far enough closes, a short one springs back', () => {
     expect(settleDrag({ dx: -150, dy: 4, ms: 2000 }, 'side', false)).toBe('close');
-    expect(settleDrag({ dx: 100, dy: 4, ms: 2000 }, 'side', false)).toBe('back');
+    expect(settleDrag({ dx: 60, dy: 4, ms: 2000 }, 'side', false)).toBe('back');
   });
 });
 
@@ -136,5 +138,37 @@ describe('exitPlan: the glide that carries a let-go card off the screen', () => 
     expect(quick.ms).toBe(120);
     expect(slow.ms).toBeLessThanOrEqual(240);
     expect(slow.ms).toBeGreaterThanOrEqual(quick.ms);
+  });
+});
+
+describe('a quick flick of the wrist throws a card even when it was not carried far (D-100)', () => {
+  const trail = (...points: [number, number, number][]) => points.map(([x, y, t]) => ({ x, y, t }));
+
+  it('reads the speed of the last 100 ms, not of the whole drag', () => {
+    const slowThenFast = trail(
+      [0, 0, 0],
+      [10, 0, 400],
+      [20, 0, 800],
+      [60, 0, 840],
+      [100, 0, 860],
+    );
+    expect(releaseVelocity(slowThenFast).vx).toBeCloseTo(2, 5); // 80 px in the last 40 ms
+    expect(releaseVelocity(trail([0, 0, 0]))).toEqual({ vx: 0, vy: 0 });
+    expect(releaseVelocity([])).toEqual({ vx: 0, vy: 0 });
+  });
+  it('throws a sheet down or sideways when the finger leaves fast, never the wrong way', () => {
+    expect(flings('down', { vx: 0, vy: 0.9 }, { dx: 2, dy: 30 })).toBe(true);
+    expect(flings('down', { vx: 0, vy: 0.2 }, { dx: 0, dy: 30 })).toBe(false); // too slow
+    expect(flings('down', { vx: 0, vy: 0.9 }, { dx: 0, dy: 10 })).toBe(false); // barely moved
+    expect(flings('side', { vx: -0.8, vy: 0 }, { dx: -30, dy: 3 })).toBe(true);
+    expect(flings('side', { vx: 0.8, vy: 0 }, { dx: -30, dy: 3 })).toBe(false); // came back
+    expect(flings('side', { vx: 0.8, vy: 0 }, { dx: 30, dy: 40 })).toBe(false); // mostly vertical
+  });
+  it('the glide uses the speed at release when it is known', () => {
+    const screen = { width: 390, height: 844 };
+    const fast = exitPlan('side', { dx: 60, dy: 0, ms: 900 }, { x: 60, y: 0 }, screen, 3);
+    const average = exitPlan('side', { dx: 60, dy: 0, ms: 900 }, { x: 60, y: 0 }, screen);
+    expect(fast.ms).toBe(120);
+    expect(average.ms).toBeGreaterThan(fast.ms);
   });
 });

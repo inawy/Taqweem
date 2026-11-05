@@ -272,7 +272,7 @@ button.block {
   border-radius: 50%;
   background: var(--nawy-color-accent-fill);
   color: var(--nawy-color-on-accent-fill);
-  box-shadow: var(--nawy-shadow-lift);
+  box-shadow: none;
   cursor: pointer;
 }
 
@@ -291,7 +291,7 @@ button.block {
   border-radius: var(--nawy-radius);
   background: var(--nawy-color-text);
   color: var(--nawy-color-bg);
-  box-shadow: 0 4px 16px rgb(0 0 0 / 0.3);
+  box-shadow: none;
 }
 
 .toast-action {

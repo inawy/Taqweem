@@ -204,7 +204,8 @@ button.more {
 .month .bar[data-dragging='true'] {
   z-index: 30;
   opacity: 0.9;
-  box-shadow: 0 6px 20px rgb(0 0 0 / 0.3);
+  /* Picked up: a ring in the accent colour, not a shadow (D-100). */
+  box-shadow: 0 0 0 2px var(--nawy-color-accent-fill);
   cursor: grabbing;
   transition: none;
 }

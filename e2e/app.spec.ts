@@ -639,6 +639,11 @@ test.describe('on a phone', () => {
     page,
   }) => {
     await page.goto('/');
+    // No blurred shadow anywhere on the main screen either (D-100): the add button is flat.
+    await expect(page.locator('.fab')).toBeVisible();
+    expect(await page.locator('.fab').evaluate((el) => getComputedStyle(el).boxShadow)).toBe(
+      'none',
+    );
     const cdp = await page.context().newCDPSession(page);
     const swipe = async (from: { x: number; y: number }, to: { x: number; y: number }) => {
       const point = (p: { x: number; y: number }) => [{ x: p.x, y: p.y, id: 1 }];

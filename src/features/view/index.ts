@@ -13,12 +13,21 @@ export {
   closeSwipe,
   dragOffset,
   exitPlan,
+  flings,
+  releaseVelocity,
   settleDrag,
   startsDrag,
   swipeIntent,
   verticalSwipeIntent,
 } from './swipe';
-export type { CloseDirection, DragOutcome, ExitPlan, SwipeIntent, SwipeMove } from './swipe';
+export type {
+  CloseDirection,
+  DragOutcome,
+  ExitPlan,
+  SwipeIntent,
+  SwipeMove,
+  TrailPoint,
+} from './swipe';
 export { placeBeside } from './placement';
 export type { Point, Size } from './placement';
 export { FAB_HIDE_PX, FAB_SHOW_PX, fabAfterScroll } from './fab';

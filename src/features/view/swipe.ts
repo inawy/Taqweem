@@ -49,6 +49,8 @@ export function closeSwipe(move: SwipeMove, direction: CloseDirection, rtl: bool
 }
 
 const SLOW_CARRY_PX = 120;
+/** A sheet is lighter to throw: it closes when carried this far, however slowly (D-100). */
+const SHEET_CARRY_PX = 80;
 /** How far a panel moves before it counts as "being dragged away" at all. */
 export const DRAG_START_PX = 8;
 
@@ -63,10 +65,10 @@ export function settleDrag(move: SwipeMove, direction: CloseDirection, rtl: bool
   if (closeSwipe(move, direction, rtl)) return 'close';
   const { dx, dy } = move;
   if (direction === 'down') {
-    return dy >= SLOW_CARRY_PX && dy >= Math.abs(dx) * 1.5 ? 'close' : 'back';
+    return dy >= SHEET_CARRY_PX && dy >= Math.abs(dx) * 1.5 ? 'close' : 'back';
   }
   if (direction === 'side') {
-    return Math.abs(dx) >= SLOW_CARRY_PX && Math.abs(dx) >= Math.abs(dy) * 2 ? 'close' : 'back';
+    return Math.abs(dx) >= SHEET_CARRY_PX && Math.abs(dx) >= Math.abs(dy) * 2 ? 'close' : 'back';
   }
   const toward = rtl ? dx > 0 : dx < 0;
   return toward && Math.abs(dx) >= SLOW_CARRY_PX && Math.abs(dx) >= Math.abs(dy) * 2
@@ -136,17 +138,62 @@ export function exitPlan(
   move: SwipeMove,
   offset: { readonly x: number; readonly y: number },
   viewport: { readonly width: number; readonly height: number },
+  /** The speed of the finger at the moment it let go (px per ms); the whole-drag average if absent. */
+  releaseSpeed?: number,
 ): ExitPlan {
   const ms = Math.max(move.ms, 1);
   if (axis === 'down') {
     const remaining = Math.max(viewport.height - offset.y, 0);
-    const speed = Math.max(Math.abs(move.dy) / ms, EXIT_MIN_SPEED);
+    const speed = Math.max(releaseSpeed ?? Math.abs(move.dy) / ms, EXIT_MIN_SPEED);
     return { x: offset.x, y: viewport.height, ms: clampMs(remaining / speed) };
   }
   const sign = move.dx < 0 ? -1 : 1;
   const remaining = Math.max(viewport.width - Math.abs(offset.x), 0);
-  const speed = Math.max(Math.abs(move.dx) / ms, EXIT_MIN_SPEED);
+  const speed = Math.max(releaseSpeed ?? Math.abs(move.dx) / ms, EXIT_MIN_SPEED);
   return { x: sign * viewport.width, y: offset.y, ms: clampMs(remaining / speed) };
+}
+
+/** A recent finger position, for reading how fast the finger was moving when it let go. */
+export interface TrailPoint {
+  readonly x: number;
+  readonly y: number;
+  readonly t: number;
+}
+
+const FLING_WINDOW_MS = 100;
+/** A throw this fast closes a sheet even if it was not carried far (px per ms). */
+const FLING_SPEED = 0.5;
+const FLING_MIN_PX = 24;
+
+/** The finger's velocity over the last ~100 ms of the trail (px per ms), zero if it is too short. */
+export function releaseVelocity(trail: readonly TrailPoint[]): {
+  readonly vx: number;
+  readonly vy: number;
+} {
+  const last = trail[trail.length - 1];
+  if (!last) return { vx: 0, vy: 0 };
+  const first = trail.find((p) => last.t - p.t <= FLING_WINDOW_MS) ?? last;
+  const dt = last.t - first.t;
+  if (dt <= 0) return { vx: 0, vy: 0 };
+  return { vx: (last.x - first.x) / dt, vy: (last.y - first.y) / dt };
+}
+
+/**
+ * Whether the way the finger was moving at the instant it let go throws the sheet away even
+ * though it was not carried far: a quick flick of the wrist is enough (D-100).
+ */
+export function flings(
+  axis: 'down' | 'side',
+  velocity: { readonly vx: number; readonly vy: number },
+  move: Pick<SwipeMove, 'dx' | 'dy'>,
+): boolean {
+  if (axis === 'down') {
+    return velocity.vy >= FLING_SPEED && move.dy >= FLING_MIN_PX && move.dy >= Math.abs(move.dx);
+  }
+  const along = Math.abs(velocity.vx) >= FLING_SPEED;
+  const sameWay = Math.sign(velocity.vx) === Math.sign(move.dx);
+  const far = Math.abs(move.dx) >= FLING_MIN_PX && Math.abs(move.dx) >= Math.abs(move.dy);
+  return along && sameWay && far;
 }
 
 function clampMs(value: number): number {

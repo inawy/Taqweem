@@ -46,7 +46,7 @@ describe('closing by swiping (D-063)', () => {
     expect(screen.queryByRole('dialog', { name: 'About Nawy Today' })).toBeTruthy();
     swipe(dialog.querySelector('.sheet-grip') as Element, 0, 120);
     // It does not vanish: it glides out first (D-099), then it is gone.
-    expect(dialog.style.opacity).toBe('0');
+    expect((dialog.parentElement as HTMLElement).style.backgroundColor).toBe('transparent');
     expect(dialog.style.transform).toContain('translate(');
     await waitFor(() =>
       expect(screen.queryByRole('dialog', { name: 'About Nawy Today' })).toBeNull(),

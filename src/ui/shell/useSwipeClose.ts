@@ -1,6 +1,14 @@
 import { useRef, type TouchEvent } from 'react';
-import { DRAG_START_PX, dragOffset, exitPlan, settleDrag, startsDrag } from '@/features/view';
-import type { CloseDirection } from '@/features/view';
+import {
+  DRAG_START_PX,
+  dragOffset,
+  exitPlan,
+  flings,
+  releaseVelocity,
+  settleDrag,
+  startsDrag,
+} from '@/features/view';
+import type { CloseDirection, TrailPoint } from '@/features/view';
 
 export interface SwipeCloseHandlers {
   readonly onTouchStart: (e: TouchEvent<HTMLElement>) => void;
@@ -29,10 +37,20 @@ interface Gesture {
   axis: CloseDirection | undefined;
   /** Where the panel was last drawn. */
   offset: { x: number; y: number };
+  /** The last few finger positions, to read how fast it was moving when it let go. */
+  trail: TrailPoint[];
 }
 
 const SPRING_MS = 160;
 const FIELD = 'input, textarea, select, [contenteditable="true"]';
+
+/** The dimmed layer behind a sheet (the drawer has its own, outside the panel). */
+function scrimOf(panel: HTMLElement): HTMLElement | null {
+  const parent = panel.parentElement;
+  return parent?.classList.contains('modal-backdrop') ? parent : null;
+}
+
+const SCRIM_ALPHA = 0.45; // the backdrop's colour in CSS
 
 function prefersReducedMotion(): boolean {
   return typeof window.matchMedia === 'function'
@@ -59,10 +77,19 @@ export function useSwipeClose(
   const release = (panel: HTMLElement, animate: boolean): void => {
     panel.style.transition = animate ? `transform ${SPRING_MS}ms var(--nawy-ease)` : '';
     panel.style.transform = '';
+    const scrim = scrimOf(panel);
+    if (scrim) {
+      scrim.style.transition = animate ? `background-color ${SPRING_MS}ms linear` : '';
+      scrim.style.backgroundColor = '';
+    }
     if (animate) {
       window.setTimeout(() => {
         panel.style.transition = '';
+        panel.style.willChange = '';
+        if (scrim) scrim.style.transition = '';
       }, SPRING_MS + 20);
+    } else {
+      panel.style.willChange = '';
     }
   };
 
@@ -89,6 +116,7 @@ export function useSwipeClose(
         dragging: undefined,
         axis: undefined,
         offset: { x: 0, y: 0 },
+        trail: [{ x: touch.clientX, y: touch.clientY, t: e.timeStamp }],
       };
     },
     onTouchMove: (e) => {
@@ -114,8 +142,19 @@ export function useSwipeClose(
       }
       const { x, y } = dragOffset(move, g.axis ?? 'down', rtl);
       g.offset = { x, y };
+      g.trail.push({ x: touch.clientX, y: touch.clientY, t: e.timeStamp });
+      if (g.trail.length > 8) g.trail.shift();
+      g.panel.style.willChange = 'transform';
       g.panel.style.transition = 'none';
       g.panel.style.transform = `translate(${x}px, ${y}px)`;
+      // The dimmed page behind lightens as the card leaves, so nothing flashes when it is gone.
+      const scrim = direction === 'sheet' ? scrimOf(g.panel) : null;
+      if (scrim) {
+        const span = g.axis === 'down' ? window.innerHeight : window.innerWidth;
+        const travelled = Math.min(1, Math.hypot(x, y) / (span * 0.6));
+        scrim.style.transition = 'none';
+        scrim.style.backgroundColor = `rgb(0 0 0 / ${(SCRIM_ALPHA * (1 - travelled)).toFixed(3)})`;
+      }
     },
     onTouchEnd: (e) => {
       const g = gesture.current;
@@ -142,8 +181,18 @@ export function useSwipeClose(
               ? ['down', 'side']
               : ['side']
             : [direction];
+      g.trail.push({ x: touch.clientX, y: touch.clientY, t: e.timeStamp });
+      const velocity = releaseVelocity(g.trail);
       const axis =
-        g.dragging === false ? undefined : ways.find((w) => settleDrag(move, w, rtl) === 'close');
+        g.dragging === false
+          ? undefined
+          : ways.find(
+              (w) =>
+                settleDrag(move, w, rtl) === 'close' ||
+                (direction === 'sheet' &&
+                  (w === 'down' || w === 'side') &&
+                  flings(w, velocity, move)),
+            );
       if (axis === undefined) {
         release(g.panel, g.dragging === true);
         return;
@@ -160,18 +209,19 @@ export function useSwipeClose(
         return;
       }
       // The card carries on in the direction and at the speed it was thrown, then goes.
-      const plan = exitPlan(axis, move, g.offset, {
-        width: window.innerWidth,
-        height: window.innerHeight,
-      });
+      const plan = exitPlan(
+        axis,
+        move,
+        g.offset,
+        { width: window.innerWidth, height: window.innerHeight },
+        Math.abs(axis === 'down' ? velocity.vy : velocity.vx) || undefined,
+      );
       leaving.current = true;
       const { panel } = g;
-      const backdrop = panel.parentElement?.classList.contains('modal-backdrop')
-        ? panel.parentElement
-        : null;
-      panel.style.transition = `transform ${plan.ms}ms cubic-bezier(0.25, 0.1, 0.5, 1), opacity ${plan.ms}ms linear`;
+      const backdrop = scrimOf(panel);
+      panel.style.willChange = 'transform';
+      panel.style.transition = `transform ${plan.ms}ms cubic-bezier(0.3, 0, 0.7, 1)`;
       panel.style.transform = `translate(${plan.x}px, ${plan.y}px)`;
-      panel.style.opacity = '0';
       if (backdrop) {
         backdrop.style.transition = `background-color ${plan.ms}ms linear`;
         backdrop.style.backgroundColor = 'transparent';
@@ -184,7 +234,7 @@ export function useSwipeClose(
           if (!panel.isConnected) return;
           panel.style.transition = '';
           panel.style.transform = '';
-          panel.style.opacity = '';
+          panel.style.willChange = '';
           if (backdrop) {
             backdrop.style.transition = '';
             backdrop.style.backgroundColor = '';

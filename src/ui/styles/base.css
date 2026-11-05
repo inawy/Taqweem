@@ -55,6 +55,16 @@ html {
   background: var(--nawy-color-bg);
 }
 
+/* While a card or the side drawer is open, a pull downward belongs to it (to throw it away), not to
+   the browser's pull to refresh underneath: the page behind does not chain the gesture. Pull to
+   refresh works as before on the plain screen (D-101). */
+:root:has(.modal-backdrop),
+:root:has(.modal-backdrop) body,
+:root:has(.shell[data-drawer='open']),
+:root:has(.shell[data-drawer='open']) body {
+  overscroll-behavior-y: contain;
+}
+
 body {
   margin: 0;
   background: var(--nawy-color-bg);

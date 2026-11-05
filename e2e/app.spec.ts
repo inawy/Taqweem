@@ -677,6 +677,27 @@ test.describe('on a phone', () => {
     }
   });
 
+  test('pull to refresh is held back only while a card or the drawer is open (D-101)', async ({
+    page,
+  }) => {
+    await page.goto('/');
+    const behaviour = () =>
+      page.evaluate(() => ({
+        root: getComputedStyle(document.documentElement).overscrollBehaviorY,
+        body: getComputedStyle(document.body).overscrollBehaviorY,
+      }));
+    expect(await behaviour()).toEqual({ root: 'auto', body: 'auto' });
+    await page.getByRole('button', { name: 'Menu', exact: true }).click();
+    await expect(page.locator('.shell')).toHaveAttribute('data-drawer', 'open');
+    expect(await behaviour()).toEqual({ root: 'contain', body: 'contain' });
+    await page.getByRole('button', { name: 'About and privacy' }).click();
+    await expect(page.getByRole('dialog', { name: 'About Nawy Today' })).toBeVisible();
+    expect(await behaviour()).toEqual({ root: 'contain', body: 'contain' });
+    await page.keyboard.press('Escape');
+    await expect(page.getByRole('dialog', { name: 'About Nawy Today' })).toBeHidden();
+    expect(await behaviour()).toEqual({ root: 'auto', body: 'auto' });
+  });
+
   test('buttons are at least 44px tall', async ({ page }) => {
     await page.goto('/');
     const small = await page.evaluate(() =>

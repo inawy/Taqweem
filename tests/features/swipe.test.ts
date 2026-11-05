@@ -145,13 +145,7 @@ describe('a quick flick of the wrist throws a card even when it was not carried 
   const trail = (...points: [number, number, number][]) => points.map(([x, y, t]) => ({ x, y, t }));
 
   it('reads the speed of the last 100 ms, not of the whole drag', () => {
-    const slowThenFast = trail(
-      [0, 0, 0],
-      [10, 0, 400],
-      [20, 0, 800],
-      [60, 0, 840],
-      [100, 0, 860],
-    );
+    const slowThenFast = trail([0, 0, 0], [10, 0, 400], [20, 0, 800], [60, 0, 840], [100, 0, 860]);
     expect(releaseVelocity(slowThenFast).vx).toBeCloseTo(2, 5); // 80 px in the last 40 ms
     expect(releaseVelocity(trail([0, 0, 0]))).toEqual({ vx: 0, vy: 0 });
     expect(releaseVelocity([])).toEqual({ vx: 0, vy: 0 });

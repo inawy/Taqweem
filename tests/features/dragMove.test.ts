@@ -158,10 +158,17 @@ describe('keyAction', () => {
     expect(keyAction('ArrowLeft', ctrl, false)).toBeUndefined();
   });
 
+  it('changes only the start with Alt + Shift + up/down', () => {
+    const alt = { ...mods, alt: true };
+    expect(keyAction('ArrowUp', alt, false)).toEqual({ kind: 'resize-start', minutes: -15 });
+    expect(keyAction('ArrowDown', alt, true)).toEqual({ kind: 'resize-start', minutes: 15 });
+  });
+
   it('ignores plain arrows, other keys and Alt/Meta combinations', () => {
     expect(keyAction('ArrowDown', { ...mods, shift: false }, false)).toBeUndefined();
     expect(keyAction('KeyA', mods, false)).toBeUndefined();
-    expect(keyAction('ArrowDown', { ...mods, alt: true }, false)).toBeUndefined();
+    expect(keyAction('ArrowLeft', { ...mods, alt: true }, false)).toBeUndefined();
+    expect(keyAction('ArrowDown', { ...mods, alt: true, ctrl: true }, false)).toBeUndefined();
     expect(keyAction('ArrowDown', { ...mods, meta: true }, false)).toBeUndefined();
   });
 });

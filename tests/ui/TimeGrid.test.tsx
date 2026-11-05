@@ -157,6 +157,7 @@ describe('TimeGrid keyboard editing', () => {
   const setup = () => {
     const onMove = vi.fn();
     const onResize = vi.fn();
+    const onResizeStart = vi.fn();
     const r = render(
       <SettingsProvider storage={storage('en')} languages={['en']}>
         <TimeGrid
@@ -168,11 +169,12 @@ describe('TimeGrid keyboard editing', () => {
           onCreateAt={() => undefined}
           onMoveEvent={onMove}
           onResizeEvent={onResize}
+          onResizeEventStart={onResizeStart}
         />
       </SettingsProvider>,
     );
     const block = r.container.querySelector('.block') as HTMLElement;
-    return { block, onMove, onResize };
+    return { block, onMove, onResize, onResizeStart };
   };
 
   it('moves a focused block with Shift + arrows', () => {
@@ -189,6 +191,14 @@ describe('TimeGrid keyboard editing', () => {
     press(block, { code: 'ArrowDown', shiftKey: true, ctrlKey: true });
     expect(onResize).toHaveBeenCalledWith(expect.anything(), 15);
     expect(onMove).not.toHaveBeenCalled();
+  });
+
+  it('changes only the start with Alt + Shift + up/down', () => {
+    const { block, onMove, onResize, onResizeStart } = setup();
+    press(block, { code: 'ArrowUp', shiftKey: true, altKey: true });
+    expect(onResizeStart).toHaveBeenCalledWith(expect.anything(), -15);
+    expect(onMove).not.toHaveBeenCalled();
+    expect(onResize).not.toHaveBeenCalled();
   });
 
   it('does nothing for a plain arrow, and announces its keys', () => {

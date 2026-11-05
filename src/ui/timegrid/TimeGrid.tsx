@@ -357,7 +357,7 @@ function Block({
       data-event-id={event.id}
       aria-keyshortcuts={
         onMove
-          ? 'Shift+ArrowUp Shift+ArrowDown Shift+ArrowLeft Shift+ArrowRight Control+Shift+ArrowUp Control+Shift+ArrowDown'
+          ? 'Shift+ArrowUp Shift+ArrowDown Shift+ArrowLeft Shift+ArrowRight Control+Shift+ArrowUp Control+Shift+ArrowDown Alt+Shift+ArrowUp Alt+Shift+ArrowDown'
           : undefined
       }
       onKeyDown={(e) => {
@@ -370,10 +370,13 @@ function Block({
         );
         if (!action) return;
         if (action.kind === 'resize' && (!onResize || block.endsAfter)) return;
+        if (action.kind === 'resize-start' && (!onResizeStart || block.startsBefore)) return;
         e.preventDefault();
         onKeyboardEdit(event.id);
         if (action.kind === 'move') {
           onMove(block.occurrence, { days: action.days, minutes: action.minutes });
+        } else if (action.kind === 'resize-start') {
+          onResizeStart?.(block.occurrence, action.minutes);
         } else {
           onResize?.(block.occurrence, action.minutes);
         }

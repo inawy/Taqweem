@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { MIN_RESIZE_MINUTES, draftForNew, moveDraft, resizeDraft } from '@/features/events';
+import {
+  MIN_RESIZE_MINUTES,
+  draftForNew,
+  moveDraft,
+  resizeDraft,
+  resizeStartDraft,
+} from '@/features/events';
 import type { Draft } from '@/features/events';
 import { dragDelta, keyAction } from '@/features/timegrid';
 
@@ -157,5 +163,24 @@ describe('keyAction', () => {
     expect(keyAction('KeyA', mods, false)).toBeUndefined();
     expect(keyAction('ArrowDown', { ...mods, alt: true }, false)).toBeUndefined();
     expect(keyAction('ArrowDown', { ...mods, meta: true }, false)).toBeUndefined();
+  });
+});
+
+describe('resizeStartDraft', () => {
+  it('moves only the start and keeps the end', () => {
+    expect(resizeStartDraft(timed(), -30)).toMatchObject({ startTime: '08:30', endTime: '10:00' });
+    expect(resizeStartDraft(timed(), 30)).toMatchObject({ startTime: '09:30', endTime: '10:00' });
+  });
+
+  it('never leaves less than one step', () => {
+    expect(resizeStartDraft(timed(), 600)).toMatchObject({ startTime: '09:45', endTime: '10:00' });
+  });
+
+  it('may carry the start back across midnight, and refuses all-day', () => {
+    expect(resizeStartDraft(timed({ startTime: '00:30' }), -60)).toMatchObject({
+      startDate: '2026-10-19',
+      startTime: '23:30',
+    });
+    expect(resizeStartDraft(timed({ allDay: true }), 30)).toBeUndefined();
   });
 });

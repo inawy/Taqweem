@@ -83,6 +83,29 @@ test.describe('the whole cycle in a real browser', () => {
     await expect(block.locator('.block-time')).toContainText(/9:00.*10:00/);
   });
 
+  test('dragging the top edge changes the start only, and undo puts it back', async ({ page }) => {
+    await page.goto('/');
+    await addEvent(page, 'Start earlier');
+    await page.getByRole('button', { name: 'Day', exact: true }).click();
+    const block = page.locator('.block', { hasText: 'Start earlier' });
+    await expect(block.locator('.block-time')).toContainText(/9:00.*10:00/);
+    await block.evaluate((el) => el.scrollIntoView({ block: 'center' }));
+    const handle = await block.locator('.block-resize-top').boundingBox();
+    if (!handle) throw new Error('the block has no top edge');
+    const x = handle.x + handle.width / 2;
+    const y = handle.y + handle.height / 2;
+    await page.mouse.move(x, y);
+    await page.mouse.down();
+    await page.mouse.move(x, y - 24, { steps: 6 });
+    await page.mouse.move(x, y - 48, { steps: 6 });
+    await page.mouse.up();
+    await expect(block.locator('.block-time')).toContainText(/7:00.*10:00/);
+    await expect(page.getByRole('dialog')).toHaveCount(0);
+
+    await page.getByRole('button', { name: 'Undo' }).click();
+    await expect(block.locator('.block-time')).toContainText(/9:00.*10:00/);
+  });
+
   test('dragging an all-day item moves it by whole days, and undo puts it back', async ({
     page,
   }) => {

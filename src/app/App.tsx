@@ -540,6 +540,7 @@ function Calendar({
             }
             onMoveEvent={flow.moveEvent}
             onResizeEvent={flow.resizeEvent}
+            onResizeEventStart={flow.resizeEventStart}
           />
         )}
       </ViewMotion>

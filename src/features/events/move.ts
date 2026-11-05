@@ -24,6 +24,19 @@ export function resizeDraft(draft: Draft, minutes: number): Draft | undefined {
   return { ...draft, endDate: nextEnd.slice(0, 10), endTime: nextEnd.slice(11, 16) };
 }
 
+/**
+ * The same event with its START moved by `minutes` (what dragging the top edge does). The end
+ * stays; the start never goes closer than a step to it. `undefined` for all-day or unreadable.
+ */
+export function resizeStartDraft(draft: Draft, minutes: number): Draft | undefined {
+  if (draft.allDay) return undefined;
+  const start = toEpochMinute(`${draft.startDate}T${draft.startTime}`);
+  const end = toEpochMinute(`${draft.endDate}T${draft.endTime}`);
+  if (start === undefined || end === undefined) return undefined;
+  const nextStart = isoOfEpochMinute(Math.min(end - MIN_RESIZE_MINUTES, start + minutes), false);
+  return { ...draft, startDate: nextStart.slice(0, 10), startTime: nextStart.slice(11, 16) };
+}
+
 export function moveDraft(draft: Draft, days: number, minutes: number): Draft | undefined {
   if (draft.allDay) {
     if (days === 0) return draft;

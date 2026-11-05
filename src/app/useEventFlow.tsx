@@ -12,6 +12,7 @@ import {
   draftToFields,
   moveDraft,
   resizeDraft,
+  resizeStartDraft,
   execute,
   isSeries,
   planDelete,
@@ -75,6 +76,7 @@ export interface EventFlow {
   readonly moveEvent: (occurrence: Occurrence, delta: { days: number; minutes: number }) => void;
   /** Moves an occurrence's end by minutes (dragging the bottom edge). */
   readonly resizeEvent: (occurrence: Occurrence, minutes: number) => void;
+  readonly resizeEventStart: (occurrence: Occurrence, minutes: number) => void;
   /** The editor, the scope question and the toast. Render it once, anywhere. */
   readonly overlay: ReactNode;
   /** True while a dialog is open: global shortcuts must pause. */
@@ -235,6 +237,12 @@ export function useEventFlow({
   const resizeEvent = useCallback(
     (occurrence: Occurrence, minutes: number): void =>
       changeOccurrence(occurrence, (d) => resizeDraft(d, minutes), 'eventResized'),
+    [changeOccurrence],
+  );
+
+  const resizeEventStart = useCallback(
+    (occurrence: Occurrence, minutes: number): void =>
+      changeOccurrence(occurrence, (d) => resizeStartDraft(d, minutes), 'eventResized'),
     [changeOccurrence],
   );
 
@@ -476,6 +484,7 @@ export function useEventFlow({
     openEvent,
     moveEvent,
     resizeEvent,
+    resizeEventStart,
     overlay,
     dialogOpen: editing !== null || ask !== null || viewing !== null || quick !== null,
     back,

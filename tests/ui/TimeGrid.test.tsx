@@ -110,6 +110,46 @@ describe('TimeGrid resize edge', () => {
   });
 });
 
+describe('TimeGrid top edge', () => {
+  const withTop = (events: unknown[], props: object = {}) =>
+    render(
+      <SettingsProvider storage={storage('en')} languages={['en']}>
+        <TimeGrid
+          model={model(events)}
+          today="2026-10-13"
+          nowLocal="2026-10-13T12:00"
+          lanes={3}
+          onOpenEvent={() => undefined}
+          onCreateAt={() => undefined}
+          {...props}
+        />
+      </SettingsProvider>,
+    );
+
+  it('gives a block a top edge only when start resizing is available', () => {
+    const events = [makeEvent({ id: 'a', title: 'A' })];
+    expect(withTop(events).container.querySelector('.block-resize-top')).toBeNull();
+    cleanup();
+    const r = withTop(events, { onResizeEventStart: vi.fn() });
+    expect(r.container.querySelectorAll('.block-resize-top')).toHaveLength(1);
+  });
+
+  it('has no top edge where the real start is on an earlier day', () => {
+    const { container } = withTop(
+      [
+        makeEvent({
+          id: 'night',
+          title: 'Night',
+          start: '2026-10-12T22:00',
+          end: '2026-10-13T02:00',
+        }),
+      ],
+      { onResizeEventStart: vi.fn() },
+    );
+    expect(container.querySelectorAll('.block-resize-top')).toHaveLength(0);
+  });
+});
+
 describe('TimeGrid keyboard editing', () => {
   const press = (el: Element, init: KeyboardEventInit) =>
     fireEvent.keyDown(el, { bubbles: true, ...init });

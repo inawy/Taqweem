@@ -245,6 +245,11 @@ button.tg-headcell:hover {
   touch-action: none;
 }
 
+.block-resize-top {
+  inset-block-start: 0;
+  inset-block-end: auto;
+}
+
 .block-resize::after {
   content: '';
   position: absolute;
@@ -255,6 +260,11 @@ button.tg-headcell:hover {
   background: currentcolor;
   opacity: 0;
   transition: opacity var(--nawy-duration) var(--nawy-ease);
+}
+
+.block-resize-top::after {
+  inset-block-end: auto;
+  inset-block-start: 3px;
 }
 
 .block:hover .block-resize::after,

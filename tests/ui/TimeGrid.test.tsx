@@ -146,7 +146,8 @@ describe('TimeGrid top edge', () => {
       ],
       { onResizeEventStart: vi.fn() },
     );
-    expect(container.querySelectorAll('.block-resize-top')).toHaveLength(0);
+    // The part on the 12th starts there (an edge); the part on the 13th starts at midnight (none).
+    expect(container.querySelectorAll('.block-resize-top')).toHaveLength(1);
   });
 });
 

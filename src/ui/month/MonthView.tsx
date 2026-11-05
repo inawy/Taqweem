@@ -17,7 +17,7 @@ import type { MonthBar, MonthModel, WeekModel } from '@/features/month';
 import { useT } from '@/features/i18n';
 import { useSettings } from '@/features/settings';
 import { keyAction } from '@/features/timegrid';
-import { verticalSwipeIntent } from '@/features/view';
+import { islamicOccasion, verticalSwipeIntent } from '@/features/view';
 import type { SwipeIntent } from '@/features/view';
 import type { DragDelta } from '@/features/timegrid';
 import { calendarColorVars } from '@/ui/theme/calendarColor';
@@ -157,7 +157,16 @@ function WeekRow({
   onKeyboardEdit,
   moreLabel,
 }: WeekRowProps) {
+  const t = useT();
   const rowRef = useRef<HTMLDivElement>(null);
+  const occasionTitle = (day: PlainDate): string | undefined => {
+    const key = islamicOccasion(day);
+    return key ? t(key) : undefined;
+  };
+  const occasionLabel = (day: PlainDate): string => {
+    const name = occasionTitle(day);
+    return name ? ` · ${name}` : '';
+  };
   return (
     <div className="week" ref={rowRef}>
       {week.days.map((day, col) => {
@@ -176,9 +185,10 @@ function WeekRow({
               className="day-btn"
               aria-label={
                 hijri
-                  ? `${formatDate(day, fmt, 'full')} · ${formatHijriDate(day, fmt)}`
+                  ? `${formatDate(day, fmt, 'full')} · ${formatHijriDate(day, fmt)}${occasionLabel(day)}`
                   : formatDate(day, fmt, 'full')
               }
+              title={hijri ? occasionTitle(day) : undefined}
               aria-current={day === today ? 'date' : undefined}
               aria-pressed={selected === undefined ? undefined : day === selected}
               onClick={() => onOpenDay(day)}
@@ -187,7 +197,11 @@ function WeekRow({
                 {formatDayOfMonth(day, fmt)}
               </time>
               {hijri && (
-                <span className="hijri-num" aria-hidden="true">
+                <span
+                  className="hijri-num"
+                  data-occasion={islamicOccasion(day) ? 'true' : undefined}
+                  aria-hidden="true"
+                >
                   {formatHijriDay(day, fmt)}
                 </span>
               )}

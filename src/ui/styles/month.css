@@ -195,6 +195,13 @@ button.more {
   color: var(--nawy-color-text-muted);
 }
 
+/* An Islamic occasion: the Hijri number is bold in the accent colour; the name is in the tooltip
+   and the spoken label (D-107). */
+.hijri-num[data-occasion='true'] {
+  font-weight: 700;
+  color: var(--nawy-color-focus);
+}
+
 /* An item picked up to move it to another day or week (D-049). */
 .month .bar {
   user-select: none;

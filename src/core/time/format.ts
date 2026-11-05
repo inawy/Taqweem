@@ -104,6 +104,23 @@ function hijriFormatter(
   });
 }
 
+/**
+ * The Hijri month (1–12) and day of a date (Umm al-Qura), as numbers, for finding occasions.
+ * Display only: nothing Hijri is stored (D-016). `undefined` if the platform cannot say.
+ */
+export function hijriMonthDay(date: PlainDate): { month: number; day: number } | undefined {
+  const parts = formatter('en', {
+    calendar: 'islamic-umalqura',
+    numberingSystem: 'latn',
+    timeZone: 'UTC',
+    day: 'numeric',
+    month: 'numeric',
+  }).formatToParts(utcMidnight(date));
+  const month = Number(parts.find((p) => p.type === 'month')?.value);
+  const day = Number(parts.find((p) => p.type === 'day')?.value);
+  return Number.isInteger(month) && Number.isInteger(day) ? { month, day } : undefined;
+}
+
 /** Just the Hijri day of the month, e.g. "1" (display only). */
 export function formatHijriDay(date: PlainDate, o: FormatOptions): string {
   return hijriFormatter(o, { day: 'numeric' }).format(utcMidnight(date));

@@ -6,6 +6,7 @@ import {
   formatDayOfMonth,
   formatHijriDate,
   formatHijriDay,
+  hijriMonthDay,
   formatHijriSpan,
   formatMonthTitle,
   formatTime,
@@ -176,5 +177,20 @@ describe('formatYear', () => {
     expect(formatYear('2026-10-13', EN)).toBe('2026');
     expect(formatYear('2026-10-13', { locale: 'ar', numerals: 'arab' })).toBe('٢٠٢٦');
     expect(formatYear('2026-10-13', { locale: 'ar', numerals: 'latn' })).toBe('2026');
+  });
+});
+
+describe('hijriMonthDay', () => {
+  it('reads the Umm al-Qura month and day of a date', () => {
+    const a = hijriMonthDay('2026-10-13');
+    expect(a?.month).toBeGreaterThanOrEqual(1);
+    expect(a?.month).toBeLessThanOrEqual(12);
+    expect(a?.day).toBeGreaterThanOrEqual(1);
+    expect(a?.day).toBeLessThanOrEqual(30);
+  });
+  it('moves forward one day at a time', () => {
+    const a = hijriMonthDay('2026-10-13');
+    const b = hijriMonthDay('2026-10-14');
+    expect(b?.day === (a?.day ?? 0) + 1 || b?.day === 1).toBe(true);
   });
 });

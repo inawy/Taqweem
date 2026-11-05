@@ -25,6 +25,7 @@ import { buildTimeGridModel } from '@/features/timegrid';
 import { useEventFlow } from './useEventFlow';
 import {
   hijriSubtitle,
+  islamicOccasion,
   shiftAnchor,
   useShortcuts,
   useViewMotion,
@@ -362,13 +363,21 @@ function Calendar({
   const skipped = active.skipped;
   const problems = active.problems;
 
+  // On a single day, its Islamic occasion (if any) follows the Hijri date (D-107).
+  const dayOccasion = view === 'day' ? islamicOccasion(anchor) : undefined;
+  const occasionSuffix = dayOccasion ? ` · ${t(dayOccasion)}` : '';
+
   const showStorageWarning =
     reminder.storageWarning && !reminder.show && !flow.dialogOpen && !searchOpen && !dataOpen;
 
   return (
     <Shell
       title={viewTitle(view, anchor, settings.weekStart, fmt)}
-      subtitle={settings.hijri ? hijriSubtitle(view, anchor, settings.weekStart, fmt) : undefined}
+      subtitle={
+        settings.hijri
+          ? hijriSubtitle(view, anchor, settings.weekStart, fmt) + occasionSuffix
+          : undefined
+      }
       view={view}
       onView={setView}
       drawerOpen={drawerOpen}

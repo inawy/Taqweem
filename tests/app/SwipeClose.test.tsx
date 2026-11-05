@@ -85,12 +85,29 @@ describe('closing by swiping (D-063)', () => {
     }
   });
 
-  it('the editor is not closed by a swipe (it would save a draft by accident)', async () => {
+  it('the editor is thrown from its header only, and closes the way Escape does (D-103)', async () => {
     open();
     fireEvent.click(await screen.findByRole('button', { name: 'Add event' }));
     const dialog = await screen.findByRole('dialog', { name: 'New event' });
-    swipe(dialog.querySelector('.ed-head') as Element, 0, 160);
+    // From the form, a swipe is a text selection or a scroll, never a close.
+    swipe(dialog.querySelector('.ed-title') as Element, 0, 160);
+    swipe(dialog.querySelector('.ed-body') as Element, 160, 0);
     expect(screen.queryByRole('dialog', { name: 'New event' })).toBeTruthy();
+    // From the header, with nothing typed, it simply closes.
+    swipe(dialog.querySelector('.ed-head') as Element, 0, 160);
+    await waitFor(() => expect(screen.queryByRole('dialog', { name: 'New event' })).toBeNull());
+  });
+
+  it('a swipe from the editor header saves what was typed, as closing always does', async () => {
+    open();
+    fireEvent.click(await screen.findByRole('button', { name: 'Add event' }));
+    const dialog = await screen.findByRole('dialog', { name: 'New event' });
+    fireEvent.change(dialog.querySelector('.ed-title') as Element, {
+      target: { value: 'Thrown and kept' },
+    });
+    swipe(dialog.querySelector('.ed-head') as Element, 160, 0);
+    await waitFor(() => expect(screen.queryByRole('dialog', { name: 'New event' })).toBeNull());
+    expect(await screen.findAllByText('Thrown and kept')).not.toHaveLength(0);
   });
 
   it('the drawer and a sheet follow the finger, spring back when let go early, and close when carried', async () => {

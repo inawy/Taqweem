@@ -78,10 +78,18 @@ function prefersReducedMotion(): boolean {
  * vanish: it glides on from where the finger left it, in the direction and at the speed it was
  * thrown, and only then is removed.
  */
+export interface SwipeCloseOptions {
+  /** Only a touch that starts on the card's grip or header may drag it (a card with a form). */
+  readonly gripOnly?: boolean;
+  /** `false`: no glide out; the card springs back and the owner decides whether it closes. */
+  readonly glide?: boolean;
+}
+
 export function useSwipeClose(
   direction: SwipeDirection,
   onClose: () => void,
   enabled = true,
+  options: SwipeCloseOptions = {},
 ): SwipeCloseHandlers {
   const gesture = useRef<Gesture | null>(null);
   const leaving = useRef(false);
@@ -115,6 +123,10 @@ export function useSwipeClose(
       const target = e.target instanceof Element ? e.target : null;
       // A finger on a text field is selecting text or moving a slider, not throwing the card.
       if (direction === 'sheet' && target?.closest(FIELD)) {
+        gesture.current = null;
+        return;
+      }
+      if (options.gripOnly && !target?.closest('.sheet-grip')) {
         gesture.current = null;
         return;
       }
@@ -218,7 +230,7 @@ export function useSwipeClose(
         onClose();
         return;
       }
-      if (prefersReducedMotion()) {
+      if (prefersReducedMotion() || options.glide === false) {
         release(g.panel, false);
         onClose();
         return;

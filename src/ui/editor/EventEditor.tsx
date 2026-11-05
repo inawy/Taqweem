@@ -9,6 +9,7 @@ import { useT } from '@/features/i18n';
 import type { MessageKey } from '@/features/i18n';
 import { trapTab } from '@/lib/focusTrap';
 import { useRestoreFocus } from '@/ui/shell/useRestoreFocus';
+import { useSwipeClose } from '@/ui/shell/useSwipeClose';
 import { useVisualViewport } from '@/lib/useVisualViewport';
 import { CloseIcon } from '@/ui/shell/Icons';
 import { RepeatFields } from './RepeatFields';
@@ -147,6 +148,13 @@ export function EventEditor({
     return false;
   }, [commit, initial, onClose]);
 
+  // Thrown from its header it closes by the same way as Escape: it saves when something changed and
+  // is valid, and stays open with the reason when it cannot (D-103). No glide: it may stay.
+  const swipe = useSwipeClose('sheet', () => void requestClose(), !busy, {
+    gripOnly: true,
+    glide: false,
+  });
+
   useVisualViewport();
   useEffect(() => {
     registerClose?.(requestClose);
@@ -178,6 +186,7 @@ export function EventEditor({
         aria-modal="true"
         aria-labelledby={titleId}
         onKeyDown={onKeyDown}
+        {...swipe}
       >
         <form
           onSubmit={(e) => {
@@ -185,7 +194,7 @@ export function EventEditor({
             void submit();
           }}
         >
-          <header className="ed-head">
+          <header className="ed-head sheet-grip">
             <h2 id={titleId}>{mode === 'new' ? t('newEvent') : t('editEvent')}</h2>
             <button
               type="button"

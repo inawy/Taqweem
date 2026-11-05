@@ -29,7 +29,10 @@ interface Gesture {
   readonly at: number;
   /** The whole panel that moves: a sheet's `.modal`, or the drawer itself. */
   readonly panel: HTMLElement;
-  /** The touch began on the sheet's grip or header, the only place a drag DOWN may start. */
+  /**
+   * A drag DOWN may start here: on the grip or header, or anywhere on the card whose content is
+   * not scrolled (a finger pulling down on scrolled text is scrolling it back up).
+   */
   readonly fromGrip: boolean;
   /** `undefined` until the first few pixels say whether this touch is a drag or something else. */
   dragging: boolean | undefined;
@@ -43,6 +46,15 @@ interface Gesture {
 
 const SPRING_MS = 160;
 const FIELD = 'input, textarea, select, [contenteditable="true"]';
+
+/** Whether the touched spot sits in content scrolled away from its top, inside this card. */
+function scrolledWithin(target: Element | null, panel: HTMLElement): boolean {
+  for (let el = target; el && panel.contains(el); el = el.parentElement) {
+    if (el.scrollTop > 0) return true;
+    if (el === panel) break;
+  }
+  return false;
+}
 
 /** The dimmed layer behind a sheet (the drawer has its own, outside the panel). */
 function scrimOf(panel: HTMLElement): HTMLElement | null {
@@ -112,7 +124,10 @@ export function useSwipeClose(
         y: touch.clientY,
         at: e.timeStamp,
         panel,
-        fromGrip: direction !== 'sheet' || !!target?.closest('.sheet-grip'),
+        fromGrip:
+          direction !== 'sheet' ||
+          !!target?.closest('.sheet-grip') ||
+          !scrolledWithin(target, panel),
         dragging: undefined,
         axis: undefined,
         offset: { x: 0, y: 0 },

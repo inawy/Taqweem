@@ -698,6 +698,28 @@ test.describe('on a phone', () => {
     expect(await behaviour()).toEqual({ root: 'auto', body: 'auto' });
   });
 
+  test('a card is also thrown down from its text, not only from its grip (D-102)', async ({
+    page,
+  }) => {
+    await page.goto('/');
+    const cdp = await page.context().newCDPSession(page);
+    await page.getByRole('button', { name: 'Menu', exact: true }).click();
+    await page.getByRole('button', { name: 'About and privacy' }).click();
+    const dialog = page.getByRole('dialog', { name: 'About Nawy Today' });
+    await expect(dialog).toBeVisible();
+    await page.waitForTimeout(400); // the sheet has slid in
+    const box = await dialog.boundingBox();
+    const x = (box?.x ?? 0) + (box?.width ?? 0) / 2;
+    const y = (box?.y ?? 0) + 160; // in the text, well below the grip
+    const point = (dy: number) => [{ x, y: y + dy, id: 1 }];
+    await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: point(0) });
+    for (const dy of [30, 70, 110, 150]) {
+      await cdp.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: point(dy) });
+    }
+    await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+    await expect(dialog).toBeHidden();
+  });
+
   test('buttons are at least 44px tall', async ({ page }) => {
     await page.goto('/');
     const small = await page.evaluate(() =>

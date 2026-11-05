@@ -35,19 +35,35 @@ describe('closing by swiping (D-063)', () => {
     expect(shell.getAttribute('data-drawer')).toBe('closed');
   });
 
-  it('a read-only sheet closes when its header is swiped down, but not from its text', async () => {
+  it('a read-only sheet closes when swiped down from its header or from its text (D-102)', async () => {
+    open();
+    for (const where of ['.sheet-grip', '.about-text']) {
+      fireEvent.click(await screen.findByRole('button', { name: 'Menu' }));
+      fireEvent.click(await screen.findByRole('button', { name: 'About and privacy' }));
+      const dialog = await screen.findByRole('dialog', { name: 'About Nawy Today' });
+      swipe(dialog.querySelector(where) as Element, 0, 40); // too short: it stays
+      expect(screen.queryByRole('dialog', { name: 'About Nawy Today' })).toBeTruthy();
+      swipe(dialog.querySelector(where) as Element, 0, 120);
+      // It does not vanish: it glides out first (D-099), then it is gone.
+      expect((dialog.parentElement as HTMLElement).style.backgroundColor).toBe('transparent');
+      expect(dialog.style.transform).toContain('translate(');
+      await waitFor(() =>
+        expect(screen.queryByRole('dialog', { name: 'About Nawy Today' })).toBeNull(),
+      );
+    }
+  });
+
+  it('pulling down on text that is scrolled away from its top scrolls it, it does not close', async () => {
     open();
     fireEvent.click(await screen.findByRole('button', { name: 'Menu' }));
     fireEvent.click(await screen.findByRole('button', { name: 'About and privacy' }));
     const dialog = await screen.findByRole('dialog', { name: 'About Nawy Today' });
-    swipe(dialog.querySelector('.about-text') as Element, 0, 120);
+    const body = dialog.querySelector('.ed-body') as HTMLElement;
+    Object.defineProperty(body, 'scrollTop', { value: 80, configurable: true });
+    swipe(dialog.querySelector('.about-text') as Element, 0, 160);
     expect(screen.queryByRole('dialog', { name: 'About Nawy Today' })).toBeTruthy();
-    swipe(dialog.querySelector('.sheet-grip') as Element, 0, 40);
-    expect(screen.queryByRole('dialog', { name: 'About Nawy Today' })).toBeTruthy();
-    swipe(dialog.querySelector('.sheet-grip') as Element, 0, 120);
-    // It does not vanish: it glides out first (D-099), then it is gone.
-    expect((dialog.parentElement as HTMLElement).style.backgroundColor).toBe('transparent');
-    expect(dialog.style.transform).toContain('translate(');
+    Object.defineProperty(body, 'scrollTop', { value: 0, configurable: true });
+    swipe(dialog.querySelector('.about-text') as Element, 0, 160);
     await waitFor(() =>
       expect(screen.queryByRole('dialog', { name: 'About Nawy Today' })).toBeNull(),
     );

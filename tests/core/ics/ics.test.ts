@@ -203,6 +203,19 @@ describe('serializeIcs', () => {
     expect(text).not.toContain('VALARM');
   });
 
+  it('exports a Hijri-yearly series without an RRULE other calendars would misread (D-111)', () => {
+    const text = serializeIcs({
+      calendars,
+      events: [
+        makeEvent({ id: 'h', calendarId: 'c', title: 'Ramadan', rrule: 'FREQ=YEARLY;X-HIJRI=9-1' }),
+        makeEvent({ id: 'w', calendarId: 'c', title: 'Weekly', rrule: 'FREQ=WEEKLY;COUNT=4' }),
+      ],
+    });
+    expect(text).not.toContain('RRULE:FREQ=YEARLY;X-HIJRI');
+    expect(text).toContain('X-NAWY-HIJRI-RULE:FREQ=YEARLY;X-HIJRI=9-1');
+    expect(text).toContain('RRULE:FREQ=WEEKLY;COUNT=4');
+  });
+
   it('leaves out deleted events and overrides whose series is gone', () => {
     const text = serializeIcs({
       calendars,

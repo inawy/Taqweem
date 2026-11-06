@@ -7,6 +7,7 @@ import {
   dateParts,
   datePart,
   diffDays,
+  hijriMonthDay,
   isValidDate,
   isValidTimeZone,
   timePart,
@@ -18,7 +19,14 @@ import type { NewEvent } from '@/data';
 // The editor's working copy of an event: plain strings and numbers, exactly what the form shows.
 // `draftToFields` is the single gate from the form to a storable event; it never throws.
 
-export type RepeatKind = 'none' | 'daily' | 'weekly' | 'monthly' | 'yearly' | 'custom';
+export type RepeatKind =
+  | 'none'
+  | 'daily'
+  | 'weekly'
+  | 'monthly'
+  | 'yearly'
+  | 'hijriYearly'
+  | 'custom';
 export type MonthlyMode = 'day' | 'nth';
 export type RepeatEnd =
   { kind: 'never' } | { kind: 'until'; date: string } | { kind: 'count'; count: number };
@@ -111,6 +119,8 @@ export function repeatFromRule(rrule: string | undefined, startDate: string): Re
     ) {
       draft = { ...NO_REPEAT, ...base, kind: 'monthly', monthlyMode: 'nth' };
     }
+  } else if (r.freq === 'YEARLY' && r.hijri !== undefined) {
+    draft = { ...NO_REPEAT, ...base, kind: 'hijriYearly' };
   } else if (r.freq === 'YEARLY' && r.byDay.length === 0) {
     const { month, day } = dateParts(startDate);
     const sameDay =
@@ -159,6 +169,10 @@ export function repeatToRule(
         : { ...rule, freq: 'MONTHLY', byMonthDay: [day] };
   } else if (repeat.kind === 'yearly') {
     rule = { ...rule, freq: 'YEARLY', byMonth: [month], byMonthDay: [day] };
+  } else if (repeat.kind === 'hijriYearly') {
+    const hijri = hijriMonthDay(startDate);
+    if (hijri === undefined) return { ok: false, error: 'interval' };
+    rule = { ...rule, freq: 'YEARLY', interval: 1, hijri };
   }
   if (repeat.end.kind === 'count') {
     if (!Number.isInteger(repeat.end.count) || repeat.end.count < 1 || repeat.end.count > 10000) {

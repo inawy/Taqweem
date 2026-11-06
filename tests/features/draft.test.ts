@@ -10,6 +10,8 @@ import {
   withStart,
 } from '@/features/events/draft';
 import type { Draft } from '@/features/events/draft';
+import { hijriMonthDay } from '@/core/time';
+import type { PlainDate } from '@/core/time';
 import { makeAllDayEvent, makeEvent } from '../helpers/factories';
 
 const fresh = (over: Partial<Draft> = {}): Draft => ({
@@ -106,6 +108,18 @@ describe('repeat <-> rule', () => {
       ok: true,
       rrule: 'FREQ=YEARLY;BYMONTHDAY=13;BYMONTH=10',
     });
+  });
+
+  it('builds and reads back a Hijri yearly rule (D-111)', () => {
+    const h = hijriMonthDay(start as PlainDate);
+    const built = repeatToRule(
+      { ...fresh().repeat, kind: 'hijriYearly', interval: 5 },
+      start,
+      false,
+    );
+    expect(built).toEqual({ ok: true, rrule: `FREQ=YEARLY;X-HIJRI=${h?.month}-${h?.day}` });
+    const back = repeatFromRule((built as { rrule: string }).rrule, start);
+    expect(back.kind).toBe('hijriYearly');
   });
 
   it('until is a date for all-day and end-of-day for timed events', () => {

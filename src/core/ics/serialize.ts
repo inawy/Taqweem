@@ -64,7 +64,10 @@ export function serializeIcs(input: IcsInput): string {
     if (e.notes) lines.push(`DESCRIPTION:${escapeText(e.notes)}`);
     const calendarName = calendarNames.get(e.calendarId);
     if (calendarName) lines.push(`CATEGORIES:${escapeText(calendarName)}`);
-    if (e.rrule) lines.push(`RRULE:${e.rrule}`);
+    // A Hijri-yearly rule has no RFC 5545 form: other calendars would read it as a plain yearly one.
+    // It is exported as a single event with a note of the rule (D-111); the JSON backup keeps it.
+    if (e.rrule?.includes('X-HIJRI')) lines.push(`X-NAWY-HIJRI-RULE:${e.rrule}`);
+    else if (e.rrule) lines.push(`RRULE:${e.rrule}`);
     for (const x of e.exdates ?? []) lines.push(when('EXDATE', x, tz));
     lines.push('END:VEVENT');
   }

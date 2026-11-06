@@ -237,6 +237,7 @@ export function splitSeries(
         byMonthDay: rule.byMonthDay,
         byMonth: rule.byMonth,
         wkst: rule.wkst,
+        ...(rule.hijri !== undefined && { hijri: rule.hijri }),
         until: master.allDay ? dayBefore : `${dayBefore}T23:59`,
       });
     }

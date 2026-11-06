@@ -3,6 +3,7 @@ import {
   daysInMonthOf,
   epochDayOf,
   fromEpochDay,
+  hijriMonthDay,
   isoDateOfEpochDay,
   isoWeekdayOfEpochDay,
   toEpochDay,
@@ -62,6 +63,10 @@ export function expandRule(
   const fromDay = epochDayOf(fromN.slice(0, 10));
   const toDay = epochDayOf(toN.slice(0, 10));
   if (fromDay === undefined || toDay === undefined) throw new RangeError('Invalid window');
+
+  if (rule.hijri !== undefined) {
+    return expandHijri(rule, rule.hijri, startDay, timeSuffix, fromN, toN, untilN, toDay, limit);
+  }
 
   const start = fromEpochDay(startDay);
   const startMonthIndex = start.year * 12 + (start.month - 1);
@@ -196,6 +201,49 @@ export function expandRule(
         if (out.length >= limit) return out;
       }
     }
+  }
+  return out;
+}
+
+const HIJRI_MAX_STEPS = 400_000;
+
+/**
+ * Yearly on a Hijri month and day (D-111). Walks day by day until the date is found, then jumps
+ * 340 days (a Hijri year is 354 or 355) before looking again, so a far window costs a few calls
+ * per year. A day 30 in a month that has only 29 that year is skipped, like 31 April.
+ */
+function expandHijri(
+  rule: Rule,
+  hijri: { readonly month: number; readonly day: number },
+  startDay: number,
+  timeSuffix: string,
+  fromN: string,
+  toN: string,
+  untilN: string | undefined,
+  toDay: number,
+  limit: number,
+): string[] {
+  const out: string[] = [];
+  let emitted = 0;
+  let day = startDay;
+  for (let step = 0; step < HIJRI_MAX_STEPS && day <= toDay; step += 1) {
+    const iso = isoDateOfEpochDay(day);
+    if (Number(iso.slice(0, 4)) > MAX_YEAR) break;
+    const h = hijriMonthDay(iso);
+    if (h === undefined || h.month !== hijri.month || h.day !== hijri.day) {
+      day += 1;
+      continue;
+    }
+    const occurrence = `${iso}${timeSuffix}`;
+    const n = normalize(occurrence);
+    if (untilN !== undefined && n > untilN) return out;
+    emitted += 1;
+    if (rule.count !== undefined && emitted > rule.count) return out;
+    if (n >= fromN && n < toN) {
+      out.push(occurrence);
+      if (out.length >= limit) return out;
+    }
+    day += 340;
   }
   return out;
 }

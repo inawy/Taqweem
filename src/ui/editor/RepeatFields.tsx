@@ -5,13 +5,21 @@ import type { RepeatDraft, RepeatKind } from '@/features/events';
 import { useT } from '@/features/i18n';
 import type { MessageKey } from '@/features/i18n';
 
-const KINDS: readonly RepeatKind[] = ['none', 'daily', 'weekly', 'monthly', 'yearly'];
+const KINDS: readonly RepeatKind[] = [
+  'none',
+  'daily',
+  'weekly',
+  'monthly',
+  'yearly',
+  'hijriYearly',
+];
 const KIND_LABEL: Record<RepeatKind, MessageKey> = {
   none: 'repeatNone',
   daily: 'repeatDaily',
   weekly: 'repeatWeekly',
   monthly: 'repeatMonthly',
   yearly: 'repeatYearly',
+  hijriYearly: 'repeatHijriYearly',
   custom: 'repeatCustom',
 };
 const UNIT: Record<string, MessageKey> = {
@@ -65,18 +73,20 @@ export function RepeatFields({ value, onChange, fmt, weekStart }: RepeatFieldsPr
 
       {value.kind !== 'none' && value.kind !== 'custom' && (
         <>
-          <label className="ed-inline">
-            <span>{t('every')}</span>
-            <input
-              type="number"
-              inputMode="numeric"
-              min={1}
-              max={999}
-              value={Number.isFinite(value.interval) ? value.interval : ''}
-              onChange={(e) => onChange({ ...value, interval: e.target.valueAsNumber })}
-            />
-            <span>{t(UNIT[value.kind] ?? 'unitDay')}</span>
-          </label>
+          {value.kind !== 'hijriYearly' && (
+            <label className="ed-inline">
+              <span>{t('every')}</span>
+              <input
+                type="number"
+                inputMode="numeric"
+                min={1}
+                max={999}
+                value={Number.isFinite(value.interval) ? value.interval : ''}
+                onChange={(e) => onChange({ ...value, interval: e.target.valueAsNumber })}
+              />
+              <span>{t(UNIT[value.kind] ?? 'unitDay')}</span>
+            </label>
+          )}
 
           {value.kind === 'weekly' && (
             <div className="ed-days" role="group" aria-label={t('onWeekdays')}>

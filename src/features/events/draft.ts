@@ -20,7 +20,7 @@ import type { NewEvent } from '@/data';
 // `draftToFields` is the single gate from the form to a storable event; it never throws.
 
 export type RepeatKind =
-  'none' | 'daily' | 'weekly' | 'monthly' | 'yearly' | 'hijriYearly' | 'custom';
+  'none' | 'daily' | 'weekly' | 'monthly' | 'yearly' | 'hijriYearly' | 'hijriMonthly' | 'custom';
 export type MonthlyMode = 'day' | 'nth';
 export type RepeatEnd =
   { kind: 'never' } | { kind: 'until'; date: string } | { kind: 'count'; count: number };
@@ -101,6 +101,8 @@ export function repeatFromRule(rrule: string | undefined, startDate: string): Re
     r.byDay.every((d) => d.nth === undefined)
   ) {
     draft = { ...NO_REPEAT, ...base, kind: 'weekly', weekdays: r.byDay.map((d) => d.day) };
+  } else if (r.freq === 'MONTHLY' && r.hijri !== undefined) {
+    draft = { ...NO_REPEAT, ...base, kind: 'hijriMonthly' };
   } else if (r.freq === 'MONTHLY' && r.byMonth.length === 0) {
     const day = dateParts(startDate).day;
     if (noBy || (r.byMonthDay.length === 1 && r.byMonthDay[0] === day && r.byDay.length === 0)) {
@@ -167,6 +169,10 @@ export function repeatToRule(
     const hijri = hijriMonthDay(startDate);
     if (hijri === undefined) return { ok: false, error: 'interval' };
     rule = { ...rule, freq: 'YEARLY', interval: 1, hijri };
+  } else if (repeat.kind === 'hijriMonthly') {
+    const hijri = hijriMonthDay(startDate);
+    if (hijri === undefined) return { ok: false, error: 'interval' };
+    rule = { ...rule, freq: 'MONTHLY', interval: 1, hijri: { day: hijri.day } };
   }
   if (repeat.end.kind === 'count') {
     if (!Number.isInteger(repeat.end.count) || repeat.end.count < 1 || repeat.end.count > 10000) {

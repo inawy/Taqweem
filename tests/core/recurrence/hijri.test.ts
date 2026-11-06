@@ -103,3 +103,49 @@ describe('expanding a Hijri yearly rule', () => {
     for (const d of days) expect(hijriMonthDay(d as PlainDate)).toEqual({ month: 1, day: 30 });
   });
 });
+
+describe('monthly on a Hijri day (D-114)', () => {
+  it('parses, formats and refuses wrong shapes', () => {
+    expect(rule('FREQ=MONTHLY;X-HIJRI=15').hijri).toEqual({ day: 15 });
+    expect(formatRule(rule('FREQ=MONTHLY;X-HIJRI=15;COUNT=4'))).toBe(
+      'FREQ=MONTHLY;X-HIJRI=15;COUNT=4',
+    );
+    for (const bad of [
+      'FREQ=MONTHLY;X-HIJRI=9-1',
+      'FREQ=YEARLY;X-HIJRI=15',
+      'FREQ=MONTHLY;X-HIJRI=31',
+      'FREQ=MONTHLY;INTERVAL=2;X-HIJRI=15',
+      'FREQ=MONTHLY;BYMONTHDAY=3;X-HIJRI=15',
+    ]) {
+      expect(parseRule(bad).ok).toBe(false);
+    }
+  });
+
+  it('lands on the same Hijri day every Hijri month, 29 or 30 days apart', () => {
+    const start = firstRamadan();
+    const days = expandRule(rule('FREQ=MONTHLY;X-HIJRI=1'), start, start, '2028-01-01');
+    expect(days.length).toBeGreaterThanOrEqual(20);
+    expect(days[0]).toBe(start);
+    const ms = (d: string): number => Date.UTC(+d.slice(0, 4), +d.slice(5, 7) - 1, +d.slice(8, 10));
+    for (let i = 0; i < days.length; i += 1) {
+      expect(hijriMonthDay(days[i] as PlainDate)?.day).toBe(1);
+      if (i > 0) {
+        const gap = (ms(days[i] as string) - ms(days[i - 1] as string)) / 86_400_000;
+        expect([29, 30]).toContain(gap);
+      }
+    }
+  });
+
+  it('honours COUNT, and skips months without a day 30', () => {
+    const start = firstRamadan();
+    const five = expandRule(rule('FREQ=MONTHLY;X-HIJRI=1;COUNT=5'), start, start, '2100-01-01');
+    expect(five).toHaveLength(5);
+    const thirty = expandRule(
+      rule('FREQ=MONTHLY;X-HIJRI=30'),
+      '2026-01-01',
+      '2026-01-01',
+      '2028-01-01',
+    );
+    for (const d of thirty) expect(hijriMonthDay(d as PlainDate)?.day).toBe(30);
+  });
+});

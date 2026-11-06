@@ -208,13 +208,14 @@ export function expandRule(
 const HIJRI_MAX_STEPS = 400_000;
 
 /**
- * Yearly on a Hijri month and day (D-111). Walks day by day until the date is found, then jumps
- * 340 days (a Hijri year is 354 or 355) before looking again, so a far window costs a few calls
+ * Yearly on a Hijri month and day, or monthly on a Hijri day (D-111, D-114). Walks day by day until
+ * the date is found, then jumps 340 days (a Hijri year is 354 or 355; 26 for a monthly rule, a month
+ * being 29 or 30) before looking again, so a far window costs a few calls
  * per year. A day 30 in a month that has only 29 that year is skipped, like 31 April.
  */
 function expandHijri(
   rule: Rule,
-  hijri: { readonly month: number; readonly day: number },
+  hijri: { readonly month?: number; readonly day: number },
   startDay: number,
   timeSuffix: string,
   fromN: string,
@@ -230,7 +231,11 @@ function expandHijri(
     const iso = isoDateOfEpochDay(day);
     if (Number(iso.slice(0, 4)) > MAX_YEAR) break;
     const h = hijriMonthDay(iso);
-    if (h === undefined || h.month !== hijri.month || h.day !== hijri.day) {
+    if (
+      h === undefined ||
+      h.day !== hijri.day ||
+      (hijri.month !== undefined && h.month !== hijri.month)
+    ) {
       day += 1;
       continue;
     }
@@ -243,7 +248,7 @@ function expandHijri(
       out.push(occurrence);
       if (out.length >= limit) return out;
     }
-    day += 340;
+    day += hijri.month === undefined ? 26 : 340; // a Hijri month has 29 or 30 days, a year 354 or 355
   }
   return out;
 }

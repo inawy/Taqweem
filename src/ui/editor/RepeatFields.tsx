@@ -12,6 +12,7 @@ const KINDS: readonly RepeatKind[] = [
   'monthly',
   'yearly',
   'hijriYearly',
+  'hijriMonthly',
 ];
 const KIND_LABEL: Record<RepeatKind, MessageKey> = {
   none: 'repeatNone',
@@ -20,6 +21,7 @@ const KIND_LABEL: Record<RepeatKind, MessageKey> = {
   monthly: 'repeatMonthly',
   yearly: 'repeatYearly',
   hijriYearly: 'repeatHijriYearly',
+  hijriMonthly: 'repeatHijriMonthly',
   custom: 'repeatCustom',
 };
 const UNIT: Record<string, MessageKey> = {
@@ -73,7 +75,7 @@ export function RepeatFields({ value, onChange, fmt, weekStart }: RepeatFieldsPr
 
       {value.kind !== 'none' && value.kind !== 'custom' && (
         <>
-          {value.kind !== 'hijriYearly' && (
+          {value.kind !== 'hijriYearly' && value.kind !== 'hijriMonthly' && (
             <label className="ed-inline">
               <span>{t('every')}</span>
               <input

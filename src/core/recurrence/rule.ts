@@ -23,10 +23,11 @@ export interface Rule {
   readonly until?: string;
   readonly wkst: IsoWeekday;
   /**
-   * Yearly on a HIJRI month and day (Umm al-Qura), e.g. every 1 Ramadan (D-111). Only with
-   * FREQ=YEARLY and nothing else selecting days; written as the non-standard part X-HIJRI=9-1.
+   * On a HIJRI date (Umm al-Qura) (D-111, D-114). With FREQ=YEARLY it has a month and a day, e.g.
+   * every 1 Ramadan (`X-HIJRI=9-1`); with FREQ=MONTHLY only a day, every Hijri month (`X-HIJRI=15`).
+   * Nothing else may select days; the part is not standard RRULE.
    */
-  readonly hijri?: { readonly month: number; readonly day: number };
+  readonly hijri?: { readonly month?: number; readonly day: number };
 }
 
 export type ParseResult = { ok: true; rule: Rule } | { ok: false; error: string };
@@ -172,18 +173,24 @@ export function parseRule(text: string): ParseResult {
     byDay.sort((a, b) => a.day - b.day || (a.nth ?? 0) - (b.nth ?? 0));
   }
 
-  let hijri: { month: number; day: number } | undefined;
+  let hijri: { month?: number; day: number } | undefined;
   const hijriText = parts.get('X-HIJRI');
   if (hijriText !== undefined) {
-    const m = /^(\d{1,2})-(\d{1,2})$/.exec(hijriText);
-    const month = m ? Number(m[1]) : 0;
-    const day = m ? Number(m[2]) : 0;
-    if (month < 1 || month > 12 || day < 1 || day > 30) return fail(`invalid X-HIJRI ${hijriText}`);
-    if (freq !== 'YEARLY' || interval !== 1) return fail('X-HIJRI needs FREQ=YEARLY, every year');
+    const yearly = /^(\d{1,2})-(\d{1,2})$/.exec(hijriText);
+    const monthly = /^(\d{1,2})$/.exec(hijriText);
+    const month = yearly ? Number(yearly[1]) : undefined;
+    const day = Number((yearly ?? monthly)?.[yearly ? 2 : 1] ?? 0);
+    if ((month !== undefined && (month < 1 || month > 12)) || day < 1 || day > 30) {
+      return fail(`invalid X-HIJRI ${hijriText}`);
+    }
+    if (yearly ? freq !== 'YEARLY' : freq !== 'MONTHLY') {
+      return fail('X-HIJRI=M-D needs FREQ=YEARLY and X-HIJRI=D needs FREQ=MONTHLY');
+    }
+    if (interval !== 1) return fail('X-HIJRI needs INTERVAL 1');
     if (byDay.length > 0 || byMonthDay.length > 0 || byMonth.length > 0) {
       return fail('X-HIJRI cannot be combined with BYDAY, BYMONTHDAY or BYMONTH');
     }
-    hijri = { month, day };
+    hijri = month === undefined ? { day } : { month, day };
   }
 
   return {
@@ -213,7 +220,10 @@ export function formatRule(rule: Rule): string {
   }
   if (rule.byMonthDay.length > 0) out.push(`BYMONTHDAY=${rule.byMonthDay.join(',')}`);
   if (rule.byMonth.length > 0) out.push(`BYMONTH=${rule.byMonth.join(',')}`);
-  if (rule.hijri !== undefined) out.push(`X-HIJRI=${rule.hijri.month}-${rule.hijri.day}`);
+  if (rule.hijri !== undefined) {
+    const { month, day } = rule.hijri;
+    out.push(`X-HIJRI=${month === undefined ? '' : `${month}-`}${day}`);
+  }
   if (rule.wkst !== 1) out.push(`WKST=${DAY_CODES[rule.wkst - 1] ?? ''}`);
   if (rule.count !== undefined) out.push(`COUNT=${rule.count}`);
   if (rule.until !== undefined) {

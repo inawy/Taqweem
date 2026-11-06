@@ -122,6 +122,13 @@ describe('repeat <-> rule', () => {
     expect(back.kind).toBe('hijriYearly');
   });
 
+  it('builds and reads back a monthly Hijri rule (D-114)', () => {
+    const h = hijriMonthDay(start as PlainDate);
+    const built = repeatToRule({ ...fresh().repeat, kind: 'hijriMonthly' }, start, false);
+    expect(built).toEqual({ ok: true, rrule: `FREQ=MONTHLY;X-HIJRI=${h?.day}` });
+    expect(repeatFromRule((built as { rrule: string }).rrule, start).kind).toBe('hijriMonthly');
+  });
+
   it('until is a date for all-day and end-of-day for timed events', () => {
     const r = {
       ...fresh().repeat,

@@ -1,4 +1,4 @@
-import { addDays, isValidDate, weekdayOf } from '@/core/time';
+import { addDays, compareDates, dateParts, isValidDate, weekdayOf } from '@/core/time';
 import { withStart } from './draft';
 import type { Draft } from './draft';
 import type { IsoWeekday, PlainDate } from '@/core/time';
@@ -56,6 +56,47 @@ const WEEKDAYS: Readonly<Record<string, IsoWeekday>> = {
   sun: 7,
 };
 
+const MONTHS: Readonly<Record<string, number>> = {
+  يناير: 1,
+  january: 1,
+  jan: 1,
+  فبراير: 2,
+  february: 2,
+  feb: 2,
+  مارس: 3,
+  march: 3,
+  mar: 3,
+  ابريل: 4,
+  april: 4,
+  apr: 4,
+  مايو: 5,
+  may: 5,
+  يونيو: 6,
+  june: 6,
+  jun: 6,
+  يوليو: 7,
+  july: 7,
+  jul: 7,
+  اغسطس: 8,
+  august: 8,
+  aug: 8,
+  سبتمبر: 9,
+  september: 9,
+  sep: 9,
+  اكتوبر: 10,
+  october: 10,
+  oct: 10,
+  نوفمبر: 11,
+  november: 11,
+  nov: 11,
+  ديسمبر: 12,
+  december: 12,
+  dec: 12,
+};
+
+/** "next" after a weekday or "week": القادم، الجاي، المقبل. */
+const NEXT = new Set(['القادم', 'القادمه', 'القادمة', 'الجاي', 'الجاى', 'المقبل', 'المقبله']);
+
 const TODAY = new Set(['اليوم', 'النهارده', 'النهاردة', 'today']);
 const TOMORROW = new Set(['بكره', 'بكرة', 'غدا', 'غدا', 'tomorrow']);
 
@@ -96,6 +137,20 @@ function clock(hour: number, minute: number, half: Half | undefined): string | u
   return `${String(h).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
 }
 
+/** A real day from day, month and (optional) year; with no year, the next one not in the past. */
+function civil(day: number, month: number, year: number | undefined, today: PlainDate): PlainDate | undefined {
+  const pad = (v: number, w: number): string => String(v).padStart(w, '0');
+  const make = (y: number): PlainDate | undefined => {
+    const text = `${pad(y, 4)}-${pad(month, 2)}-${pad(day, 2)}`;
+    return isValidDate(text) ? text : undefined;
+  };
+  if (year !== undefined) return make(year);
+  const thisYear = dateParts(today).year;
+  const first = make(thisYear);
+  if (first !== undefined && compareDates(first, today) >= 0) return first;
+  return make(thisYear + 1);
+}
+
 /**
  * Reads "اجتماع الخميس 5 مساءً" (or "Lunch tomorrow 1pm"): the first day word and the first clock
  * time, in Arabic (Egyptian and Gulf spellings) or English. A bare hour with no morning/evening
@@ -116,14 +171,43 @@ export function parseQuickText(line: string, today: PlainDate): QuickText {
     const w = n(i);
     let next: PlainDate | undefined;
     let span = 1;
-    if (TODAY.has(w)) next = today;
+    const num = /^\d{1,2}$/;
+    const iso = /^(\d{4})-(\d{2})-(\d{2})$/.exec(w);
+    const slash = /^(\d{1,2})\/(\d{1,2})(?:\/(\d{4}))?$/.exec(w);
+    const year = (j: number): number | undefined =>
+      /^\d{4}$/.test(n(j)) ? Number(n(j)) : undefined;
+    if (iso) next = civil(Number(iso[3]), Number(iso[2]), Number(iso[1]), today);
+    else if (slash) {
+      next = civil(
+        Number(slash[1]),
+        Number(slash[2]),
+        slash[3] === undefined ? undefined : Number(slash[3]),
+        today,
+      );
+    } else if (num.test(w) && MONTHS[n(i + 1)] !== undefined) {
+      const y = year(i + 2);
+      next = civil(Number(w), MONTHS[n(i + 1)] as number, y, today);
+      span = y === undefined ? 2 : 3;
+    } else if (MONTHS[w] !== undefined && num.test(n(i + 1))) {
+      const y = year(i + 2);
+      next = civil(Number(n(i + 1)), MONTHS[w] as number, y, today);
+      span = y === undefined ? 2 : 3;
+    } else if ((w === 'الاسبوع' && NEXT.has(n(i + 1))) || (w === 'next' && n(i + 1) === 'week')) {
+      next = addDays(today, 7);
+      span = 2;
+    } else if (TODAY.has(w)) next = today;
     else if (TOMORROW.has(w)) next = addDays(today, 1);
     else if (w === 'بعد' && (n(i + 1) === 'بكره' || n(i + 1) === 'بكرة' || n(i + 1) === 'غد')) {
       next = addDays(today, 2);
       span = 2;
     } else if (WEEKDAYS[w] !== undefined) {
       const target = WEEKDAYS[w] as IsoWeekday;
-      next = addDays(today, (target - weekdayOf(today) + 7) % 7);
+      const ahead = (target - weekdayOf(today) + 7) % 7;
+      const wantsNext = NEXT.has(n(i + 1)) || n(i - 1) === 'next';
+      // "الخميس الجاي" / "next thursday" is never today: a full week on if it is the same day.
+      next = addDays(today, wantsNext && ahead === 0 ? 7 : ahead);
+      if (NEXT.has(n(i + 1))) span = 2;
+      else if (n(i - 1) === 'next' && i > 0) used[i - 1] = true;
     }
     if (!next || !isValidDate(next)) continue;
     date = next;
@@ -132,6 +216,7 @@ export function parseQuickText(line: string, today: PlainDate): QuickText {
   }
 
   for (let i = 0; i < words.length && time === undefined; i += 1) {
+    if (used[i]) continue;
     const m = CLOCK.exec(n(i));
     if (!m) continue;
     const hour = Number(m[1]);

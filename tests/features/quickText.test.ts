@@ -99,3 +99,46 @@ describe('applyQuickText', () => {
     expect(out).toMatchObject({ startTime: '11:00', endTime: '12:00' });
   });
 });
+
+describe('explicit and relative dates', () => {
+  it('reads a day and month in Arabic and English, with or without a year', () => {
+    expect(parse('سفر 15 نوفمبر')).toMatchObject({ title: 'سفر', date: '2026-11-15' });
+    expect(parse('Trip nov 15')).toMatchObject({ title: 'Trip', date: '2026-11-15' });
+    expect(parse('عرض ٢٠ ديسمبر ٢٠٢٧')).toMatchObject({ date: '2027-12-20' });
+    expect(parse('Party 3 March 2028')).toMatchObject({ date: '2028-03-03' });
+  });
+
+  it('puts a month that has already gone this year into next year', () => {
+    expect(parse('ذكرى 2 مارس')).toMatchObject({ date: '2027-03-02' });
+    expect(parse('اليوم نفسه 5 نوفمبر')).toMatchObject({ date: '2026-11-05' });
+  });
+
+  it('reads 15/11, 15/11/2026 and 2026-11-15', () => {
+    expect(parse('موعد 15/11')).toMatchObject({ date: '2026-11-15' });
+    expect(parse('موعد 15/11/2027')).toMatchObject({ date: '2027-11-15' });
+    expect(parse('موعد 2026-12-01')).toMatchObject({ title: 'موعد', date: '2026-12-01' });
+  });
+
+  it('ignores a day that does not exist', () => {
+    expect(parse('موعد 31/2')).toEqual({ title: 'موعد 31/2', understood: '' });
+    expect(parse('موعد 30 فبراير')).toEqual({ title: 'موعد 30 فبراير', understood: '' });
+  });
+
+  it('keeps a date and a time apart', () => {
+    expect(parse('اجتماع 15 نوفمبر 5 مساءً')).toMatchObject({
+      title: 'اجتماع',
+      date: '2026-11-15',
+      time: '17:00',
+    });
+  });
+
+  it('reads "next week" and "next <weekday>"', () => {
+    expect(parse('مراجعة الأسبوع الجاي')).toMatchObject({ title: 'مراجعة', date: '2026-11-12' });
+    expect(parse('Review next week')).toMatchObject({ date: '2026-11-12' });
+    // Today is a Thursday: "الخميس" is today, "الخميس الجاي" and "next thursday" a week on.
+    expect(parse('نادي الخميس')).toMatchObject({ date: '2026-11-05' });
+    expect(parse('نادي الخميس الجاي')).toMatchObject({ title: 'نادي', date: '2026-11-12' });
+    expect(parse('Gym next thursday')).toMatchObject({ title: 'Gym', date: '2026-11-12' });
+    expect(parse('Gym next friday')).toMatchObject({ date: '2026-11-06' });
+  });
+});

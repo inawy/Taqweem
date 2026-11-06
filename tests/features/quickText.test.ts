@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { applyQuickText, parseQuickText } from '@/features/events';
 import type { PlainDate } from '@/core/time';
+import type { Draft } from '@/features/events';
 
 // 2026-11-05 is a Thursday.
 const TODAY = '2026-11-05' as PlainDate;
@@ -62,7 +63,7 @@ describe('parseQuickText', () => {
 });
 
 describe('applyQuickText', () => {
-  const allDay = {
+  const allDay: Draft = {
     title: '',
     notes: '',
     location: '',
@@ -74,7 +75,7 @@ describe('applyQuickText', () => {
     endTime: '10:00',
     tzid: 'UTC',
     repeat: { kind: 'none', interval: 1, weekdays: [], monthlyMode: 'day', end: { kind: 'never' } },
-  } as const;
+  };
 
   it('turns an all-day draft into a one-hour event when a time is said', () => {
     const out = applyQuickText({ ...allDay }, parse('Lunch friday 1pm'));

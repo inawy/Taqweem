@@ -20,13 +20,7 @@ import type { NewEvent } from '@/data';
 // `draftToFields` is the single gate from the form to a storable event; it never throws.
 
 export type RepeatKind =
-  | 'none'
-  | 'daily'
-  | 'weekly'
-  | 'monthly'
-  | 'yearly'
-  | 'hijriYearly'
-  | 'custom';
+  'none' | 'daily' | 'weekly' | 'monthly' | 'yearly' | 'hijriYearly' | 'custom';
 export type MonthlyMode = 'day' | 'nth';
 export type RepeatEnd =
   { kind: 'never' } | { kind: 'until'; date: string } | { kind: 'count'; count: number };

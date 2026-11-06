@@ -101,7 +101,10 @@ function clock(hour: number, minute: number, half: Half | undefined): string | u
  * Nothing is invented: if no day or time is found the line is returned as the title, untouched.
  */
 export function parseQuickText(line: string, today: PlainDate): QuickText {
-  const words = line.trim().split(/\s+/).filter((w) => w !== '');
+  const words = line
+    .trim()
+    .split(/\s+/)
+    .filter((w) => w !== '');
   const used = new Array<boolean>(words.length).fill(false);
   const n = (i: number): string => norm(words[i] ?? '');
   let date: PlainDate | undefined;

@@ -138,7 +138,12 @@ function clock(hour: number, minute: number, half: Half | undefined): string | u
 }
 
 /** A real day from day, month and (optional) year; with no year, the next one not in the past. */
-function civil(day: number, month: number, year: number | undefined, today: PlainDate): PlainDate | undefined {
+function civil(
+  day: number,
+  month: number,
+  year: number | undefined,
+  today: PlainDate,
+): PlainDate | undefined {
   const pad = (v: number, w: number): string => String(v).padStart(w, '0');
   const make = (y: number): PlainDate | undefined => {
     const text = `${pad(y, 4)}-${pad(month, 2)}-${pad(day, 2)}`;

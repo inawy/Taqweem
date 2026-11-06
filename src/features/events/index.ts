@@ -14,7 +14,7 @@ export { isSeries, planDelete, planEdit, ruleChanged } from './plan';
 export type { Plan, PlanError, Scope, Target } from './plan';
 export { resolveTarget } from './target';
 export { describeWhen } from './when';
-export { parseQuickText } from './quickText';
+export { applyQuickText, parseQuickText } from './quickText';
 export type { QuickText } from './quickText';
 export type { WhenInput } from './when';
 export { MIN_RESIZE_MINUTES, moveDraft, resizeDraft, resizeStartDraft } from './move';

@@ -2,7 +2,7 @@ import { useEffect, useId, useLayoutEffect, useRef, useState } from 'react';
 import type { CSSProperties, FormEvent, KeyboardEvent } from 'react';
 import type { Calendar } from '@/core/model';
 import type { PlainDate } from '@/core/time';
-import { parseQuickText, withStart } from '@/features/events';
+import { applyQuickText, parseQuickText } from '@/features/events';
 import type { Draft } from '@/features/events';
 import { placeBeside } from '@/features/view';
 import { useT } from '@/features/i18n';
@@ -60,14 +60,7 @@ export function QuickAdd({
   // Words in the title that name a day or a time ("اجتماع الخميس 5 مساءً") set the start, and are
   // left out of the title; what was understood shows in the line under it (D-108).
   const said = parseQuickText(title, today);
-  const withCalendar: Draft = { ...initial, title: said.title.trim(), calendarId };
-  const draft: Draft =
-    said.date !== undefined || said.time !== undefined
-      ? withStart(withCalendar, {
-          ...(said.date !== undefined && { startDate: said.date }),
-          ...(said.time !== undefined && { startTime: said.time }),
-        })
-      : withCalendar;
+  const draft: Draft = applyQuickText({ ...initial, calendarId }, said);
   const calendar = calendars.find((c) => c.id === calendarId);
   const [place, setPlace] = useState<CSSProperties | undefined>(undefined);
 

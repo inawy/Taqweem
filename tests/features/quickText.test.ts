@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { parseQuickText } from '@/features/events';
+import { applyQuickText, parseQuickText } from '@/features/events';
 import type { PlainDate } from '@/core/time';
 
 // 2026-11-05 is a Thursday.
@@ -58,5 +58,43 @@ describe('parseQuickText', () => {
 
   it('says what it understood', () => {
     expect(parse('اجتماع الخميس 5 مساءً').understood).toBe('الخميس 5 مساءً');
+  });
+});
+
+describe('applyQuickText', () => {
+  const allDay = {
+    title: '',
+    notes: '',
+    location: '',
+    calendarId: 'c',
+    allDay: true,
+    startDate: '2026-10-13',
+    startTime: '09:00',
+    endDate: '2026-10-13',
+    endTime: '10:00',
+    tzid: 'UTC',
+    repeat: { kind: 'none', interval: 1, weekdays: [], monthlyMode: 'day', end: { kind: 'never' } },
+  } as const;
+
+  it('turns an all-day draft into a one-hour event when a time is said', () => {
+    const out = applyQuickText({ ...allDay }, parse('Lunch friday 1pm'));
+    expect(out).toMatchObject({
+      title: 'Lunch',
+      allDay: false,
+      startDate: '2026-11-06',
+      startTime: '13:00',
+      endDate: '2026-11-06',
+      endTime: '14:00',
+    });
+  });
+
+  it('only moves the day of an all-day draft when no time is said', () => {
+    const out = applyQuickText({ ...allDay }, parse('Trip friday'));
+    expect(out).toMatchObject({ allDay: true, startDate: '2026-11-06', endDate: '2026-11-06' });
+  });
+
+  it('keeps the length of a timed draft', () => {
+    const out = applyQuickText({ ...allDay, allDay: false }, parse('Call 11am'));
+    expect(out).toMatchObject({ startTime: '11:00', endTime: '12:00' });
   });
 });

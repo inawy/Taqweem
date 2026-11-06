@@ -1,4 +1,6 @@
 import { addDays, isValidDate, weekdayOf } from '@/core/time';
+import { withStart } from './draft';
+import type { Draft } from './draft';
 import type { IsoWeekday, PlainDate } from '@/core/time';
 
 /** What a line of free text says about when an event is; anything it does not say is absent. */
@@ -161,4 +163,33 @@ export function parseQuickText(line: string, today: PlainDate): QuickText {
     ...(time !== undefined && { time }),
     understood,
   };
+}
+
+/**
+ * The draft with what the text said applied: the day moves it (same length), a time moves the
+ * start; a time on an all-day draft makes it a one-hour event at that time on that day.
+ */
+export function applyQuickText(draft: Draft, said: QuickText): Draft {
+  const titled: Draft = { ...draft, title: said.title.trim() };
+  if (said.date === undefined && said.time === undefined) return titled;
+  if (said.time !== undefined && draft.allDay) {
+    const day = said.date ?? (isValidDate(draft.startDate) ? draft.startDate : undefined);
+    if (day === undefined) return titled;
+    const [h = 0, m = 0] = said.time.split(':').map(Number);
+    const end = Math.min(h * 60 + m + 60, 23 * 60 + 59);
+    const hh = String(Math.floor(end / 60)).padStart(2, '0');
+    const mm = String(end % 60).padStart(2, '0');
+    return {
+      ...titled,
+      allDay: false,
+      startDate: day,
+      startTime: said.time,
+      endDate: day,
+      endTime: `${hh}:${mm}`,
+    };
+  }
+  return withStart(titled, {
+    ...(said.date !== undefined && { startDate: said.date }),
+    ...(said.time !== undefined && { startTime: said.time }),
+  });
 }

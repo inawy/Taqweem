@@ -1,6 +1,8 @@
 import { useEffect, useId, useLayoutEffect, useRef, useState } from 'react';
 import type { CSSProperties, FormEvent, KeyboardEvent } from 'react';
 import type { Calendar } from '@/core/model';
+import type { PlainDate } from '@/core/time';
+import { parseQuickText, withStart } from '@/features/events';
 import type { Draft } from '@/features/events';
 import { placeBeside } from '@/features/view';
 import { useT } from '@/features/i18n';
@@ -18,8 +20,10 @@ export interface QuickAddProps {
   /** The new event as the tap made it: the day and time, the first visible calendar. */
   readonly initial: Draft;
   readonly calendars: readonly Calendar[];
-  /** Already formatted: "Tuesday, October 20, 2026 · 9:00 AM – 10:00 AM". */
-  readonly when: string;
+  /** Today, so words like "بكرة" and "الخميس" mean a real day. */
+  readonly today: PlainDate;
+  /** Formats a draft's day and time: "Tuesday, October 20, 2026 · 9:00 AM – 10:00 AM". */
+  readonly when: (draft: Draft) => string;
   /** Saves; resolves false when it could not (what was typed stays). */
   readonly onSave: (draft: Draft) => Promise<boolean>;
   /** Opens the full editor with what was typed so far. */
@@ -37,6 +41,7 @@ export interface QuickAddProps {
 export function QuickAdd({
   initial,
   calendars,
+  today,
   when,
   onSave,
   onMore,
@@ -52,7 +57,17 @@ export function QuickAdd({
   const [calendarId, setCalendarId] = useState(initial.calendarId);
   const [busy, setBusy] = useState(false);
   const [failed, setFailed] = useState(false);
-  const draft: Draft = { ...initial, title: title.trim(), calendarId };
+  // Words in the title that name a day or a time ("اجتماع الخميس 5 مساءً") set the start, and are
+  // left out of the title; what was understood shows in the line under it (D-108).
+  const said = parseQuickText(title, today);
+  const withCalendar: Draft = { ...initial, title: said.title.trim(), calendarId };
+  const draft: Draft =
+    said.date !== undefined || said.time !== undefined
+      ? withStart(withCalendar, {
+          ...(said.date !== undefined && { startDate: said.date }),
+          ...(said.time !== undefined && { startTime: said.time }),
+        })
+      : withCalendar;
   const calendar = calendars.find((c) => c.id === calendarId);
   const [place, setPlace] = useState<CSSProperties | undefined>(undefined);
 
@@ -130,7 +145,7 @@ export function QuickAdd({
             value={title}
             onChange={(e) => setTitle(e.target.value)}
           />
-          <p className="quick-when muted">{when}</p>
+          <p className="quick-when muted">{when(draft)}</p>
           <label className="quick-calendar">
             <span
               className="quick-dot"

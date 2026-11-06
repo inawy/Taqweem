@@ -91,6 +91,25 @@ describe('the quick card on a wide screen (D-071)', () => {
     expect(screen.queryByRole('dialog', { name: 'Quick add' })).toBeNull();
   });
 
+  it('reads a day and a time out of the title, and keeps them out of the title (D-108)', async () => {
+    await seed();
+    const card = await tapStrip();
+    const title = within(card).getByLabelText('Title');
+    fireEvent.change(title, { target: { value: 'Lunch friday 1pm' } });
+    expect(card.textContent).toContain('October 16, 2026');
+    expect(card.textContent).toContain('1:00 PM');
+    fireEvent.click(within(card).getByRole('button', { name: 'More options' }));
+    const editor = await screen.findByRole('dialog', { name: 'New event' });
+    expect((within(editor).getByLabelText('Title') as HTMLInputElement).value).toBe('Lunch');
+  });
+
+  it('leaves the tapped day alone when the title says no day or time', async () => {
+    await seed();
+    const card = await tapStrip();
+    fireEvent.change(within(card).getByLabelText('Title'), { target: { value: 'Holiday' } });
+    expect(card.textContent).toContain('October 13, 2026');
+  });
+
   it('Escape closes it and creates nothing', async () => {
     await seed();
     const card = await tapStrip();

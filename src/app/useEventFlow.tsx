@@ -59,6 +59,8 @@ export interface EventFlowInput {
   readonly fmt: FormatOptions;
   readonly hour12: boolean;
   readonly weekStart: IsoWeekday;
+  /** Today's date, for reading "tomorrow" and weekday names in the quick card. */
+  readonly today: PlainDate;
 }
 
 export interface EventFlow {
@@ -94,6 +96,7 @@ export function useEventFlow({
   fmt,
   hour12,
   weekStart,
+  today,
 }: EventFlowInput): EventFlow {
   const t = useT();
   const [editing, setEditing] = useState<Editing | null>(null);
@@ -410,13 +413,12 @@ export function useEventFlow({
       })()
     : null;
 
-  const quickWhen = (() => {
-    if (!quick) return '';
-    const fields = draftToFields(quick.draft);
+  const quickWhen = (draft: Draft): string => {
+    const fields = draftToFields(draft);
     if (!fields.ok) return '';
     const { start, end, allDay, tzid } = fields.fields;
     return describeWhen({ start, end, allDay, tzid }, { ...fmt, hour12 }, tz);
-  })();
+  };
 
   const overlay = (
     <>
@@ -426,6 +428,7 @@ export function useEventFlow({
           key={quick.id}
           initial={quick.draft}
           calendars={calendars}
+          today={today}
           when={quickWhen}
           point={quick.point}
           onSave={quickSave}

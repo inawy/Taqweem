@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
 import type { KeyboardEvent } from 'react';
 import type { Calendar } from '@/core/model';
-import { localTimeZone } from '@/core/time';
+import { isValidDate, localTimeZone } from '@/core/time';
 import type { FormatOptions, IsoWeekday, PlainDate } from '@/core/time';
 import {
   applyQuickText,
@@ -19,6 +19,7 @@ import { useSwipeClose } from '@/ui/shell/useSwipeClose';
 import { useVisualViewport } from '@/lib/useVisualViewport';
 import { CloseIcon } from '@/ui/shell/Icons';
 import { RepeatFields } from './RepeatFields';
+import { islamicOccasion } from '@/features/view';
 
 /** What the owner of the editor reports back after trying to save. */
 export type SaveOutcome = { ok: true } | { ok: false; message: MessageKey | null };
@@ -123,6 +124,12 @@ export function EventEditor({
   const read =
     mode === 'new' && today !== undefined ? parseQuickText(draft.title, today) : undefined;
   const said = read && read.understood !== '' ? read : undefined;
+
+  // A new event on a day that is an Islamic occasion offers to become that occasion every year (D-112).
+  const occasion =
+    mode === 'new' && draft.repeat.kind === 'none' && isValidDate(draft.startDate)
+      ? islamicOccasion(draft.startDate)
+      : undefined;
 
   const set = <K extends keyof Draft>(key: K, value: Draft[K]): void => {
     setError(null);
@@ -241,6 +248,24 @@ export function EventEditor({
                 }}
               >
                 {t('quickApply')} «{said.understood}»
+              </button>
+            )}
+
+            {occasion && (
+              <button
+                type="button"
+                className="btn ed-suggest"
+                onClick={() =>
+                  setDraft((d) => ({
+                    ...d,
+                    title: d.title.trim() === '' ? t(occasion) : d.title,
+                    allDay: true,
+                    endDate: d.startDate,
+                    repeat: { ...d.repeat, kind: 'hijriYearly', interval: 1 },
+                  }))
+                }
+              >
+                {t('occasionEveryYear')} «{t(occasion)}»
               </button>
             )}
 

@@ -4,6 +4,9 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { App } from '@/app/App';
 import { createDb, createStore } from '@/data';
 import type { NawyDb } from '@/data';
+import { addDays } from '@/core/time';
+import type { PlainDate } from '@/core/time';
+import { islamicOccasion } from '@/features/view';
 import { makeNewEvent } from '../helpers/factories';
 
 const NOW = () => Date.UTC(2026, 9, 13, 12, 0); // Tue 13 Oct 2026
@@ -68,6 +71,22 @@ describe('create', () => {
       '16:00',
     );
     expect(within(dialog).queryByRole('button', { name: /Set the time to/ })).toBeNull();
+  });
+
+  it('offers to repeat an Islamic occasion every Hijri year (D-112)', async () => {
+    open();
+    fireEvent.click(await screen.findByRole('button', { name: 'Add event' }));
+    const dialog = await screen.findByRole('dialog', { name: 'New event' });
+    expect(within(dialog).queryByRole('button', { name: /Repeat every Hijri year/ })).toBeNull();
+    // Find a real Eid al-Adha in 2027 with the same code that marks it in the calendar.
+    let day = '2027-04-25' as PlainDate;
+    while (islamicOccasion(day) !== 'occEidAdha') day = addDays(day, 1);
+    fireEvent.change(within(dialog).getByLabelText('Starts · Date'), { target: { value: day } });
+    fireEvent.click(await within(dialog).findByRole('button', { name: /Repeat every Hijri year/ }));
+    expect((within(dialog).getByLabelText('Title') as HTMLInputElement).value).toBe('Eid al-Adha');
+    expect((within(dialog).getByLabelText('All day') as HTMLInputElement).checked).toBe(true);
+    expect((within(dialog).getByLabelText('Repeat') as HTMLSelectElement).value).toBe('hijriYearly');
+    expect(within(dialog).queryByRole('button', { name: /Repeat every Hijri year/ })).toBeNull();
   });
 
   it('touching the all-day strip starts an all-day event on that day', async () => {

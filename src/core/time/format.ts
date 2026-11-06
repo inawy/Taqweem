@@ -104,11 +104,24 @@ function hijriFormatter(
   });
 }
 
+const HIJRI_CACHE_MAX = 20_000;
+const hijriCache = new Map<string, { month: number; day: number } | undefined>();
+
 /**
  * The Hijri month (1–12) and day of a date (Umm al-Qura), as numbers, for finding occasions.
  * Display only: nothing Hijri is stored (D-016). `undefined` if the platform cannot say.
  */
 export function hijriMonthDay(date: PlainDate): { month: number; day: number } | undefined {
+  // The same days are asked for again and again (every Hijri repeat of every event walks them),
+  // and a date's Hijri month and day never change, so remember them (D-113).
+  if (hijriCache.has(date)) return hijriCache.get(date);
+  const value = computeHijriMonthDay(date);
+  if (hijriCache.size >= HIJRI_CACHE_MAX) hijriCache.clear();
+  hijriCache.set(date, value);
+  return value;
+}
+
+function computeHijriMonthDay(date: PlainDate): { month: number; day: number } | undefined {
   const parts = formatter('en', {
     calendar: 'islamic-umalqura',
     numberingSystem: 'latn',

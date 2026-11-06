@@ -64,7 +64,9 @@ describe('create', () => {
     expect((within(dialog).getByLabelText('Starts · Date') as HTMLInputElement).value).toBe(
       '2026-10-16',
     );
-    expect((within(dialog).getByLabelText('Starts · Time') as HTMLInputElement).value).toBe('16:00');
+    expect((within(dialog).getByLabelText('Starts · Time') as HTMLInputElement).value).toBe(
+      '16:00',
+    );
     expect(within(dialog).queryByRole('button', { name: /Set the time to/ })).toBeNull();
   });
 

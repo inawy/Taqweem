@@ -2,8 +2,14 @@ import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react'
 import type { KeyboardEvent } from 'react';
 import type { Calendar } from '@/core/model';
 import { localTimeZone } from '@/core/time';
-import type { FormatOptions, IsoWeekday } from '@/core/time';
-import { draftToFields, isDirty, withStart } from '@/features/events';
+import type { FormatOptions, IsoWeekday, PlainDate } from '@/core/time';
+import {
+  applyQuickText,
+  draftToFields,
+  isDirty,
+  parseQuickText,
+  withStart,
+} from '@/features/events';
 import type { Draft, DraftError } from '@/features/events';
 import { useT } from '@/features/i18n';
 import type { MessageKey } from '@/features/i18n';
@@ -23,6 +29,8 @@ export interface EventEditorProps {
   readonly calendars: readonly Calendar[];
   readonly fmt: FormatOptions;
   readonly weekStart: IsoWeekday;
+  /** Today: with it, a new event offers to read a day and time out of its title (D-110). */
+  readonly today?: PlainDate | undefined;
   /** Called with a draft that already passed `draftToFields`. `null` message = user cancelled. */
   readonly onSave: (draft: Draft) => Promise<SaveOutcome>;
   readonly onDelete?: (() => void) | undefined;
@@ -81,6 +89,7 @@ export function EventEditor({
   calendars,
   fmt,
   weekStart,
+  today,
   onSave,
   onDelete,
   onClose,
@@ -109,6 +118,12 @@ export function EventEditor({
     return () => window.clearTimeout(id);
   }, []);
   const zones = useMemo(() => timeZoneOptions(initial.tzid, fullZones), [initial.tzid, fullZones]);
+  // A new event whose title says "الخميس 5 مساءً" offers to apply it, one tap, never by itself:
+  // the person is already looking at the date and time fields (D-110).
+  const read =
+    mode === 'new' && today !== undefined ? parseQuickText(draft.title, today) : undefined;
+  const said = read && read.understood !== '' ? read : undefined;
+
   const set = <K extends keyof Draft>(key: K, value: Draft[K]): void => {
     setError(null);
     setDraft((d) => ({ ...d, [key]: value }));
@@ -215,6 +230,19 @@ export function EventEditor({
               value={draft.title}
               onChange={(e) => set('title', e.target.value)}
             />
+
+            {said && (
+              <button
+                type="button"
+                className="btn ed-suggest"
+                onClick={() => {
+                  setDraft((d) => applyQuickText(d, said));
+                  titleRef.current?.focus();
+                }}
+              >
+                {t('quickApply')} «{said.understood}»
+              </button>
+            )}
 
             <label className="ed-check">
               <input

@@ -444,6 +444,7 @@ export function useEventFlow({
           calendars={calendars}
           fmt={fmt}
           weekStart={weekStart}
+          today={editing.mode === 'new' ? today : undefined}
           onSave={save}
           onDelete={editing.mode === 'edit' ? () => void remove() : undefined}
           onClose={closeEditor}

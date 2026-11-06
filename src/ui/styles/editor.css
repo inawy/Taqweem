@@ -167,6 +167,12 @@ button.block {
   font-weight: 600;
 }
 
+.ed-body .ed-suggest {
+  align-self: flex-start;
+  min-block-size: 44px;
+  text-align: start;
+}
+
 .ed-body .ed-title:focus-visible {
   outline: none;
   border-block-end-color: var(--nawy-color-accent-fill);

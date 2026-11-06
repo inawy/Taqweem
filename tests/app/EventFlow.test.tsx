@@ -51,6 +51,23 @@ describe('create', () => {
     expect(screen.getByText('Personal')).toBeTruthy(); // the calendar that was created
   });
 
+  it('offers to read a day and time out of a new title, and applies it only on a tap (D-110)', async () => {
+    open();
+    fireEvent.click(await screen.findByRole('button', { name: 'Add event' }));
+    const dialog = await screen.findByRole('dialog', { name: 'New event' });
+    expect(within(dialog).queryByRole('button', { name: /Set the time to/ })).toBeNull();
+    type('Title', 'Dentist friday 4pm');
+    const date = within(dialog).getByLabelText('Start date') as HTMLInputElement;
+    expect(date.value).toBe('2026-10-13'); // nothing changed by itself
+    fireEvent.click(within(dialog).getByRole('button', { name: /Set the time to/ }));
+    expect((within(dialog).getByLabelText('Title') as HTMLInputElement).value).toBe('Dentist');
+    expect((within(dialog).getByLabelText('Start date') as HTMLInputElement).value).toBe(
+      '2026-10-16',
+    );
+    expect((within(dialog).getByLabelText('Start time') as HTMLInputElement).value).toBe('16:00');
+    expect(within(dialog).queryByRole('button', { name: /Set the time to/ })).toBeNull();
+  });
+
   it('touching the all-day strip starts an all-day event on that day', async () => {
     const { container } = open();
     await screen.findByRole('button', { name: 'Add event' });

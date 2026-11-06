@@ -85,7 +85,9 @@ describe('create', () => {
     fireEvent.click(await within(dialog).findByRole('button', { name: /Repeat every Hijri year/ }));
     expect((within(dialog).getByLabelText('Title') as HTMLInputElement).value).toBe('Eid al-Adha');
     expect((within(dialog).getByLabelText('All day') as HTMLInputElement).checked).toBe(true);
-    expect((within(dialog).getByLabelText('Repeat') as HTMLSelectElement).value).toBe('hijriYearly');
+    expect((within(dialog).getByLabelText('Repeat') as HTMLSelectElement).value).toBe(
+      'hijriYearly',
+    );
     expect(within(dialog).queryByRole('button', { name: /Repeat every Hijri year/ })).toBeNull();
   });
 

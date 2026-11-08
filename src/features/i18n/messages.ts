@@ -88,7 +88,8 @@ const ar = {
   defaultViewLabel: 'العرض عند فتح التطبيق',
   defaultViewAuto: 'تلقائي (حسب الشاشة)',
   hideWeekendLabel: 'إخفاء نهاية الأسبوع في عرض الأسبوع',
-  hiddenWeekendEvents: '{count} حدث في الأيام المخفية من هذا الأسبوع (يظهر في الشهر وجدول الأعمال).',
+  hiddenWeekendEvents:
+    '{count} حدث في الأيام المخفية من هذا الأسبوع (يظهر في الشهر وجدول الأعمال).',
   hideWeekendNone: 'لا تُخفِ شيئًا',
   hideWeekendFriSat: 'الجمعة والسبت',
   hideWeekendSatSun: 'السبت والأحد',
@@ -407,7 +408,8 @@ const en: Record<MessageKey, string> = {
   defaultViewLabel: 'View when the app opens',
   defaultViewAuto: 'Automatic (by screen)',
   hideWeekendLabel: 'Hide the weekend in the week view',
-  hiddenWeekendEvents: '{count} event(s) on the hidden days of this week (shown in the month and the agenda).',
+  hiddenWeekendEvents:
+    '{count} event(s) on the hidden days of this week (shown in the month and the agenda).',
   hideWeekendNone: 'Hide nothing',
   hideWeekendFriSat: 'Friday and Saturday',
   hideWeekendSatSun: 'Saturday and Sunday',

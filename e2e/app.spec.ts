@@ -228,7 +228,8 @@ test.describe('the whole cycle in a real browser', () => {
     await page.mouse.move(x - cell, y, { steps: 6 });
     await page.mouse.up();
     await expect(page.getByRole('dialog')).toHaveCount(0);
-    if (before.first > 1) await expect.poll(cols).toEqual({ first: before.first - 1, span: before.span + 1 });
+    if (before.first > 1)
+      await expect.poll(cols).toEqual({ first: before.first - 1, span: before.span + 1 });
     else await expect(bars).toHaveCount(2); // it started in the week before
 
     await page.getByRole('button', { name: 'Undo' }).click();

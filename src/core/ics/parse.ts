@@ -252,7 +252,9 @@ function readEvent(
   }
 
   let rrule: string | undefined;
-  const ruleLine = first('RRULE');
+  // Nawy's own Hijri repeats have no RFC 5545 form; its export carries the rule on a private line,
+  // read back only when there is no RRULE (D-115).
+  const ruleLine = first('RRULE') ?? first('X-NAWY-HIJRI-RULE');
   if (ruleLine && originalStart === undefined) {
     rrule = normalizeRule(ruleLine.value, allDay, tzid);
     if (rrule === undefined) counters.ruleDropped += 1;

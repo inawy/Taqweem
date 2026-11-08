@@ -216,6 +216,36 @@ describe('serializeIcs', () => {
     expect(text).toContain('RRULE:FREQ=WEEKLY;COUNT=4');
   });
 
+  it('reads its own Hijri rule back from the private line, and ignores it next to an RRULE (D-115)', () => {
+    const back = parseIcs(
+      file(
+        event(
+          'UID:h',
+          'DTSTART;VALUE=DATE:20260219',
+          'SUMMARY:Ramadan',
+          'X-NAWY-HIJRI-RULE:FREQ=YEARLY;X-HIJRI=9-1',
+        ),
+      ),
+      { zone: ZONE },
+    );
+    expect(back.events[0]).toMatchObject({ rrule: 'FREQ=YEARLY;X-HIJRI=9-1' });
+    expect(back.report.ruleDropped).toBe(0);
+
+    const both = parseIcs(
+      file(
+        event(
+          'UID:b',
+          'DTSTART;VALUE=DATE:20260219',
+          'SUMMARY:Both',
+          'RRULE:FREQ=WEEKLY;COUNT=2',
+          'X-NAWY-HIJRI-RULE:FREQ=YEARLY;X-HIJRI=9-1',
+        ),
+      ),
+      { zone: ZONE },
+    );
+    expect(both.events[0]).toMatchObject({ rrule: 'FREQ=WEEKLY;COUNT=2' });
+  });
+
   it('leaves out deleted events and overrides whose series is gone', () => {
     const text = serializeIcs({
       calendars,

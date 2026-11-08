@@ -41,6 +41,7 @@ describe('parseSettings is lenient field by field', () => {
       numerals: 'arab',
       defaultView: 'week',
       hideWeekend: 'fri-sat',
+      secondZone: 'Africa/Cairo',
     };
     expect(parseSettings(s, 'ar')).toEqual(s);
   });
@@ -155,5 +156,15 @@ describe('hideWeekend (D-120)', () => {
     expect(parseSettings({ hideWeekend: 'sat-sun' }, 'en').hideWeekend).toBe('sat-sun');
     expect(parseSettings({ hideWeekend: 'thu-fri' }, 'ar').hideWeekend).toBe('none');
     expect(parseSettings({ hideWeekend: true }, 'ar').hideWeekend).toBe('none');
+  });
+});
+
+describe('secondZone (D-122)', () => {
+  it('is off by default and accepts only a real zone', () => {
+    expect(defaultSettings('ar').secondZone).toBe('');
+    expect(parseSettings({ secondZone: 'Europe/London' }, 'ar').secondZone).toBe('Europe/London');
+    expect(parseSettings({ secondZone: 'Mars/Olympus' }, 'ar').secondZone).toBe('');
+    expect(parseSettings({ secondZone: 5 }, 'ar').secondZone).toBe('');
+    expect(parseSettings({ secondZone: '' }, 'ar').secondZone).toBe('');
   });
 });

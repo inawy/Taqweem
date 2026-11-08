@@ -3,6 +3,7 @@ import type { KeyboardEvent } from 'react';
 import type { IsoWeekday, Numerals } from '@/core/time';
 import { useT } from '@/features/i18n';
 import type { MessageKey } from '@/features/i18n';
+import { SECOND_ZONES, zoneName } from '@/features/timegrid';
 import { DEFAULT_VIEWS, WEEKEND_HIDING, useSettings } from '@/features/settings';
 import type { DefaultView, Locale, ThemePreference, WeekendHiding } from '@/features/settings';
 import { trapTab } from '@/lib/focusTrap';
@@ -143,6 +144,22 @@ export function SettingsDialog({ onClose }: SettingsDialogProps) {
                   {t(WEEKEND_LABELS[value])}
                 </option>
               ))}
+            </select>
+          </label>
+          <label className="field">
+            <span>{t('secondZoneLabel')}</span>
+            <select
+              value={settings.secondZone}
+              onChange={(e) => update({ secondZone: e.currentTarget.value })}
+            >
+              <option value="">{t('secondZoneNone')}</option>
+              {[...new Set([settings.secondZone, ...SECOND_ZONES])]
+                .filter((zone) => zone !== '')
+                .map((zone) => (
+                  <option key={zone} value={zone}>
+                    {zoneName(zone)}
+                  </option>
+                ))}
             </select>
           </label>
           <label className="field">

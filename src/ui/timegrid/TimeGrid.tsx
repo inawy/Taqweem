@@ -2,11 +2,17 @@ import { useEffect, useRef, useState } from 'react';
 import type { CSSProperties, RefObject } from 'react';
 import { nowPosition } from '@/core/layout';
 import type { Occurrence } from '@/core/recurrence';
-import { formatDate, formatDayOfMonth, formatTime, formatWeekday } from '@/core/time';
+import {
+  formatDate,
+  formatDayOfMonth,
+  formatTime,
+  formatWeekday,
+  localTimeZone,
+} from '@/core/time';
 import type { FormatOptions, PlainDate, PlainDateTime, TimeFormatOptions } from '@/core/time';
 import { useT } from '@/features/i18n';
 import { useSettings } from '@/features/settings';
-import { keyAction } from '@/features/timegrid';
+import { clockInZone, keyAction, zoneName } from '@/features/timegrid';
 import type { AllDayBar, DragDelta, TimeGridModel, TimedBlock } from '@/features/timegrid';
 import { useRefocus } from '@/lib/useRefocus';
 import { ErrorBoundary } from '@/lib/ErrorBoundary';
@@ -73,6 +79,11 @@ export function TimeGrid({
   const fmt: FormatOptions = { locale: settings.locale, numerals: settings.numerals };
   const timeFmt: TimeFormatOptions = { ...fmt, hour12: settings.hour12 };
   const count = model.days.length;
+  // A second clock beside the hours (D-122): the first shown day decides which date's offset it uses.
+  const second = settings.secondZone;
+  const home = localTimeZone();
+  const firstDay = model.days[0]?.date;
+  const showSecond = second !== '' && second !== home && firstDay !== undefined;
   // The all-day strip is only as tall as its busiest day (plus the "+N" row when something is cut).
   const anyHidden = model.allDay.hidden.some((n) => n > 0);
   const allDayRows = anyHidden
@@ -114,6 +125,11 @@ export function TimeGrid({
     >
       <div className="tg-row tg-head">
         <div className="tg-gutter" />
+        {showSecond && (
+          <div className="tg-gutter tg-zone-name" title={second}>
+            {zoneName(second)}
+          </div>
+        )}
         <div className="tg-cells">
           {model.days.map((d) => {
             const weekday = formatWeekday(d.date, fmt, 'short');
@@ -155,6 +171,7 @@ export function TimeGrid({
 
       <div className="tg-row tg-allday">
         <div className="tg-gutter tg-allday-label">{t('allDay')}</div>
+        {showSecond && <div className="tg-gutter" />}
         <div className="tg-allday-grid" ref={allDayRef}>
           {model.days.map((d, i) => (
             <div
@@ -208,6 +225,15 @@ export function TimeGrid({
               </span>
             ))}
           </div>
+          {showSecond && firstDay !== undefined && (
+            <div className="tg-gutter tg-hours tg-hours-second" aria-hidden="true">
+              {Array.from({ length: 23 }, (_, i) => i + 1).map((h) => (
+                <span key={h} className="tg-hour" style={{ insetBlockStart: `${(h / 24) * 100}%` }}>
+                  {formatTime(clockInZone(firstDay, h, home, second), timeFmt)}
+                </span>
+              ))}
+            </div>
+          )}
           <div className="tg-cells tg-cols" ref={cellsRef}>
             {model.days.map((d) => {
               const now = nowPosition(nowLocal, d.date);

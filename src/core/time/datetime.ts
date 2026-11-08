@@ -75,6 +75,17 @@ export function toInstantMs(value: PlainDateTime, timeZone: TimeZoneId): number 
   return parse(value).toZonedDateTime(timeZone, { disambiguation: 'compatible' }).epochMilliseconds;
 }
 
+/** True when the platform knows this zone (a name read from storage is never trusted). */
+export function isTimeZone(id: string): boolean {
+  if (id.trim() === '' || id.length > 64) return false;
+  try {
+    toInstantMs('2000-01-01T00:00', id);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 /** The wall-clock time in `timeZone` at the given instant. */
 export function fromInstantMs(epochMs: number, timeZone: TimeZoneId): PlainDateTime {
   return Temporal.Instant.fromEpochMilliseconds(epochMs)

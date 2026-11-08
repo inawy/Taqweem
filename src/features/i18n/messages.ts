@@ -90,6 +90,8 @@ const ar = {
   hideWeekendLabel: 'إخفاء نهاية الأسبوع في عرض الأسبوع',
   hiddenWeekendEvents:
     '{count} حدث في الأيام المخفية من هذا الأسبوع (يظهر في الشهر وجدول الأعمال).',
+  secondZoneLabel: 'ساعة ثانية بجانب الساعات (منطقة زمنية أخرى)',
+  secondZoneNone: 'بدون',
   hideWeekendNone: 'لا تُخفِ شيئًا',
   hideWeekendFriSat: 'الجمعة والسبت',
   hideWeekendSatSun: 'السبت والأحد',
@@ -410,6 +412,8 @@ const en: Record<MessageKey, string> = {
   hideWeekendLabel: 'Hide the weekend in the week view',
   hiddenWeekendEvents:
     '{count} event(s) on the hidden days of this week (shown in the month and the agenda).',
+  secondZoneLabel: 'Second clock beside the hours (another time zone)',
+  secondZoneNone: 'None',
   hideWeekendNone: 'Hide nothing',
   hideWeekendFriSat: 'Friday and Saturday',
   hideWeekendSatSun: 'Saturday and Sunday',

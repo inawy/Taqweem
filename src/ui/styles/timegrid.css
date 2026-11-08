@@ -114,6 +114,24 @@ button.tg-headcell:hover {
   position: relative;
 }
 
+/* The second clock's name above its column, and its labels a shade quieter (D-122). */
+.tg-zone-name {
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+  padding-inline-end: 6px;
+  padding-block-end: 4px;
+  font-size: 0.6875rem;
+  color: var(--nawy-color-text-muted);
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.tg-hours-second .tg-hour {
+  opacity: 0.85;
+}
+
 .tg-hour {
   position: absolute;
   inset-inline-end: 6px;

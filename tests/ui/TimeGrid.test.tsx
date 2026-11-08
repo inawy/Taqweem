@@ -469,3 +469,16 @@ describe('TimeGrid: going to now (D-077)', () => {
     }
   });
 });
+
+describe('TimeGrid second clock (D-122)', () => {
+  it('has one column of hour labels by default and a second, named, when a zone is chosen', () => {
+    const plain = view(model([]));
+    expect(plain.container.querySelectorAll('.tg-hours')).toHaveLength(1);
+    expect(plain.container.querySelector('.tg-zone-name')).toBeNull();
+    cleanup();
+    const two = view(model([]), { extra: { secondZone: 'Asia/Tokyo' } });
+    expect(two.container.querySelectorAll('.tg-hours')).toHaveLength(2);
+    expect(two.container.querySelector('.tg-zone-name')?.textContent).toBe('Tokyo');
+    expect(two.container.querySelectorAll('.tg-hours-second .tg-hour')).toHaveLength(23);
+  });
+});

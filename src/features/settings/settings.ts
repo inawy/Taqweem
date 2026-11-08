@@ -1,3 +1,4 @@
+import { isTimeZone } from '@/core/time';
 import type { IsoWeekday, Numerals } from '@/core/time';
 
 // User settings: small, local, validated on the way in. A corrupt or foreign value in storage
@@ -31,6 +32,8 @@ export interface Settings {
   readonly numerals: Numerals;
   readonly defaultView: DefaultView;
   readonly hideWeekend: WeekendHiding;
+  /** A second clock beside the hours of the day and week views: an IANA zone, or '' for none. */
+  readonly secondZone: string;
 }
 
 export const SETTINGS_KEY = 'nawy-today:settings:v1';
@@ -51,6 +54,7 @@ export function defaultSettings(locale: Locale): Settings {
     numerals: 'latn',
     defaultView: 'auto',
     hideWeekend: 'none',
+    secondZone: '',
   };
 }
 
@@ -77,6 +81,10 @@ export function parseSettings(raw: unknown, fallbackLocale: Locale): Settings {
     numerals: isOneOf(o['numerals'], ['latn', 'arab'] as const) ? o['numerals'] : d.numerals,
     defaultView: isOneOf(o['defaultView'], DEFAULT_VIEWS) ? o['defaultView'] : d.defaultView,
     hideWeekend: isOneOf(o['hideWeekend'], WEEKEND_HIDING) ? o['hideWeekend'] : d.hideWeekend,
+    secondZone:
+      typeof o['secondZone'] === 'string' && (o['secondZone'] === '' || isTimeZone(o['secondZone']))
+        ? o['secondZone']
+        : d.secondZone,
   };
 }
 

@@ -377,8 +377,13 @@ function Calendar({
       title={viewTitle(view, anchor, settings.weekStart, fmt, hiddenWeekdays(settings.hideWeekend))}
       subtitle={
         settings.hijri
-          ? hijriSubtitle(view, anchor, settings.weekStart, fmt, hiddenWeekdays(settings.hideWeekend)) +
-            occasionSuffix
+          ? hijriSubtitle(
+              view,
+              anchor,
+              settings.weekStart,
+              fmt,
+              hiddenWeekdays(settings.hideWeekend),
+            ) + occasionSuffix
           : undefined
       }
       view={view}

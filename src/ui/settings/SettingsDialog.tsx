@@ -4,12 +4,7 @@ import type { IsoWeekday, Numerals } from '@/core/time';
 import { useT } from '@/features/i18n';
 import type { MessageKey } from '@/features/i18n';
 import { DEFAULT_VIEWS, WEEKEND_HIDING, useSettings } from '@/features/settings';
-import type {
-  DefaultView,
-  Locale,
-  ThemePreference,
-  WeekendHiding,
-} from '@/features/settings';
+import type { DefaultView, Locale, ThemePreference, WeekendHiding } from '@/features/settings';
 import { trapTab } from '@/lib/focusTrap';
 import { CloseIcon } from '@/ui/shell/Icons';
 import { useRestoreFocus } from '@/ui/shell/useRestoreFocus';

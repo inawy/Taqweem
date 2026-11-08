@@ -140,6 +140,36 @@ describe('app: views', () => {
     expect(screen.getByText('All day')).toBeTruthy();
   });
 
+  it('says how many events sit on the days the week view hides (D-121)', async () => {
+    const { calendarId } = await seed();
+    const db = createDb(dbName);
+    await createStore(db).createEvent(
+      makeNewEvent({
+        calendarId,
+        title: 'Saturday plan',
+        start: '2026-10-17T10:00',
+        end: '2026-10-17T11:00',
+      }),
+    );
+    db.close();
+    const storage = memoryStorage();
+    storage.setItem(SETTINGS_KEY, JSON.stringify({ locale: 'en', hideWeekend: 'sat-sun' }));
+    open(storage);
+    await screen.findByText('Team sync');
+    fireEvent.click(screen.getByRole('button', { name: 'Week' }));
+    expect(screen.getByText('Team sync')).toBeTruthy();
+    expect(screen.queryByText('Saturday plan')).toBeNull();
+    expect(screen.getByText(/^1 event\(s\) on the hidden days of this week/)).toBeTruthy();
+  });
+
+  it('shows no such note when nothing is hidden', async () => {
+    await seed();
+    open();
+    await screen.findByText('Team sync');
+    fireEvent.click(screen.getByRole('button', { name: 'Week' }));
+    expect(screen.queryByText(/hidden days of this week/)).toBeNull();
+  });
+
   it('draws the now line in the week that contains today', async () => {
     open();
     await screen.findByRole('heading', { level: 1 });

@@ -259,6 +259,27 @@ function Calendar({
     [calendarData.calendars, gridEvents, view, anchor, settings.weekStart, settings.hideWeekend],
   );
 
+  // Events on the days the week view leaves out: counted so they are not lost without a word (D-121).
+  const hiddenInWeek = useMemo(() => {
+    if (view !== 'week' || settings.hideWeekend === 'none') return 0;
+    const hidden = hiddenWeekdays(settings.hideWeekend);
+    const shown = visibleDays('week', anchor, settings.weekStart, hidden);
+    const all = visibleDays('week', anchor, settings.weekStart);
+    const days = all.filter((d) => !shown.includes(d));
+    if (days.length === 0) return 0;
+    const model = buildTimeGridModel({
+      calendars: calendarData.calendars,
+      events: gridEvents,
+      days,
+      maxAllDayLanes: MAX_ALL_DAY_LANES,
+    });
+    return (
+      model.days.reduce((sum, d) => sum + d.blocks.length, 0) +
+      model.allDay.bars.length +
+      model.allDay.hidden.reduce((sum, n) => sum + n, 0)
+    );
+  }, [view, settings.hideWeekend, settings.weekStart, anchor, calendarData.calendars, gridEvents]);
+
   const agendaModel = useMemo(
     () =>
       buildAgendaModel({
@@ -482,6 +503,11 @@ function Calendar({
       {failed && (
         <p role="status" className="banner">
           {t('actionFailed')}
+        </p>
+      )}
+      {hiddenInWeek > 0 && (
+        <p role="status" className="banner">
+          {t('hiddenWeekendEvents', { count: count(hiddenInWeek) })}
         </p>
       )}
       {skipped > 0 && (

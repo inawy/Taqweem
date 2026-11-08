@@ -169,6 +169,40 @@ test.describe('the whole cycle in a real browser', () => {
     await expect.poll(weekIndex).toBe(before);
   });
 
+  test('dragging the end of a bar in the month ends the event a day later, and undo puts it back', async ({
+    page,
+  }) => {
+    await page.goto('/');
+    await addEvent(page, 'Longer');
+    const bars = page.locator('.month .bar', { hasText: 'Longer' });
+    const span = async () => {
+      const [a, b] = ((await bars.first().evaluate((el) => el.style.gridColumn)) ?? '')
+        .split('/')
+        .map((v) => Number(v));
+      return (b ?? 0) - (a ?? 0);
+    };
+    const first = await bars.first().evaluate((el) => Number(el.style.gridColumn.split(' ')[0]));
+    const before = await span();
+    const handle = await bars.first().locator('.bar-resize').boundingBox();
+    const row = await bars.first().boundingBox();
+    if (!handle || !row) throw new Error('the bar has no end edge');
+    const cell = row.width / before;
+    const x = handle.x + handle.width / 2;
+    const y = handle.y + handle.height / 2;
+    await page.mouse.move(x, y);
+    await page.mouse.down();
+    await page.mouse.move(x + cell / 2, y, { steps: 6 });
+    await page.mouse.move(x + cell, y, { steps: 6 });
+    await page.mouse.up();
+    await expect(page.getByRole('dialog')).toHaveCount(0);
+    if (first + before <= 7) await expect.poll(span).toBe(before + 1);
+    else await expect(bars).toHaveCount(2); // it ran over into the next week
+
+    await page.getByRole('button', { name: 'Undo' }).click();
+    await expect(bars).toHaveCount(1);
+    await expect.poll(span).toBe(before);
+  });
+
   test('editing and deleting work, and undo brings the event back', async ({ page }) => {
     await page.goto('/');
     await addEvent(page, 'Lunch');

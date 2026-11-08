@@ -44,6 +44,8 @@ export interface MonthViewProps {
   readonly onPage?: ((intent: Exclude<SwipeIntent, null>) => void) | undefined;
   /** An item was dragged (or moved with Shift + arrows) by whole days: weeks count as 7 days. */
   readonly onMoveEvent?: ((occurrence: Occurrence, delta: DragDelta) => void) | undefined;
+  /** The end of a bar was dragged by whole days (D-117). */
+  readonly onResizeEventDays?: ((occurrence: Occurrence, days: number) => void) | undefined;
 }
 
 type Vars = CSSProperties & Record<`--${string}`, string | number>;
@@ -55,6 +57,7 @@ export function MonthView({
   onOpenDay,
   onOpenEvent,
   onMoveEvent,
+  onResizeEventDays,
   onPage,
   selected,
 }: MonthViewProps) {
@@ -113,6 +116,7 @@ export function MonthView({
           onOpenDay={onOpenDay}
           onOpenEvent={onOpenEvent}
           onMoveEvent={onMoveEvent}
+          onResizeEventDays={onResizeEventDays}
           onKeyboardEdit={remember}
           moreLabel={(count) => t('moreEvents', { count: formatCount(count, fmt) })}
         />
@@ -138,6 +142,8 @@ interface WeekRowProps {
   readonly onOpenDay: (date: PlainDate) => void;
   readonly onOpenEvent: (occurrence: Occurrence) => void;
   readonly onMoveEvent?: ((occurrence: Occurrence, delta: DragDelta) => void) | undefined;
+  /** The end of a bar was dragged by whole days (D-117). */
+  readonly onResizeEventDays?: ((occurrence: Occurrence, days: number) => void) | undefined;
   readonly onKeyboardEdit: (eventId: string) => void;
   readonly moreLabel: (count: number) => string;
 }
@@ -154,6 +160,7 @@ function WeekRow({
   onOpenDay,
   onOpenEvent,
   onMoveEvent,
+  onResizeEventDays,
   onKeyboardEdit,
   moreLabel,
 }: WeekRowProps) {
@@ -233,6 +240,7 @@ function WeekRow({
             onOpen={onOpenEvent}
             rowRef={rowRef}
             onMove={onMoveEvent}
+            onResizeDays={onResizeEventDays}
             onKeyboardEdit={onKeyboardEdit}
           />
         </ErrorBoundary>
@@ -276,6 +284,7 @@ function EventBar({
   onOpen,
   rowRef,
   onMove,
+  onResizeDays,
   onKeyboardEdit,
 }: {
   readonly bar: MonthBar;
@@ -283,6 +292,7 @@ function EventBar({
   readonly onOpen: (occurrence: Occurrence) => void;
   readonly rowRef: RefObject<HTMLElement | null>;
   readonly onMove?: ((occurrence: Occurrence, delta: DragDelta) => void) | undefined;
+  readonly onResizeDays?: ((occurrence: Occurrence, days: number) => void) | undefined;
   readonly onKeyboardEdit: (eventId: string) => void;
 }) {
   const t = useT();
@@ -296,8 +306,18 @@ function EventBar({
     weeks: true,
     onMove: (delta) => onMove?.(bar.occurrence, { days: delta.days, minutes: 0 }),
   });
+  // The end edge: sideways, whole days; the bar stretches or shrinks inside its week while dragging.
+  const resize = useBlockDrag({
+    hourPx: 1,
+    columns: 7,
+    gridRef: rowRef,
+    axis: 'x',
+    onMove: (delta) => onResizeDays?.(bar.occurrence, delta.days),
+  });
+  const previewEnd = Math.min(6, Math.max(bar.startCol, bar.endCol + resize.delta.days));
   const style: Vars = {
     ...barStyle(bar),
+    ...(resize.offset && { gridColumn: `${bar.startCol + 1} / ${previewEnd + 2}` }),
     ...(drag.offset && { transform: `translate(${drag.offset.x}px, ${drag.offset.y}px)` }),
   };
   return (
@@ -305,7 +325,7 @@ function EventBar({
       type="button"
       className="bar"
       style={style}
-      data-dragging={drag.offset ? 'true' : undefined}
+      data-dragging={drag.offset || resize.offset ? 'true' : undefined}
       data-event-id={event.id}
       aria-keyshortcuts={
         onMove ? 'Shift+ArrowUp Shift+ArrowDown Shift+ArrowLeft Shift+ArrowRight' : undefined
@@ -329,12 +349,23 @@ function EventBar({
       data-open-end={bar.continuesAfter ? 'true' : undefined}
       title={title}
       onClick={() => {
-        if (!drag.consumeClick()) onOpen(bar.occurrence);
+        const afterResize = resize.consumeClick();
+        if (!drag.consumeClick() && !afterResize) onOpen(bar.occurrence);
       }}
       {...(onMove ? drag.handlers : {})}
     >
       {bar.showTime && <span className="bar-time">{formatTime(start, timeFmt)}</span>}
       <span className="bar-title">{title}</span>
+      {onResizeDays && !bar.continuesAfter && (
+        <span
+          className="bar-resize"
+          aria-hidden="true"
+          onPointerDown={(e) => {
+            e.stopPropagation(); // not a move of the whole bar
+            resize.handlers.onPointerDown(e);
+          }}
+        />
+      )}
     </button>
   );
 }

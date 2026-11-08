@@ -94,6 +94,20 @@
   border-end-end-radius: 0;
 }
 
+/* The end of a bar: drag it sideways to make the event end on another day (D-117). */
+.bar {
+  position: relative;
+}
+
+.bar-resize {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-end: 0;
+  inline-size: 8px;
+  cursor: ew-resize;
+  touch-action: none;
+}
+
 .bar-time {
   color: var(--nawy-color-text-muted);
   flex: none;

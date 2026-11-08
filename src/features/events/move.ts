@@ -37,6 +37,24 @@ export function resizeStartDraft(draft: Draft, minutes: number): Draft | undefin
   return { ...draft, startDate: nextStart.slice(0, 10), startTime: nextStart.slice(11, 16) };
 }
 
+/**
+ * The same event with its LAST DAY moved by `days` (what dragging the end of a bar in the month
+ * does). The first day stays; the end never goes before it, and a timed event keeps its time of
+ * day and at least one step of length. Works for all-day and timed events (D-117).
+ */
+export function resizeDaysDraft(draft: Draft, days: number): Draft | undefined {
+  if (days === 0) return draft;
+  if (draft.allDay) {
+    const moved = addDays(draft.endDate as PlainDate, days);
+    return { ...draft, endDate: moved < draft.startDate ? draft.startDate : moved };
+  }
+  const start = toEpochMinute(`${draft.startDate}T${draft.startTime}`);
+  const end = toEpochMinute(`${draft.endDate}T${draft.endTime}`);
+  if (start === undefined || end === undefined) return undefined;
+  const nextEnd = isoOfEpochMinute(Math.max(start + MIN_RESIZE_MINUTES, end + days * 1440), false);
+  return { ...draft, endDate: nextEnd.slice(0, 10), endTime: nextEnd.slice(11, 16) };
+}
+
 export function moveDraft(draft: Draft, days: number, minutes: number): Draft | undefined {
   if (draft.allDay) {
     if (days === 0) return draft;

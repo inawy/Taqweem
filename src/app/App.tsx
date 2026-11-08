@@ -511,6 +511,7 @@ function Calendar({
           <div className={phone ? 'month-split' : 'month-wrap'}>
             <MonthView
               onMoveEvent={flow.moveEvent}
+              onResizeEventDays={flow.resizeEventDays}
               model={monthModel}
               today={today}
               lanes={MAX_LANES}

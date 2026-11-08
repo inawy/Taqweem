@@ -17,4 +17,4 @@ export { describeWhen } from './when';
 export { applyQuickText, parseQuickText } from './quickText';
 export type { QuickText } from './quickText';
 export type { WhenInput } from './when';
-export { MIN_RESIZE_MINUTES, moveDraft, resizeDraft, resizeStartDraft } from './move';
+export { MIN_RESIZE_MINUTES, moveDraft, resizeDaysDraft, resizeDraft, resizeStartDraft } from './move';

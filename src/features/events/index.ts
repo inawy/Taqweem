@@ -22,5 +22,6 @@ export {
   moveDraft,
   resizeDaysDraft,
   resizeDraft,
+  resizeStartDaysDraft,
   resizeStartDraft,
 } from './move';

@@ -13,6 +13,7 @@ import {
   moveDraft,
   resizeDraft,
   resizeDaysDraft,
+  resizeStartDaysDraft,
   resizeStartDraft,
   execute,
   isSeries,
@@ -82,6 +83,8 @@ export interface EventFlow {
   readonly resizeEventStart: (occurrence: Occurrence, minutes: number) => void;
   /** Moves an occurrence's last day by whole days (dragging the end of a bar in the month). */
   readonly resizeEventDays: (occurrence: Occurrence, days: number) => void;
+  /** Moves an occurrence's first day by whole days (dragging the start of a bar in the month). */
+  readonly resizeEventStartDays: (occurrence: Occurrence, days: number) => void;
   /** The editor, the scope question and the toast. Render it once, anywhere. */
   readonly overlay: ReactNode;
   /** True while a dialog is open: global shortcuts must pause. */
@@ -255,6 +258,12 @@ export function useEventFlow({
   const resizeEventDays = useCallback(
     (occurrence: Occurrence, days: number): void =>
       changeOccurrence(occurrence, (d) => resizeDaysDraft(d, days), 'eventResized'),
+    [changeOccurrence],
+  );
+
+  const resizeEventStartDays = useCallback(
+    (occurrence: Occurrence, days: number): void =>
+      changeOccurrence(occurrence, (d) => resizeStartDaysDraft(d, days), 'eventResized'),
     [changeOccurrence],
   );
 
@@ -499,6 +508,7 @@ export function useEventFlow({
     resizeEvent,
     resizeEventStart,
     resizeEventDays,
+    resizeEventStartDays,
     overlay,
     dialogOpen: editing !== null || ask !== null || viewing !== null || quick !== null,
     back,

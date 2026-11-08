@@ -46,6 +46,8 @@ export interface MonthViewProps {
   readonly onMoveEvent?: ((occurrence: Occurrence, delta: DragDelta) => void) | undefined;
   /** The end of a bar was dragged by whole days (D-117). */
   readonly onResizeEventDays?: ((occurrence: Occurrence, days: number) => void) | undefined;
+  /** The start of a bar was dragged by whole days (D-119). */
+  readonly onResizeEventStartDays?: ((occurrence: Occurrence, days: number) => void) | undefined;
 }
 
 type Vars = CSSProperties & Record<`--${string}`, string | number>;
@@ -58,6 +60,7 @@ export function MonthView({
   onOpenEvent,
   onMoveEvent,
   onResizeEventDays,
+  onResizeEventStartDays,
   onPage,
   selected,
 }: MonthViewProps) {
@@ -117,6 +120,7 @@ export function MonthView({
           onOpenEvent={onOpenEvent}
           onMoveEvent={onMoveEvent}
           onResizeEventDays={onResizeEventDays}
+          onResizeEventStartDays={onResizeEventStartDays}
           onKeyboardEdit={remember}
           moreLabel={(count) => t('moreEvents', { count: formatCount(count, fmt) })}
         />
@@ -144,6 +148,8 @@ interface WeekRowProps {
   readonly onMoveEvent?: ((occurrence: Occurrence, delta: DragDelta) => void) | undefined;
   /** The end of a bar was dragged by whole days (D-117). */
   readonly onResizeEventDays?: ((occurrence: Occurrence, days: number) => void) | undefined;
+  /** The start of a bar was dragged by whole days (D-119). */
+  readonly onResizeEventStartDays?: ((occurrence: Occurrence, days: number) => void) | undefined;
   readonly onKeyboardEdit: (eventId: string) => void;
   readonly moreLabel: (count: number) => string;
 }
@@ -161,6 +167,7 @@ function WeekRow({
   onOpenEvent,
   onMoveEvent,
   onResizeEventDays,
+  onResizeEventStartDays,
   onKeyboardEdit,
   moreLabel,
 }: WeekRowProps) {
@@ -241,6 +248,7 @@ function WeekRow({
             rowRef={rowRef}
             onMove={onMoveEvent}
             onResizeDays={onResizeEventDays}
+            onResizeStartDays={onResizeEventStartDays}
             onKeyboardEdit={onKeyboardEdit}
           />
         </ErrorBoundary>
@@ -285,6 +293,7 @@ function EventBar({
   rowRef,
   onMove,
   onResizeDays,
+  onResizeStartDays,
   onKeyboardEdit,
 }: {
   readonly bar: MonthBar;
@@ -293,6 +302,7 @@ function EventBar({
   readonly rowRef: RefObject<HTMLElement | null>;
   readonly onMove?: ((occurrence: Occurrence, delta: DragDelta) => void) | undefined;
   readonly onResizeDays?: ((occurrence: Occurrence, days: number) => void) | undefined;
+  readonly onResizeStartDays?: ((occurrence: Occurrence, days: number) => void) | undefined;
   readonly onKeyboardEdit: (eventId: string) => void;
 }) {
   const t = useT();
@@ -314,10 +324,19 @@ function EventBar({
     axis: 'x',
     onMove: (delta) => onResizeDays?.(bar.occurrence, delta.days),
   });
+  const resizeStart = useBlockDrag({
+    hourPx: 1,
+    columns: 7,
+    gridRef: rowRef,
+    axis: 'x',
+    onMove: (delta) => onResizeStartDays?.(bar.occurrence, delta.days),
+  });
   const previewEnd = Math.min(6, Math.max(bar.startCol, bar.endCol + resize.delta.days));
+  const previewStart = Math.max(0, Math.min(bar.endCol, bar.startCol + resizeStart.delta.days));
   const style: Vars = {
     ...barStyle(bar),
     ...(resize.offset && { gridColumn: `${bar.startCol + 1} / ${previewEnd + 2}` }),
+    ...(resizeStart.offset && { gridColumn: `${previewStart + 1} / ${bar.endCol + 2}` }),
     ...(drag.offset && { transform: `translate(${drag.offset.x}px, ${drag.offset.y}px)` }),
   };
   return (
@@ -325,7 +344,7 @@ function EventBar({
       type="button"
       className="bar"
       style={style}
-      data-dragging={drag.offset || resize.offset ? 'true' : undefined}
+      data-dragging={drag.offset || resize.offset || resizeStart.offset ? 'true' : undefined}
       data-event-id={event.id}
       aria-keyshortcuts={
         [
@@ -371,10 +390,21 @@ function EventBar({
       title={title}
       onClick={() => {
         const afterResize = resize.consumeClick();
-        if (!drag.consumeClick() && !afterResize) onOpen(bar.occurrence);
+        const afterStart = resizeStart.consumeClick();
+        if (!drag.consumeClick() && !afterResize && !afterStart) onOpen(bar.occurrence);
       }}
       {...(onMove ? drag.handlers : {})}
     >
+      {onResizeStartDays && !bar.continuesBefore && (
+        <span
+          className="bar-resize bar-resize-start"
+          aria-hidden="true"
+          onPointerDown={(e) => {
+            e.stopPropagation(); // not a move of the whole bar
+            resizeStart.handlers.onPointerDown(e);
+          }}
+        />
+      )}
       {bar.showTime && <span className="bar-time">{formatTime(start, timeFmt)}</span>}
       <span className="bar-title">{title}</span>
       {onResizeDays && !bar.continuesAfter && (

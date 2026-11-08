@@ -512,6 +512,7 @@ function Calendar({
             <MonthView
               onMoveEvent={flow.moveEvent}
               onResizeEventDays={flow.resizeEventDays}
+              onResizeEventStartDays={flow.resizeEventStartDays}
               model={monthModel}
               today={today}
               lanes={MAX_LANES}

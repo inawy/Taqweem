@@ -5,6 +5,7 @@ import {
   moveDraft,
   resizeDaysDraft,
   resizeDraft,
+  resizeStartDaysDraft,
   resizeStartDraft,
 } from '@/features/events';
 import type { Draft } from '@/features/events';
@@ -213,5 +214,34 @@ describe('resizeDaysDraft', () => {
     expect(out).toMatchObject({ endDate: '2026-10-20', endTime: '09:15' });
     const d = timed();
     expect(resizeDaysDraft(d, 0)).toBe(d);
+  });
+});
+
+describe('resizeStartDaysDraft', () => {
+  it('moves the first day of an all-day event, never past the last', () => {
+    const d = timed({ allDay: true, startDate: '2026-10-20', endDate: '2026-10-22' });
+    expect(resizeStartDaysDraft(d, -2)).toMatchObject({
+      startDate: '2026-10-18',
+      endDate: '2026-10-22',
+    });
+    expect(resizeStartDaysDraft(d, 9)).toMatchObject({
+      startDate: '2026-10-22',
+      endDate: '2026-10-22',
+    });
+  });
+
+  it('moves a timed event’s start by whole days, keeping its time and one step of length', () => {
+    expect(resizeStartDaysDraft(timed(), -1)).toMatchObject({
+      startDate: '2026-10-19',
+      startTime: '09:00',
+      endTime: '10:00',
+    });
+    expect(resizeStartDaysDraft(timed(), 3)).toMatchObject({
+      startDate: '2026-10-20',
+      startTime: '09:45',
+      endTime: '10:00',
+    });
+    const d = timed();
+    expect(resizeStartDaysDraft(d, 0)).toBe(d);
   });
 });

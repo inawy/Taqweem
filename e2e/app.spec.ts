@@ -183,7 +183,7 @@ test.describe('the whole cycle in a real browser', () => {
     };
     const first = await bars.first().evaluate((el) => Number(el.style.gridColumn.split(' ')[0]));
     const before = await span();
-    const handle = await bars.first().locator('.bar-resize').boundingBox();
+    const handle = await bars.first().locator('.bar-resize:not(.bar-resize-start)').boundingBox();
     const row = await bars.first().boundingBox();
     if (!handle || !row) throw new Error('the bar has no end edge');
     const cell = row.width / before;
@@ -201,6 +201,39 @@ test.describe('the whole cycle in a real browser', () => {
     await page.getByRole('button', { name: 'Undo' }).click();
     await expect(bars).toHaveCount(1);
     await expect.poll(span).toBe(before);
+  });
+
+  test('dragging the start of a bar in the month starts the event a day earlier, and undo puts it back', async ({
+    page,
+  }) => {
+    await page.goto('/');
+    await addEvent(page, 'Earlier');
+    const bars = page.locator('.month .bar', { hasText: 'Earlier' });
+    const cols = async () => {
+      const [a, b] = ((await bars.first().evaluate((el) => el.style.gridColumn)) ?? '')
+        .split('/')
+        .map((v) => Number(v));
+      return { first: a ?? 0, span: (b ?? 0) - (a ?? 0) };
+    };
+    const before = await cols();
+    const handle = await bars.first().locator('.bar-resize-start').boundingBox();
+    const box = await bars.first().boundingBox();
+    if (!handle || !box) throw new Error('the bar has no start edge');
+    const cell = box.width / before.span;
+    const x = handle.x + handle.width / 2;
+    const y = handle.y + handle.height / 2;
+    await page.mouse.move(x, y);
+    await page.mouse.down();
+    await page.mouse.move(x - cell / 2, y, { steps: 6 });
+    await page.mouse.move(x - cell, y, { steps: 6 });
+    await page.mouse.up();
+    await expect(page.getByRole('dialog')).toHaveCount(0);
+    if (before.first > 1) await expect.poll(cols).toEqual({ first: before.first - 1, span: before.span + 1 });
+    else await expect(bars).toHaveCount(2); // it started in the week before
+
+    await page.getByRole('button', { name: 'Undo' }).click();
+    await expect(bars).toHaveCount(1);
+    await expect.poll(cols).toEqual(before);
   });
 
   test('editing and deleting work, and undo brings the event back', async ({ page }) => {

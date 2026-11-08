@@ -108,6 +108,11 @@
   touch-action: none;
 }
 
+.bar-resize-start {
+  inset-inline-start: 0;
+  inset-inline-end: auto;
+}
+
 .bar-time {
   color: var(--nawy-color-text-muted);
   flex: none;

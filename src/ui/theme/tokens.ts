@@ -28,12 +28,12 @@ export interface ThemeTokens {
 }
 
 export const LIGHT: ThemeTokens = {
-  bg: '#F8F5EE', // warm paper (D-123); cards and bars stay white on it
+  bg: '#FFFFFF',
   surface: '#FFFFFF',
-  surface2: '#F2EEE5',
+  surface2: '#F5F7FA',
   text: '#171B22',
   textMuted: '#4B5563',
-  border: '#E4DFD4',
+  border: '#E3E7EE',
   accent: '#2B5FD9', // a deeper step of the brand blue: the brand itself is 3.8:1 on white
   accentFill: '#2B5FD9',
   onAccentFill: '#FFFFFF',

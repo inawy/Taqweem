@@ -328,11 +328,32 @@ function EventBar({
       data-dragging={drag.offset || resize.offset ? 'true' : undefined}
       data-event-id={event.id}
       aria-keyshortcuts={
-        onMove ? 'Shift+ArrowUp Shift+ArrowDown Shift+ArrowLeft Shift+ArrowRight' : undefined
+        [
+          onMove && 'Shift+ArrowUp Shift+ArrowDown Shift+ArrowLeft Shift+ArrowRight',
+          onResizeDays && !bar.continuesAfter && 'Control+Shift+ArrowLeft Control+Shift+ArrowRight',
+        ]
+          .filter(Boolean)
+          .join(' ') || undefined
       }
       onKeyDown={(e) => {
-        if (!onMove || e.target !== e.currentTarget) return;
+        if (e.target !== e.currentTarget) return;
         const rtl = getComputedStyle(e.currentTarget).direction === 'rtl';
+        // Ctrl + Shift + left/right: the event ends a day earlier or later (D-118).
+        if (
+          onResizeDays &&
+          !bar.continuesAfter &&
+          e.ctrlKey &&
+          e.shiftKey &&
+          !e.altKey &&
+          !e.metaKey &&
+          (e.code === 'ArrowLeft' || e.code === 'ArrowRight')
+        ) {
+          e.preventDefault();
+          onKeyboardEdit(event.id);
+          onResizeDays(bar.occurrence, (e.code === 'ArrowRight') !== rtl ? 1 : -1);
+          return;
+        }
+        if (!onMove) return;
         const action = keyAction(
           e.code,
           { shift: e.shiftKey, ctrl: e.ctrlKey, alt: e.altKey, meta: e.metaKey },

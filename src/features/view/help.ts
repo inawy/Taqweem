@@ -38,6 +38,7 @@ export const SHORTCUT_GROUPS: readonly ShortcutGroup[] = [
       { keys: ['Shift', '← →'], label: 'scMoveDay' },
       { keys: ['Ctrl', 'Shift', '↑ ↓'], label: 'scResize' },
       { keys: ['Alt', 'Shift', '↑ ↓'], label: 'scResizeStart' },
+      { keys: ['Ctrl', 'Shift', '← →'], label: 'scResizeDays' },
       { keys: ['Shift', '/'], label: 'scHelp' },
     ],
   },

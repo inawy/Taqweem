@@ -10,6 +10,7 @@ afterEach(() => {
   cleanup();
   opened.length = 0;
   moved.length = 0;
+  resizedDays.length = 0;
 });
 
 const storage = (locale: 'ar' | 'en', extra: object = {}) => ({
@@ -31,6 +32,7 @@ function model(events: unknown[], maxLanes = 3): MonthModel {
 const opened: string[] = [];
 const openedEvents: string[] = [];
 const moved: [string, number, number][] = [];
+const resizedDays: [string, number][] = [];
 const view = (m: MonthModel, locale: 'ar' | 'en' = 'en', extra: object = {}) =>
   render(
     <SettingsProvider storage={storage(locale, extra)} languages={[locale]}>
@@ -41,6 +43,7 @@ const view = (m: MonthModel, locale: 'ar' | 'en' = 'en', extra: object = {}) =>
         onOpenDay={(d) => opened.push(d)}
         onOpenEvent={(o) => openedEvents.push(o.event.id)}
         onMoveEvent={(o, delta) => moved.push([o.event.id, delta.days, delta.minutes])}
+        onResizeEventDays={(o, days) => resizedDays.push([o.event.id, days])}
       />
     </SettingsProvider>,
   );
@@ -146,7 +149,19 @@ describe('MonthView keyboard moves', () => {
     ]);
   });
 
-  it('does nothing for a plain arrow or Ctrl + Shift (that resizes in the time grid)', () => {
+  it('ends the event a day later or earlier with Ctrl + Shift + right/left (D-118)', () => {
+    const bar = withEvent();
+    fireEvent.keyDown(bar, { code: 'ArrowRight', shiftKey: true, ctrlKey: true });
+    fireEvent.keyDown(bar, { code: 'ArrowLeft', shiftKey: true, ctrlKey: true });
+    expect(resizedDays).toEqual([
+      ['m1', 1],
+      ['m1', -1],
+    ]);
+    expect(moved).toEqual([]);
+    expect(bar.getAttribute('aria-keyshortcuts')).toContain('Control+Shift+ArrowRight');
+  });
+
+  it('does nothing for a plain arrow or Ctrl + Shift + up/down (that resizes in the time grid)', () => {
     const bar = withEvent();
     fireEvent.keyDown(bar, { code: 'ArrowDown' });
     fireEvent.keyDown(bar, { code: 'ArrowDown', shiftKey: true, ctrlKey: true });

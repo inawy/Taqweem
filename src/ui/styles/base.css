@@ -25,7 +25,7 @@
 
 :root {
   --dir: 1;
-  --nawy-radius: 10px;
+  --nawy-radius: 12px; /* a little softer (D-123) */
   /* Raised things get a hairline edge, not a blurred shadow (D-100). */
   --nawy-shadow-lift: 0 0 0 1px var(--nawy-color-border);
   --bar-h: 22px;

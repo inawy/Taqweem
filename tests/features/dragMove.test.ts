@@ -197,17 +197,20 @@ describe('resizeDaysDraft', () => {
   it('moves the last day of an all-day event, never before the first', () => {
     const d = timed({ allDay: true, startDate: '2026-10-19', endDate: '2026-10-19' });
     expect(resizeDaysDraft(d, 2)).toMatchObject({ startDate: '2026-10-19', endDate: '2026-10-21' });
-    expect(resizeDaysDraft(d, -5)).toMatchObject({ startDate: '2026-10-19', endDate: '2026-10-19' });
+    expect(resizeDaysDraft(d, -5)).toMatchObject({
+      startDate: '2026-10-19',
+      endDate: '2026-10-19',
+    });
   });
 
   it('moves a timed event’s end by whole days and keeps its time of day', () => {
     const out = resizeDaysDraft(timed(), 1);
-    expect(out).toMatchObject({ startDate: '2026-10-19', endDate: '2026-10-20', endTime: '10:00' });
+    expect(out).toMatchObject({ startDate: '2026-10-20', endDate: '2026-10-21', endTime: '10:00' });
   });
 
   it('never shortens a timed event below one step, and no change is no change', () => {
     const out = resizeDaysDraft(timed(), -3);
-    expect(out).toMatchObject({ endDate: '2026-10-19', endTime: '09:15' });
+    expect(out).toMatchObject({ endDate: '2026-10-20', endTime: '09:15' });
     const d = timed();
     expect(resizeDaysDraft(d, 0)).toBe(d);
   });

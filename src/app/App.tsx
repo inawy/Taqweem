@@ -24,6 +24,7 @@ import type { DefaultView, ReadableStorage, WritableStorage } from '@/features/s
 import { buildTimeGridModel } from '@/features/timegrid';
 import { useEventFlow } from './useEventFlow';
 import {
+  hiddenWeekdays,
   hijriSubtitle,
   islamicOccasion,
   shiftAnchor,
@@ -251,11 +252,11 @@ function Calendar({
         events: gridEvents,
         days:
           view === 'day' || view === 'days3' || view === 'week'
-            ? visibleDays(view, anchor, settings.weekStart)
+            ? visibleDays(view, anchor, settings.weekStart, hiddenWeekdays(settings.hideWeekend))
             : [],
         maxAllDayLanes: MAX_ALL_DAY_LANES,
       }),
-    [calendarData.calendars, gridEvents, view, anchor, settings.weekStart],
+    [calendarData.calendars, gridEvents, view, anchor, settings.weekStart, settings.hideWeekend],
   );
 
   const agendaModel = useMemo(
@@ -373,10 +374,11 @@ function Calendar({
 
   return (
     <Shell
-      title={viewTitle(view, anchor, settings.weekStart, fmt)}
+      title={viewTitle(view, anchor, settings.weekStart, fmt, hiddenWeekdays(settings.hideWeekend))}
       subtitle={
         settings.hijri
-          ? hijriSubtitle(view, anchor, settings.weekStart, fmt) + occasionSuffix
+          ? hijriSubtitle(view, anchor, settings.weekStart, fmt, hiddenWeekdays(settings.hideWeekend)) +
+            occasionSuffix
           : undefined
       }
       view={view}

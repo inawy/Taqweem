@@ -1,4 +1,11 @@
-export { hijriSubtitle, shiftAnchor, splitTitle, viewTitle, visibleDays } from './nav';
+export {
+  hiddenWeekdays,
+  hijriSubtitle,
+  shiftAnchor,
+  splitTitle,
+  viewTitle,
+  visibleDays,
+} from './nav';
 export type { ViewKind } from './nav';
 export { islamicOccasion } from './occasions';
 export type { OccasionKey } from './occasions';

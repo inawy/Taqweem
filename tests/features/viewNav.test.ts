@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  hiddenWeekdays,
   hijriSubtitle,
   shiftAnchor,
   shortcutFor,
@@ -8,6 +9,7 @@ import {
   visibleDays,
 } from '@/features/view';
 import type { KeyLike } from '@/features/view';
+import type { PlainDate } from '@/core/time';
 
 describe('shiftAnchor', () => {
   it('moves by a day, a week or a month', () => {
@@ -154,5 +156,37 @@ describe('splitTitle', () => {
   it('leaves a title with no comma alone', () => {
     expect(splitTitle('أكتوبر 2026')).toEqual({ lead: undefined, rest: 'أكتوبر 2026' });
     expect(splitTitle('')).toEqual({ lead: undefined, rest: '' });
+  });
+});
+
+describe('visibleDays with hidden weekdays (D-120)', () => {
+  // 2026-10-13 is a Tuesday.
+  const anchor = '2026-10-13' as PlainDate;
+
+  it('drops Friday and Saturday from an Arabic week starting on Saturday', () => {
+    const days = visibleDays('week', anchor, 6, hiddenWeekdays('fri-sat'));
+    expect(days).toHaveLength(5);
+    expect(days[0]).toBe('2026-10-11'); // Sunday: the Saturday before it is hidden
+    expect(days[4]).toBe('2026-10-15'); // Thursday
+  });
+
+  it('drops Saturday and Sunday from a Monday week', () => {
+    const days = visibleDays('week', anchor, 1, hiddenWeekdays('sat-sun'));
+    expect(days).toEqual(['2026-10-12', '2026-10-13', '2026-10-14', '2026-10-15', '2026-10-16']);
+  });
+
+  it('never hides the day or 3-day views, and shows everything when nothing is hidden', () => {
+    expect(visibleDays('day', anchor, 6, hiddenWeekdays('fri-sat'))).toEqual([anchor]);
+    expect(visibleDays('days3', anchor, 6, hiddenWeekdays('fri-sat'))).toHaveLength(3);
+    expect(visibleDays('week', anchor, 6, hiddenWeekdays('none'))).toHaveLength(7);
+  });
+
+  it('titles the week by its first and last shown days', () => {
+    const fmt = { locale: 'en' };
+    const full = viewTitle('week', anchor, 1, fmt);
+    const work = viewTitle('week', anchor, 1, fmt, hiddenWeekdays('sat-sun'));
+    expect(full).not.toBe(work);
+    expect(work).toContain('12');
+    expect(work).toContain('16');
   });
 });

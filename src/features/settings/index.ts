@@ -1,6 +1,7 @@
 export {
   DEFAULT_VIEWS,
   SETTINGS_KEY,
+  WEEKEND_HIDING,
   applyToDocument,
   defaultSettings,
   detectLocale,
@@ -14,6 +15,7 @@ export type {
   ReadableStorage,
   Settings,
   ThemePreference,
+  WeekendHiding,
   WritableStorage,
 } from './settings';
 export { SettingsProvider, useSettings } from './SettingsContext';

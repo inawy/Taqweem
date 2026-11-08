@@ -146,3 +146,13 @@ describe('applyToDocument', () => {
     expect(media()).toEqual(['(prefers-color-scheme: light)', '(prefers-color-scheme: dark)']);
   });
 });
+
+describe('hideWeekend (D-120)', () => {
+  it('shows every day by default and accepts only the three choices', () => {
+    expect(defaultSettings('ar').hideWeekend).toBe('none');
+    expect(parseSettings({ hideWeekend: 'fri-sat' }, 'ar').hideWeekend).toBe('fri-sat');
+    expect(parseSettings({ hideWeekend: 'sat-sun' }, 'en').hideWeekend).toBe('sat-sun');
+    expect(parseSettings({ hideWeekend: 'thu-fri' }, 'ar').hideWeekend).toBe('none');
+    expect(parseSettings({ hideWeekend: true }, 'ar').hideWeekend).toBe('none');
+  });
+});

@@ -17,6 +17,10 @@ export const DEFAULT_VIEWS: readonly DefaultView[] = [
   'year',
 ];
 
+/** Days the week view leaves out: none, Friday + Saturday, or Saturday + Sunday (D-120). */
+export type WeekendHiding = 'none' | 'fri-sat' | 'sat-sun';
+export const WEEKEND_HIDING: readonly WeekendHiding[] = ['none', 'fri-sat', 'sat-sun'];
+
 export interface Settings {
   readonly locale: Locale;
   readonly theme: ThemePreference;
@@ -26,6 +30,7 @@ export interface Settings {
   readonly hijri: boolean;
   readonly numerals: Numerals;
   readonly defaultView: DefaultView;
+  readonly hideWeekend: WeekendHiding;
 }
 
 export const SETTINGS_KEY = 'nawy-today:settings:v1';
@@ -45,6 +50,7 @@ export function defaultSettings(locale: Locale): Settings {
     hijri: false,
     numerals: 'latn',
     defaultView: 'auto',
+    hideWeekend: 'none',
   };
 }
 
@@ -70,6 +76,7 @@ export function parseSettings(raw: unknown, fallbackLocale: Locale): Settings {
     hijri: typeof o['hijri'] === 'boolean' ? o['hijri'] : d.hijri,
     numerals: isOneOf(o['numerals'], ['latn', 'arab'] as const) ? o['numerals'] : d.numerals,
     defaultView: isOneOf(o['defaultView'], DEFAULT_VIEWS) ? o['defaultView'] : d.defaultView,
+    hideWeekend: isOneOf(o['hideWeekend'], WEEKEND_HIDING) ? o['hideWeekend'] : d.hideWeekend,
   };
 }
 

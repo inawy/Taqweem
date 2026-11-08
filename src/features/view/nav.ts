@@ -9,6 +9,7 @@ import {
   formatMonthTitle,
   formatYear,
   startOfWeek,
+  weekdayOf,
 } from '@/core/time';
 import type { FormatOptions, IsoWeekday, PlainDate } from '@/core/time';
 
@@ -31,16 +32,27 @@ export function shiftAnchor(view: ViewKind, anchor: PlainDate, delta: number): P
   }
 }
 
-/** The days a view shows for an anchor: 1, 3 starting at the anchor, or 7 for the week. */
+/** The weekdays a "hide the weekend" choice leaves out of the week view (D-120). */
+export function hiddenWeekdays(choice: 'none' | 'fri-sat' | 'sat-sun'): readonly IsoWeekday[] {
+  return choice === 'fri-sat' ? [5, 6] : choice === 'sat-sun' ? [6, 7] : [];
+}
+
+/**
+ * The days a view shows for an anchor: 1, 3 starting at the anchor, or the week (7, less any
+ * `hidden` weekdays; never empty).
+ */
 export function visibleDays(
   view: 'day' | 'days3' | 'week',
   anchor: PlainDate,
   weekStart: IsoWeekday,
+  hidden: readonly IsoWeekday[] = [],
 ): PlainDate[] {
   if (view === 'day') return [anchor];
   if (view === 'days3') return [anchor, addDays(anchor, 1), addDays(anchor, 2)];
   const start = startOfWeek(anchor, weekStart);
-  return Array.from({ length: 7 }, (_, i) => addDays(start, i));
+  const week = Array.from({ length: 7 }, (_, i) => addDays(start, i));
+  const shown = week.filter((d) => !hidden.includes(weekdayOf(d)));
+  return shown.length > 0 ? shown : week;
 }
 
 export function viewTitle(
@@ -48,6 +60,7 @@ export function viewTitle(
   anchor: PlainDate,
   weekStart: IsoWeekday,
   fmt: FormatOptions,
+  hidden: readonly IsoWeekday[] = [],
 ): string {
   switch (view) {
     case 'agenda':
@@ -58,8 +71,8 @@ export function viewTitle(
       return formatDateRange(days[0] as PlainDate, days[2] as PlainDate, fmt);
     }
     case 'week': {
-      const days = visibleDays('week', anchor, weekStart);
-      return formatDateRange(days[0] as PlainDate, days[6] as PlainDate, fmt);
+      const days = visibleDays('week', anchor, weekStart, hidden);
+      return formatDateRange(days[0] as PlainDate, days[days.length - 1] as PlainDate, fmt);
     }
     case 'month':
       return formatMonthTitle(anchor, fmt);
@@ -74,6 +87,7 @@ export function hijriSubtitle(
   anchor: PlainDate,
   weekStart: IsoWeekday,
   fmt: FormatOptions,
+  hidden: readonly IsoWeekday[] = [],
 ): string {
   switch (view) {
     case 'agenda':
@@ -81,7 +95,7 @@ export function hijriSubtitle(
       return formatHijriDate(anchor, fmt);
     case 'days3':
     case 'week': {
-      const days = visibleDays(view, anchor, weekStart);
+      const days = visibleDays(view, anchor, weekStart, hidden);
       return formatHijriSpan(days[0] as PlainDate, days[days.length - 1] as PlainDate, fmt);
     }
     case 'month': {

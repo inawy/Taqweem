@@ -33,7 +33,7 @@ describe('settings live in their own dialog (D-095)', () => {
 
     fireEvent.click(within(panel).getByRole('button', { name: 'Settings' }));
     const dialog = screen.getByRole('dialog', { name: 'Settings' });
-    expect(within(dialog).getAllByRole('combobox')).toHaveLength(6);
+    expect(within(dialog).getAllByRole('combobox')).toHaveLength(7);
     expect(within(dialog).getByLabelText('Show Hijri date')).toBeTruthy();
   });
 

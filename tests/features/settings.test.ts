@@ -40,6 +40,7 @@ describe('parseSettings is lenient field by field', () => {
       hijri: true,
       numerals: 'arab',
       defaultView: 'week',
+      hideWeekend: 'fri-sat',
     };
     expect(parseSettings(s, 'ar')).toEqual(s);
   });

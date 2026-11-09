@@ -94,6 +94,15 @@ export function fromInstantMs(epochMs: number, timeZone: TimeZoneId): PlainDateT
     .toString(MINUTE);
 }
 
+/** Epoch milliseconds of an ISO-8601 instant (`2026-11-08T10:00:00.000Z`), or undefined when it is not one. */
+export function parseInstantMs(value: string): number | undefined {
+  try {
+    return Temporal.Instant.from(value).epochMilliseconds;
+  } catch {
+    return undefined;
+  }
+}
+
 /** Real elapsed minutes between two wall-clock times — DST-aware (a day can be 23 or 25 hours). */
 export function minutesBetween(
   start: PlainDateTime,

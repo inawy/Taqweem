@@ -1,6 +1,11 @@
-import { parseEnvelope } from '@/core/model';
+import {
+  convertTaqweemBackup,
+  isTaqweemBackup,
+  parseEnvelope,
+  parseEnvelopeValue,
+} from '@/core/model';
 import type { Envelope, EnvelopeError } from '@/core/model';
-import { datePart, nowLocal } from '@/core/time';
+import { datePart, localTimeZone, nowLocal, nowMs } from '@/core/time';
 import type { TimeZoneId } from '@/core/time';
 import type { MessageKey } from '@/features/i18n';
 
@@ -18,10 +23,25 @@ export type ReadOutcome =
   | { readonly ok: true; readonly envelope: Envelope }
   | { readonly ok: false; readonly failure: ReadFailure };
 
+function tryJson(text: string): unknown {
+  try {
+    return JSON.parse(text);
+  } catch {
+    return undefined;
+  }
+}
+
 /** Parses the text of a chosen file. Never throws: every failure is a named reason. */
 export function readBackupText(text: string, byteLength: number = text.length): ReadOutcome {
   if (byteLength > MAX_BACKUP_BYTES) return { ok: false, failure: 'too-big' };
-  const parsed = parseEnvelope(text);
+  let parsed = parseEnvelope(text);
+  if (!parsed.ok && parsed.error.code === 'invalid-field') {
+    // A backup from «تقويم» (D-125): same app id, an older, simpler shape.
+    const raw = tryJson(text);
+    if (isTaqweemBackup(raw)) {
+      parsed = parseEnvelopeValue(convertTaqweemBackup(raw, localTimeZone(), nowMs()).envelope);
+    }
+  }
   if (parsed.ok) return { ok: true, envelope: parsed.value };
   // JSON with no `app` field at all is just some file, not "another app's backup".
   const error = parsed.error;

@@ -2,6 +2,7 @@
 export * from './envelope';
 export * from './merge';
 export * from './replace';
+export * from './taqweem';
 export * from './result';
 export * from './tombstone';
 export * from './types';

@@ -1,5 +1,5 @@
 export { buildTimeGridModel } from './model';
-export { SECOND_ZONES, clockInZone, zoneName } from './zones';
+export { SECOND_ZONES, clockInZone, dayShift, zoneName } from './zones';
 export type { AllDayBar, DayColumn, TimeGridInput, TimeGridModel, TimedBlock } from './model';
 export {
   HOLD_MS,

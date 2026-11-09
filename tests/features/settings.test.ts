@@ -6,6 +6,7 @@ import {
   detectLocale,
   loadSettings,
   parseSettings,
+  workHoursRange,
   saveSettings,
 } from '@/features/settings';
 
@@ -42,6 +43,7 @@ describe('parseSettings is lenient field by field', () => {
       defaultView: 'week',
       hideWeekend: 'fri-sat',
       secondZone: 'Africa/Cairo',
+      workHours: '9-17',
     };
     expect(parseSettings(s, 'ar')).toEqual(s);
   });
@@ -166,5 +168,19 @@ describe('secondZone (D-122)', () => {
     expect(parseSettings({ secondZone: 'Mars/Olympus' }, 'ar').secondZone).toBe('');
     expect(parseSettings({ secondZone: 5 }, 'ar').secondZone).toBe('');
     expect(parseSettings({ secondZone: '' }, 'ar').secondZone).toBe('');
+  });
+});
+
+describe('workHours (D-127)', () => {
+  it('is off by default and accepts only the listed ranges', () => {
+    expect(defaultSettings('ar').workHours).toBe('off');
+    expect(parseSettings({ workHours: '9-17' }, 'ar').workHours).toBe('9-17');
+    expect(parseSettings({ workHours: '9-25' }, 'ar').workHours).toBe('off');
+    expect(parseSettings({ workHours: 9 }, 'ar').workHours).toBe('off');
+  });
+  it('turns a range into whole hours, or nothing when off', () => {
+    expect(workHoursRange('off')).toBeUndefined();
+    expect(workHoursRange('8-16')).toEqual({ start: 8, end: 16 });
+    expect(workHoursRange('10-18')).toEqual({ start: 10, end: 18 });
   });
 });

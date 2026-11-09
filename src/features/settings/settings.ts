@@ -22,6 +22,17 @@ export const DEFAULT_VIEWS: readonly DefaultView[] = [
 export type WeekendHiding = 'none' | 'fri-sat' | 'sat-sun';
 export const WEEKEND_HIDING: readonly WeekendHiding[] = ['none', 'fri-sat', 'sat-sun'];
 
+/** Working hours shaded in the day and week views: off, or `start-end` as whole hours (D-127). */
+export type WorkHours = 'off' | '8-16' | '9-17' | '10-18' | '8-18';
+export const WORK_HOURS: readonly WorkHours[] = ['off', '8-16', '9-17', '10-18', '8-18'];
+
+/** The shaded-outside range as whole hours, or undefined when shading is off. */
+export function workHoursRange(w: WorkHours): { start: number; end: number } | undefined {
+  if (w === 'off') return undefined;
+  const [start, end] = w.split('-').map(Number);
+  return start === undefined || end === undefined ? undefined : { start, end };
+}
+
 export interface Settings {
   readonly locale: Locale;
   readonly theme: ThemePreference;
@@ -34,6 +45,7 @@ export interface Settings {
   readonly hideWeekend: WeekendHiding;
   /** A second clock beside the hours of the day and week views: an IANA zone, or '' for none. */
   readonly secondZone: string;
+  readonly workHours: WorkHours;
 }
 
 export const SETTINGS_KEY = 'nawy-today:settings:v1';
@@ -55,6 +67,7 @@ export function defaultSettings(locale: Locale): Settings {
     defaultView: 'auto',
     hideWeekend: 'none',
     secondZone: '',
+    workHours: 'off',
   };
 }
 
@@ -85,6 +98,7 @@ export function parseSettings(raw: unknown, fallbackLocale: Locale): Settings {
       typeof o['secondZone'] === 'string' && (o['secondZone'] === '' || isTimeZone(o['secondZone']))
         ? o['secondZone']
         : d.secondZone,
+    workHours: isOneOf(o['workHours'], WORK_HOURS) ? o['workHours'] : d.workHours,
   };
 }
 

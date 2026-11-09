@@ -11,7 +11,7 @@ import {
 } from '@/core/time';
 import type { FormatOptions, PlainDate, PlainDateTime, TimeFormatOptions } from '@/core/time';
 import { useT } from '@/features/i18n';
-import { useSettings } from '@/features/settings';
+import { useSettings, workHoursRange } from '@/features/settings';
 import { clockInZone, dayShift, keyAction, zoneName } from '@/features/timegrid';
 import type { AllDayBar, DragDelta, TimeGridModel, TimedBlock } from '@/features/timegrid';
 import { useRefocus } from '@/lib/useRefocus';
@@ -81,6 +81,7 @@ export function TimeGrid({
   const count = model.days.length;
   // A second clock beside the hours (D-122): the first shown day decides which date's offset it uses.
   const second = settings.secondZone;
+  const work = workHoursRange(settings.workHours);
   const home = localTimeZone();
   const firstDay = model.days[0]?.date;
   const showSecond = second !== '' && second !== home && firstDay !== undefined;
@@ -239,7 +240,16 @@ export function TimeGrid({
               ))}
             </div>
           )}
-          <div className="tg-cells tg-cols" ref={cellsRef}>
+          <div
+            className="tg-cells tg-cols"
+            ref={cellsRef}
+            data-work={work ? 'true' : undefined}
+            style={
+              work
+                ? ({ '--work-start': work.start, '--work-end': work.end } as CSSProperties)
+                : undefined
+            }
+          >
             {model.days.map((d) => {
               const now = nowPosition(nowLocal, d.date);
               return (

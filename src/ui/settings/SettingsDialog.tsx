@@ -4,8 +4,14 @@ import type { IsoWeekday, Numerals } from '@/core/time';
 import { useT } from '@/features/i18n';
 import type { MessageKey } from '@/features/i18n';
 import { SECOND_ZONES, zoneName } from '@/features/timegrid';
-import { DEFAULT_VIEWS, WEEKEND_HIDING, useSettings } from '@/features/settings';
-import type { DefaultView, Locale, ThemePreference, WeekendHiding } from '@/features/settings';
+import { DEFAULT_VIEWS, WEEKEND_HIDING, WORK_HOURS, useSettings } from '@/features/settings';
+import type {
+  DefaultView,
+  Locale,
+  ThemePreference,
+  WeekendHiding,
+  WorkHours,
+} from '@/features/settings';
 import { trapTab } from '@/lib/focusTrap';
 import { CloseIcon } from '@/ui/shell/Icons';
 import { useRestoreFocus } from '@/ui/shell/useRestoreFocus';
@@ -30,6 +36,12 @@ const WEEKEND_LABELS: Record<WeekendHiding, MessageKey> = {
   'fri-sat': 'hideWeekendFriSat',
   'sat-sun': 'hideWeekendSatSun',
 };
+
+/** `9-17` → `09:00–17:00` (digits follow the page's numerals through the font, like the hours). */
+function workHoursText(value: WorkHours): string {
+  const [start, end] = value.split('-');
+  return `${String(start).padStart(2, '0')}:00–${String(end).padStart(2, '0')}:00`;
+}
 
 const THEMES: readonly [ThemePreference, MessageKey][] = [
   ['auto', 'themeAuto'],
@@ -160,6 +172,19 @@ export function SettingsDialog({ onClose }: SettingsDialogProps) {
                     {zoneName(zone)}
                   </option>
                 ))}
+            </select>
+          </label>
+          <label className="field">
+            <span>{t('workHoursLabel')}</span>
+            <select
+              value={settings.workHours}
+              onChange={(e) => update({ workHours: e.currentTarget.value as WorkHours })}
+            >
+              {WORK_HOURS.map((value) => (
+                <option key={value} value={value}>
+                  {value === 'off' ? t('workHoursOff') : workHoursText(value)}
+                </option>
+              ))}
             </select>
           </label>
           <label className="field">

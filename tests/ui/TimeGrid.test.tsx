@@ -492,3 +492,16 @@ describe('TimeGrid second clock (D-122)', () => {
     expect(marks.every((m) => m.textContent === '+1' || m.textContent === '−1')).toBe(true);
   });
 });
+
+describe('TimeGrid working hours (D-127)', () => {
+  it('shades outside the range only when one is chosen', () => {
+    const plain = view(model([]));
+    expect(plain.container.querySelector('.tg-cols')?.hasAttribute('data-work')).toBe(false);
+    cleanup();
+    const shaded = view(model([]), { extra: { workHours: '9-17' } });
+    const cols = shaded.container.querySelector<HTMLElement>('.tg-cols');
+    expect(cols?.getAttribute('data-work')).toBe('true');
+    expect(cols?.style.getPropertyValue('--work-start')).toBe('9');
+    expect(cols?.style.getPropertyValue('--work-end')).toBe('17');
+  });
+});

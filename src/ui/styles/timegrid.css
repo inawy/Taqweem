@@ -159,6 +159,25 @@ button.tg-headcell:hover {
   );
 }
 
+.tg-cols[data-work] .tg-col {
+  /* Hours outside the working range are tinted; the hour lines stay on top (D-127). */
+  background-image:
+    repeating-linear-gradient(
+      to bottom,
+      transparent 0,
+      transparent calc(var(--hour-h) - 1px),
+      var(--nawy-color-border) calc(var(--hour-h) - 1px),
+      var(--nawy-color-border) var(--hour-h)
+    ),
+    linear-gradient(
+      to bottom,
+      var(--nawy-color-surface-2) calc(var(--work-start) / 24 * 100%),
+      transparent calc(var(--work-start) / 24 * 100%),
+      transparent calc(var(--work-end) / 24 * 100%),
+      var(--nawy-color-surface-2) calc(var(--work-end) / 24 * 100%)
+    );
+}
+
 .block {
   position: absolute;
   z-index: 1;

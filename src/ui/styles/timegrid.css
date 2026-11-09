@@ -132,6 +132,12 @@ button.tg-headcell:hover {
   opacity: 0.85;
 }
 
+.tg-day-shift {
+  margin-inline-start: 2px;
+  font-size: 0.5625rem;
+  color: var(--nawy-color-text-muted);
+}
+
 .tg-hour {
   position: absolute;
   inset-inline-end: 6px;

@@ -12,7 +12,7 @@ import {
 import type { FormatOptions, PlainDate, PlainDateTime, TimeFormatOptions } from '@/core/time';
 import { useT } from '@/features/i18n';
 import { useSettings } from '@/features/settings';
-import { clockInZone, keyAction, zoneName } from '@/features/timegrid';
+import { clockInZone, dayShift, keyAction, zoneName } from '@/features/timegrid';
 import type { AllDayBar, DragDelta, TimeGridModel, TimedBlock } from '@/features/timegrid';
 import { useRefocus } from '@/lib/useRefocus';
 import { ErrorBoundary } from '@/lib/ErrorBoundary';
@@ -230,6 +230,11 @@ export function TimeGrid({
               {Array.from({ length: 23 }, (_, i) => i + 1).map((h) => (
                 <span key={h} className="tg-hour" style={{ insetBlockStart: `${(h / 24) * 100}%` }}>
                   {formatTime(clockInZone(firstDay, h, home, second), timeFmt)}
+                  {dayShift(firstDay, h, home, second) !== 0 && (
+                    <sup className="tg-day-shift">
+                      {dayShift(firstDay, h, home, second) > 0 ? '+1' : '−1'}
+                    </sup>
+                  )}
                 </span>
               ))}
             </div>

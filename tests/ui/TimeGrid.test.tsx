@@ -481,4 +481,14 @@ describe('TimeGrid second clock (D-122)', () => {
     expect(two.container.querySelector('.tg-zone-name')?.textContent).toBe('Tokyo');
     expect(two.container.querySelectorAll('.tg-hours-second .tg-hour')).toHaveLength(23);
   });
+
+  it('marks the labels that fall on another day with +1 / −1 (D-126)', () => {
+    const plain = view(model([]));
+    expect(plain.container.querySelector('.tg-day-shift')).toBeNull();
+    cleanup();
+    const tokyo = view(model([]), { extra: { secondZone: 'Asia/Tokyo' } });
+    const marks = Array.from(tokyo.container.querySelectorAll('.tg-day-shift'));
+    expect(marks.length).toBeGreaterThan(0);
+    expect(marks.every((m) => m.textContent === '+1' || m.textContent === '−1')).toBe(true);
+  });
 });

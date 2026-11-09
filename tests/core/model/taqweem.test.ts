@@ -76,7 +76,9 @@ describe('«تقويم» backups', () => {
       5,
     );
     const parsed = parseEnvelopeValue(envelope);
-    const shape = parsed.ok ? parsed.value.events.map((e) => [e.allDay, e.start, e.end, e.tzid]) : [];
+    const shape = parsed.ok
+      ? parsed.value.events.map((e) => [e.allDay, e.start, e.end, e.tzid])
+      : [];
     expect(shape).toEqual([
       [true, '2026-11-10', '2026-11-11', undefined],
       [true, '2026-12-31', '2027-01-01', undefined],

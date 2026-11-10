@@ -10,6 +10,7 @@ import {
   formatHijriDay,
   formatTime,
   formatWeekday,
+  weekNumberOfRow,
 } from '@/core/time';
 import type { FormatOptions, PlainDate, TimeFormatOptions } from '@/core/time';
 import type { Occurrence } from '@/core/recurrence';
@@ -116,6 +117,7 @@ export function MonthView({
           fmt={fmt}
           timeFmt={timeFmt}
           hijri={settings.hijri}
+          weekNumber={settings.weekNumbers ? weekNumberOfRow(week.days) : undefined}
           onOpenDay={onOpenDay}
           onOpenEvent={onOpenEvent}
           onMoveEvent={onMoveEvent}
@@ -143,6 +145,8 @@ interface WeekRowProps {
   readonly timeFmt: TimeFormatOptions;
   /** Show the Hijri day under each day number (display only). */
   readonly hijri: boolean;
+  /** The ISO week number to show at the start of the row, when week numbers are on (D-133). */
+  readonly weekNumber?: number | undefined;
   readonly onOpenDay: (date: PlainDate) => void;
   readonly onOpenEvent: (occurrence: Occurrence) => void;
   readonly onMoveEvent?: ((occurrence: Occurrence, delta: DragDelta) => void) | undefined;
@@ -163,6 +167,7 @@ function WeekRow({
   fmt,
   timeFmt,
   hijri,
+  weekNumber,
   onOpenDay,
   onOpenEvent,
   onMoveEvent,
@@ -181,8 +186,14 @@ function WeekRow({
     const name = occasionTitle(day);
     return name ? ` · ${name}` : '';
   };
+  const shownWeek = weekNumber === undefined ? '' : formatCount(weekNumber, fmt);
   return (
     <div className="week" ref={rowRef}>
+      {weekNumber !== undefined && (
+        <span className="week-no" aria-label={t('weekNumber', { n: shownWeek })}>
+          {shownWeek}
+        </span>
+      )}
       {week.days.map((day, col) => {
         const inMonth = Number(day.slice(5, 7)) === month;
         return (

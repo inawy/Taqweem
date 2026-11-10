@@ -39,6 +39,7 @@ describe('parseSettings is lenient field by field', () => {
       weekStart: 7,
       hour12: false,
       hijri: true,
+      weekNumbers: true,
       numerals: 'arab',
       defaultView: 'week',
       hideWeekend: 'fri-sat',
@@ -168,6 +169,14 @@ describe('secondZone (D-122)', () => {
     expect(parseSettings({ secondZone: 'Mars/Olympus' }, 'ar').secondZone).toBe('');
     expect(parseSettings({ secondZone: 5 }, 'ar').secondZone).toBe('');
     expect(parseSettings({ secondZone: '' }, 'ar').secondZone).toBe('');
+  });
+});
+
+describe('weekNumbers (D-133)', () => {
+  it('is off by default and only a real boolean turns it on', () => {
+    expect(defaultSettings('ar').weekNumbers).toBe(false);
+    expect(parseSettings({ weekNumbers: true }, 'ar').weekNumbers).toBe(true);
+    expect(parseSettings({ weekNumbers: 'yes' }, 'ar').weekNumbers).toBe(false);
   });
 });
 

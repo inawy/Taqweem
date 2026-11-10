@@ -233,6 +233,14 @@ export function SettingsDialog({ onClose }: SettingsDialogProps) {
             />
             <span>{t('hijriLabel')}</span>
           </label>
+          <label className="ed-check">
+            <input
+              type="checkbox"
+              checked={settings.weekNumbers}
+              onChange={(e) => update({ weekNumbers: e.currentTarget.checked })}
+            />
+            <span>{t('weekNumbersLabel')}</span>
+          </label>
           {!persisted && (
             <p role="status" className="muted">
               {t('notSaved')}

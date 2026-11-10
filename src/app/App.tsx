@@ -1,5 +1,13 @@
 import { useCallback, useMemo, useState } from 'react';
-import { datePart, dateParts, formatDate, localTimeZone, nowMs } from '@/core/time';
+import {
+  datePart,
+  dateParts,
+  formatDate,
+  localTimeZone,
+  nowMs,
+  weekDays,
+  weekNumberOfRow,
+} from '@/core/time';
 import type { FormatOptions, PlainDate } from '@/core/time';
 import type { NawyDb, SnapshotDb } from '@/data';
 import type { FileToSave } from '@/features/backup';
@@ -390,23 +398,28 @@ function Calendar({
   const dayOccasion = view === 'day' ? islamicOccasion(anchor) : undefined;
   const occasionSuffix = dayOccasion ? ` · ${t(dayOccasion)}` : '';
 
+  const weekLabel =
+    settings.weekNumbers && view === 'week'
+      ? t('weekNumber', { n: count(weekNumberOfRow(weekDays(anchor, settings.weekStart)) ?? 0) })
+      : undefined;
+  const hijriText = settings.hijri
+    ? hijriSubtitle(
+        view,
+        anchor,
+        settings.weekStart,
+        fmt,
+        hiddenWeekdays(settings.hideWeekend),
+      ) + occasionSuffix
+    : undefined;
+  const subtitle = [weekLabel, hijriText].filter(Boolean).join(' · ') || undefined;
+
   const showStorageWarning =
     reminder.storageWarning && !reminder.show && !flow.dialogOpen && !searchOpen && !dataOpen;
 
   return (
     <Shell
       title={viewTitle(view, anchor, settings.weekStart, fmt, hiddenWeekdays(settings.hideWeekend))}
-      subtitle={
-        settings.hijri
-          ? hijriSubtitle(
-              view,
-              anchor,
-              settings.weekStart,
-              fmt,
-              hiddenWeekdays(settings.hideWeekend),
-            ) + occasionSuffix
-          : undefined
-      }
+      subtitle={subtitle}
       view={view}
       onView={setView}
       drawerOpen={drawerOpen}

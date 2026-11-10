@@ -62,6 +62,21 @@ export function weekdayOf(date: PlainDate): IsoWeekday {
   return parse(date).dayOfWeek as IsoWeekday;
 }
 
+/** The ISO 8601 week number (1–53) of the week that `date` is in (weeks run Monday–Sunday). */
+export function isoWeekNumber(date: PlainDate): number {
+  return parse(date).weekOfYear ?? 1;
+}
+
+/**
+ * The number to show for a row of days of any week start: the ISO week of the row's Thursday, the
+ * rule ISO itself uses (the week belongs to the year that holds most of it). Undefined when the
+ * row has no Thursday (a row of fewer than seven days that skips it).
+ */
+export function weekNumberOfRow(days: readonly PlainDate[]): number | undefined {
+  const thursday = days.find((d) => weekdayOf(d) === 4);
+  return thursday === undefined ? undefined : isoWeekNumber(thursday);
+}
+
 /** The first day of the week containing `date`, for the given week start (ISO weekday). */
 export function startOfWeek(date: PlainDate, weekStart: IsoWeekday): PlainDate {
   const offset = (weekdayOf(date) - weekStart + 7) % 7;

@@ -48,6 +48,18 @@ const view = (m: MonthModel, locale: 'ar' | 'en' = 'en', extra: object = {}) =>
     </SettingsProvider>,
   );
 
+describe('MonthView week numbers (D-133)', () => {
+  it('shows no numbers by default', () => {
+    expect(view(model([])).container.querySelectorAll('.week-no')).toHaveLength(0);
+  });
+  it('numbers each row by its ISO week when switched on', () => {
+    const { container } = view(model([]), 'en', { weekNumbers: true });
+    const numbers = [...container.querySelectorAll('.week-no')].map((n) => n.textContent);
+    expect(numbers).toEqual(['40', '41', '42', '43', '44', '45']);
+    expect(container.querySelector('.week-no')?.getAttribute('aria-label')).toBe('Week 40');
+  });
+});
+
 describe('MonthView', () => {
   it('draws 42 day cells with the weekday header in the chosen week order', () => {
     const { container } = view(model([]));

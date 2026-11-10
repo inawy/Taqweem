@@ -33,6 +33,23 @@
   border-block-end: 1px solid var(--nawy-color-border);
 }
 
+.week {
+  position: relative;
+}
+
+/* The ISO week number sits in the row's first corner, over the first day's empty margin; it takes
+   no part in the grid and never catches a tap (D-133). */
+.week-no {
+  position: absolute;
+  inset-block-start: 4px;
+  inset-inline-start: 3px;
+  z-index: 1;
+  font-size: 0.625rem;
+  line-height: 1;
+  color: var(--nawy-color-text-muted);
+  pointer-events: none;
+}
+
 .day {
   grid-row: 1 / -1;
   border-inline-start: 1px solid var(--nawy-color-border);

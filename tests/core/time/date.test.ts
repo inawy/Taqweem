@@ -10,10 +10,12 @@ import {
   endOfMonth,
   firstOfMonth,
   isValidDate,
+  isoWeekNumber,
   monthGrid,
   startOfMonth,
   startOfWeek,
   weekDays,
+  weekNumberOfRow,
   weekdayOf,
 } from '@/core/time';
 
@@ -190,5 +192,21 @@ describe('monthGrid', () => {
 
   it('rejects a bad month', () => {
     expect(() => monthGrid(2026, 13, SAT)).toThrow(RangeError);
+  });
+});
+
+describe('ISO week numbers (D-133)', () => {
+  it('follows ISO 8601 at the edges of the year', () => {
+    expect(isoWeekNumber('2026-01-01')).toBe(1); // a Thursday: week 1 holds it
+    expect(isoWeekNumber('2025-12-29')).toBe(1); // Monday of that same week
+    expect(isoWeekNumber('2026-12-31')).toBe(53);
+    expect(isoWeekNumber('2027-01-01')).toBe(53);
+    expect(isoWeekNumber('2026-11-09')).toBe(46);
+  });
+  it('numbers a row by its Thursday, whatever the week start', () => {
+    expect(weekNumberOfRow(weekDays('2026-11-10', 7))).toBe(46); // Sunday-start row
+    expect(weekNumberOfRow(weekDays('2026-11-10', 6))).toBe(46); // Saturday-start row
+    expect(weekNumberOfRow(weekDays('2026-11-10', 1))).toBe(46); // Monday-start row
+    expect(weekNumberOfRow(['2026-11-13', '2026-11-14'])).toBeUndefined();
   });
 });

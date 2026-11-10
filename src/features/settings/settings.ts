@@ -43,6 +43,8 @@ export interface Settings {
   readonly hour12: boolean;
   /** Show the Hijri date as a small secondary line (display only, D-016). */
   readonly hijri: boolean;
+  /** Show ISO week numbers: a small number on each month row, and in the week view's title (D-133). */
+  readonly weekNumbers: boolean;
   readonly numerals: Numerals;
   readonly defaultView: DefaultView;
   readonly hideWeekend: WeekendHiding;
@@ -66,6 +68,7 @@ export function defaultSettings(locale: Locale): Settings {
     weekStart: locale === 'ar' ? 6 : 1, // D-016: Saturday for Arabic, Monday for English
     hour12: true,
     hijri: false,
+    weekNumbers: false,
     numerals: 'latn',
     defaultView: 'auto',
     hideWeekend: 'none',
@@ -94,6 +97,7 @@ export function parseSettings(raw: unknown, fallbackLocale: Locale): Settings {
         : d.weekStart,
     hour12: typeof o['hour12'] === 'boolean' ? o['hour12'] : d.hour12,
     hijri: typeof o['hijri'] === 'boolean' ? o['hijri'] : d.hijri,
+    weekNumbers: typeof o['weekNumbers'] === 'boolean' ? o['weekNumbers'] : d.weekNumbers,
     numerals: isOneOf(o['numerals'], ['latn', 'arab'] as const) ? o['numerals'] : d.numerals,
     defaultView: isOneOf(o['defaultView'], DEFAULT_VIEWS) ? o['defaultView'] : d.defaultView,
     hideWeekend: isOneOf(o['hideWeekend'], WEEKEND_HIDING) ? o['hideWeekend'] : d.hideWeekend,

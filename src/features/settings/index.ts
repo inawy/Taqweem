@@ -2,7 +2,6 @@ export {
   DEFAULT_VIEWS,
   SETTINGS_KEY,
   WEEKEND_HIDING,
-  WORK_HOURS,
   applyToDocument,
   defaultSettings,
   detectLocale,

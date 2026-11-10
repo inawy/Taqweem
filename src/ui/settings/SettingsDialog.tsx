@@ -4,13 +4,12 @@ import type { IsoWeekday, Numerals } from '@/core/time';
 import { useT } from '@/features/i18n';
 import type { MessageKey } from '@/features/i18n';
 import { SECOND_ZONES, zoneName } from '@/features/timegrid';
-import { DEFAULT_VIEWS, WEEKEND_HIDING, WORK_HOURS, useSettings } from '@/features/settings';
+import { DEFAULT_VIEWS, WEEKEND_HIDING, useSettings, workHoursRange } from '@/features/settings';
 import type {
   DefaultView,
   Locale,
   ThemePreference,
   WeekendHiding,
-  WorkHours,
 } from '@/features/settings';
 import { trapTab } from '@/lib/focusTrap';
 import { CloseIcon } from '@/ui/shell/Icons';
@@ -37,11 +36,9 @@ const WEEKEND_LABELS: Record<WeekendHiding, MessageKey> = {
   'sat-sun': 'hideWeekendSatSun',
 };
 
-/** `9-17` → `09:00–17:00` (digits follow the page's numerals through the font, like the hours). */
-function workHoursText(value: WorkHours): string {
-  const [start, end] = value.split('-');
-  return `${String(start).padStart(2, '0')}:00–${String(end).padStart(2, '0')}:00`;
-}
+const hourText = (h: number): string => `${String(h).padStart(2, '0')}:00`;
+const range = (from: number, to: number): number[] =>
+  Array.from({ length: to - from + 1 }, (_, i) => from + i);
 
 const THEMES: readonly [ThemePreference, MessageKey][] = [
   ['auto', 'themeAuto'],
@@ -57,6 +54,7 @@ const THEMES: readonly [ThemePreference, MessageKey][] = [
 export function SettingsDialog({ onClose }: SettingsDialogProps) {
   const t = useT();
   const { settings, update, persisted } = useSettings();
+  const work = workHoursRange(settings.workHours);
   useRestoreFocus();
   const titleId = useId();
   const ref = useRef<HTMLDivElement>(null);
@@ -177,16 +175,41 @@ export function SettingsDialog({ onClose }: SettingsDialogProps) {
           <label className="field">
             <span>{t('workHoursLabel')}</span>
             <select
-              value={settings.workHours}
-              onChange={(e) => update({ workHours: e.currentTarget.value as WorkHours })}
+              value={work ? String(work.start) : 'off'}
+              onChange={(e) => {
+                const v = e.currentTarget.value;
+                const start = Number(v);
+                if (v === 'off') {
+                  update({ workHours: 'off' });
+                } else {
+                  const end = work && work.end > start ? work.end : Math.min(24, start + 8);
+                  update({ workHours: `${start}-${end}` });
+                }
+              }}
             >
-              {WORK_HOURS.map((value) => (
-                <option key={value} value={value}>
-                  {value === 'off' ? t('workHoursOff') : workHoursText(value)}
+              <option value="off">{t('workHoursOff')}</option>
+              {range(0, 23).map((h) => (
+                <option key={h} value={h}>
+                  {hourText(h)}
                 </option>
               ))}
             </select>
           </label>
+          {work && (
+            <label className="field">
+              <span>{t('workHoursTo')}</span>
+              <select
+                value={work.end}
+                onChange={(e) => update({ workHours: `${work.start}-${e.currentTarget.value}` })}
+              >
+                {range(work.start + 1, 24).map((h) => (
+                  <option key={h} value={h}>
+                    {hourText(h)}
+                  </option>
+                ))}
+              </select>
+            </label>
+          )}
           <label className="field">
             <span>{t('timeFormat')}</span>
             <select

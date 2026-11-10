@@ -22,15 +22,18 @@ export const DEFAULT_VIEWS: readonly DefaultView[] = [
 export type WeekendHiding = 'none' | 'fri-sat' | 'sat-sun';
 export const WEEKEND_HIDING: readonly WeekendHiding[] = ['none', 'fri-sat', 'sat-sun'];
 
-/** Working hours shaded in the day and week views: off, or `start-end` as whole hours (D-127). */
-export type WorkHours = 'off' | '8-16' | '9-17' | '10-18' | '8-18';
-export const WORK_HOURS: readonly WorkHours[] = ['off', '8-16', '9-17', '10-18', '8-18'];
+/** Working hours shaded in the day and week views: `off`, or `start-end` in whole hours (D-127, D-129). */
+export type WorkHours = string;
 
-/** The shaded-outside range as whole hours, or undefined when shading is off. */
+const WORK_HOURS_RE = /^(\d{1,2})-(\d{1,2})$/;
+
+/** The shaded-outside range as whole hours (`0 ≤ start < end ≤ 24`), or undefined when off or invalid. */
 export function workHoursRange(w: WorkHours): { start: number; end: number } | undefined {
-  if (w === 'off') return undefined;
-  const [start, end] = w.split('-').map(Number);
-  return start === undefined || end === undefined ? undefined : { start, end };
+  const m = WORK_HOURS_RE.exec(w);
+  if (m === null) return undefined;
+  const start = Number(m[1]);
+  const end = Number(m[2]);
+  return start < end && end <= 24 ? { start, end } : undefined;
 }
 
 export interface Settings {
@@ -98,7 +101,11 @@ export function parseSettings(raw: unknown, fallbackLocale: Locale): Settings {
       typeof o['secondZone'] === 'string' && (o['secondZone'] === '' || isTimeZone(o['secondZone']))
         ? o['secondZone']
         : d.secondZone,
-    workHours: isOneOf(o['workHours'], WORK_HOURS) ? o['workHours'] : d.workHours,
+    workHours:
+      typeof o['workHours'] === 'string' &&
+      (o['workHours'] === 'off' || workHoursRange(o['workHours']) !== undefined)
+        ? o['workHours']
+        : d.workHours,
   };
 }
 

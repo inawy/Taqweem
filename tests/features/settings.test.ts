@@ -172,15 +172,20 @@ describe('secondZone (D-122)', () => {
 });
 
 describe('workHours (D-127)', () => {
-  it('is off by default and accepts only the listed ranges', () => {
+  it('is off by default and accepts a range of whole hours, start before end', () => {
     expect(defaultSettings('ar').workHours).toBe('off');
     expect(parseSettings({ workHours: '9-17' }, 'ar').workHours).toBe('9-17');
-    expect(parseSettings({ workHours: '9-25' }, 'ar').workHours).toBe('off');
+    expect(parseSettings({ workHours: '6-14' }, 'ar').workHours).toBe('6-14');
+    expect(parseSettings({ workHours: '0-24' }, 'ar').workHours).toBe('0-24');
+    for (const bad of ['9-25', '17-9', '9-9', '-', 'x', '9-17-1', '']) {
+      expect(parseSettings({ workHours: bad }, 'ar').workHours).toBe('off');
+    }
     expect(parseSettings({ workHours: 9 }, 'ar').workHours).toBe('off');
   });
   it('turns a range into whole hours, or nothing when off', () => {
     expect(workHoursRange('off')).toBeUndefined();
     expect(workHoursRange('8-16')).toEqual({ start: 8, end: 16 });
-    expect(workHoursRange('10-18')).toEqual({ start: 10, end: 18 });
+    expect(workHoursRange('0-24')).toEqual({ start: 0, end: 24 });
+    expect(workHoursRange('17-9')).toBeUndefined();
   });
 });

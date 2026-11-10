@@ -37,6 +37,28 @@ describe('settings live in their own dialog (D-095)', () => {
     expect(within(dialog).getByLabelText('Show Hijri date')).toBeTruthy();
   });
 
+  it('working hours: choosing a start reveals an end that must be later (D-129)', async () => {
+    open();
+    await screen.findByRole('heading', { level: 1 });
+    fireEvent.click(screen.getByRole('button', { name: 'Settings' }));
+    const dialog = screen.getByRole('dialog', { name: 'Settings' });
+    expect(within(dialog).queryByLabelText('Working hours until')).toBeNull();
+    fireEvent.change(within(dialog).getByLabelText(/^Working hours from/), {
+      target: { value: '9' },
+    });
+    const until = within(dialog).getByLabelText('Working hours until') as HTMLSelectElement;
+    expect(until.value).toBe('17');
+    expect(Array.from(until.options).map((o) => o.value)[0]).toBe('10');
+    fireEvent.change(until, { target: { value: '15' } });
+    expect(
+      (within(dialog).getByLabelText('Working hours until') as HTMLSelectElement).value,
+    ).toBe('15');
+    fireEvent.change(within(dialog).getByLabelText(/^Working hours from/), {
+      target: { value: 'off' },
+    });
+    expect(within(dialog).queryByLabelText('Working hours until')).toBeNull();
+  });
+
   it('Escape closes it and the keyboard shortcuts work again', async () => {
     open();
     await screen.findByRole('heading', { level: 1 });

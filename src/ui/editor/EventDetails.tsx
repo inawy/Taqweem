@@ -15,6 +15,7 @@ export interface EventDetailsProps {
   readonly when: string;
   readonly recurring: boolean;
   readonly onEdit: () => void;
+  readonly onDuplicate: () => void;
   readonly onDelete: () => void;
   readonly onClose: () => void;
 }
@@ -26,6 +27,7 @@ export function EventDetails({
   when,
   recurring,
   onEdit,
+  onDuplicate,
   onDelete,
   onClose,
 }: EventDetailsProps) {
@@ -109,6 +111,9 @@ export function EventDetails({
         <footer className="ed-foot">
           <button ref={editRef} type="button" className="btn btn-primary" onClick={onEdit}>
             {t('editEvent')}
+          </button>
+          <button type="button" className="btn" onClick={onDuplicate}>
+            {t('duplicateEvent')}
           </button>
           <button type="button" className="btn btn-danger" onClick={onDelete}>
             {t('delete')}

@@ -175,6 +175,22 @@ describe('edit and delete', () => {
   });
 });
 
+describe('duplicate (D-131)', () => {
+  it('opens a new event that starts as a copy, and saving it adds a second one', async () => {
+    await seed(async (store, calendarId) => {
+      await store.createEvent(makeNewEvent({ calendarId, title: 'Gym', notes: 'legs' }));
+    });
+    open();
+    fireEvent.click(await screen.findByRole('button', { name: /Gym/ }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Duplicate' }));
+    const dialog = await screen.findByRole('dialog', { name: 'New event' });
+    expect((within(dialog).getByLabelText('Title') as HTMLInputElement).value).toBe('Gym');
+    expect((within(dialog).getByLabelText('Notes') as HTMLTextAreaElement).value).toBe('legs');
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Save' }));
+    await waitFor(() => expect(bars(/Gym/)).toHaveLength(2));
+  });
+});
+
 describe('repeating events', () => {
   const seedSeries = () =>
     seed(async (store, calendarId) => {

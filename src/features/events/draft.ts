@@ -250,6 +250,11 @@ export function draftFromEvent(
   };
 }
 
+/** A new event that starts as a copy of this one: same fields, but a single event (never repeating). */
+export function copyDraft(draft: Draft): Draft {
+  return { ...draft, repeat: NO_REPEAT };
+}
+
 export type FieldsResult = { ok: true; fields: NewEvent } | { ok: false; error: DraftError };
 
 /** Form → storable fields. Every failure is a named reason the UI can show next to the field. */

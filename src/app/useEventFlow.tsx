@@ -6,6 +6,7 @@ import { localTimeZone } from '@/core/time';
 import type { FormatOptions, IsoWeekday, PlainDate, TimeFormatOptions } from '@/core/time';
 import type { EventOp, Store, UndoToken } from '@/data';
 import {
+  copyDraft,
   draftForNew,
   draftFromEvent,
   describeWhen,
@@ -191,6 +192,19 @@ export function useEventFlow({
       setEditing({ mode: 'edit', draft, target, id: counter.current });
     },
     [events, tz],
+  );
+
+  /** The editor for a new event that starts as a copy of this occurrence (never repeating). */
+  const duplicateEvent = useCallback(
+    (occurrence: Occurrence) => {
+      const draft = copyDraft(
+        draftFromEvent(occurrence.event, { start: occurrence.start, end: occurrence.end }, tz),
+      );
+      counter.current += 1;
+      setViewing(null);
+      setEditing({ mode: 'new', id: counter.current, draft });
+    },
+    [tz],
   );
 
   /** Changes one occurrence's draft (a drag) and writes it, asking the scope for repeating events. */
@@ -420,6 +434,7 @@ export function useEventFlow({
             )}
             recurring={viewing.recurring}
             onEdit={() => openEvent(viewing)}
+            onDuplicate={() => duplicateEvent(viewing)}
             onDelete={() => {
               void removeTarget(resolveTarget(events, viewing)).then((done) => {
                 if (done) setViewing(null);

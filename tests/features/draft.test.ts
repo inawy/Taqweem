@@ -1,6 +1,7 @@
 // @vitest-environment node
 import { describe, expect, it } from 'vitest';
 import {
+  copyDraft,
   draftForNew,
   draftFromEvent,
   draftToFields,
@@ -273,5 +274,19 @@ describe('withStart', () => {
   it('ignores a half-typed value', () => {
     const d = withStart(fresh(), { startDate: '2026-1' });
     expect([d.startDate, d.endDate]).toEqual(['2026-1', '2026-10-13']);
+  });
+});
+
+describe('copyDraft (D-131)', () => {
+  it('keeps every field but never repeats', () => {
+    const series = fresh({
+      notes: 'bring slides',
+      location: 'Room 4',
+      repeat: { ...fresh().repeat, kind: 'daily' },
+    });
+    const copy = copyDraft(series);
+    expect(copy).toEqual({ ...series, repeat: fresh().repeat });
+    expect(copy.repeat.kind).toBe('none');
+    expect(series.repeat.kind).toBe('daily'); // the original is untouched
   });
 });

@@ -1,6 +1,7 @@
 export { execute, undoBatch } from './actions';
 export type { Outcome } from './actions';
 export {
+  copyDraft,
   draftForNew,
   draftFromEvent,
   draftToFields,

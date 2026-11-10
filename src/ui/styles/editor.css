@@ -417,9 +417,7 @@ label {
 .icon-btn,
 .view-btn,
 .fab,
-.ed-day,
-button.bar,
-button.block {
+.ed-day {
   transition:
     transform 90ms var(--nawy-ease),
     background-color var(--nawy-duration) var(--nawy-ease);
@@ -436,10 +434,9 @@ button.block {
   transform: scale(0.92);
 }
 
-button.bar:active,
-button.block:active {
-  transform: scale(0.985);
-}
+/* Event cards (bars and blocks) get no press-down scale (D-130): their resize handles and the drag
+   are inside them, so `:active` was true for the whole card during every resize or drag, and the
+   card shrank and its text re-flowed on each press. Buttons that only click keep the feedback. */
 
 /* Dialogs arrive instead of popping in. */
 .modal-backdrop {

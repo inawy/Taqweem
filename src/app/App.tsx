@@ -585,6 +585,13 @@ function Calendar({
             onCreateAt={(date, time, point) =>
               flow.openNew(date, time, { quick: !phone, ...(point && { point }) })
             }
+            onCreateRange={(date, start, end, point) =>
+              flow.openNew(date, start, {
+                quick: !phone,
+                endTime: end,
+                ...(point && { point }),
+              })
+            }
             onCreateAllDay={(date, point) =>
               flow.openNew(date, undefined, {
                 allDay: true,

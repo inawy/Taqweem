@@ -73,7 +73,13 @@ export interface EventFlow {
   readonly openNew: (
     date: PlainDate,
     time?: string,
-    options?: { allDay?: boolean; quick?: boolean; point?: { x: number; y: number } },
+    options?: {
+      allDay?: boolean;
+      quick?: boolean;
+      point?: { x: number; y: number };
+      /** `HH:mm` end of a span the person swept out (D-135); otherwise the default length. */
+      endTime?: string;
+    },
   ) => void;
   /** Opens the event's card (what it is, with Edit and Delete). */
   readonly showEvent: (occurrence: Occurrence) => void;
@@ -167,7 +173,7 @@ export function useEventFlow({
           }
         }
         counter.current += 1;
-        const draft = draftForNew({
+        const made = draftForNew({
           date,
           ...(time !== undefined && { time }),
           ...(options?.allDay && { allDay: true }),
@@ -175,6 +181,10 @@ export function useEventFlow({
           calendarId: calendar.id,
           tzid: tz,
         });
+        const draft =
+          options?.endTime !== undefined && !options.allDay
+            ? { ...made, endTime: options.endTime }
+            : made;
         if (options?.quick) setQuick({ id: counter.current, draft, point: options.point });
         else setEditing({ mode: 'new', id: counter.current, draft });
       })();

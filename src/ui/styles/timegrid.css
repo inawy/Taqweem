@@ -159,6 +159,16 @@ button.tg-headcell:hover {
   );
 }
 
+.tg-sweep {
+  position: absolute;
+  inset-inline: 2px;
+  z-index: 2;
+  border: 1px solid var(--nawy-color-accent-fill);
+  border-radius: var(--nawy-radius);
+  background: color-mix(in srgb, var(--nawy-color-accent-fill) 16%, transparent);
+  pointer-events: none;
+}
+
 .tg-cols[data-work] .tg-col {
   /* Hours outside the working range are tinted; the hour lines stay on top (D-127). */
   background-image:

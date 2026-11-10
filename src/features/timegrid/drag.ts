@@ -44,6 +44,30 @@ export const HOLD_MS = 130;
 /** A mouse starts a drag after this much movement (a click stays a click). */
 export const MOUSE_SLOP_PX = 4;
 
+/** A dragged-out new event snaps to this many minutes (D-135). */
+export const CREATE_STEP_MINUTES = 15;
+
+/**
+ * The span a mouse swept out on an empty day column, as minutes since midnight: caught outward to
+ * the step, in time order whichever way it was dragged, at least one step long, inside the day.
+ * `fromY` and `toY` are measured from the column's top; `height` is the column's whole height.
+ */
+export function createRange(
+  fromY: number,
+  toY: number,
+  height: number,
+): { readonly start: number; readonly end: number } {
+  const DAY = 24 * 60;
+  if (!(height > 0)) return { start: 0, end: CREATE_STEP_MINUTES };
+  const at = (y: number): number => Math.min(DAY, Math.max(0, (y / height) * DAY));
+  const lo = Math.min(at(fromY), at(toY));
+  const hi = Math.max(at(fromY), at(toY));
+  const step = CREATE_STEP_MINUTES;
+  const start = Math.min(DAY - step, Math.floor(lo / step) * step);
+  const end = Math.min(DAY, Math.max(start + step, Math.ceil(hi / step) * step));
+  return { start, end };
+}
+
 /** One keyboard step of time, the same as one drag step. */
 export const KEY_STEP_MINUTES = 15;
 

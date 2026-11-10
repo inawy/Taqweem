@@ -12,7 +12,14 @@ import {
 import type { FormatOptions, PlainDate, PlainDateTime, TimeFormatOptions } from '@/core/time';
 import { useT } from '@/features/i18n';
 import { useSettings, workHoursRange } from '@/features/settings';
-import { clockInZone, dayShift, keyAction, zoneName } from '@/features/timegrid';
+import {
+  MOUSE_SLOP_PX,
+  clockInZone,
+  createRange,
+  dayShift,
+  keyAction,
+  zoneName,
+} from '@/features/timegrid';
 import type { AllDayBar, DragDelta, TimeGridModel, TimedBlock } from '@/features/timegrid';
 import { useRefocus } from '@/lib/useRefocus';
 import { ErrorBoundary } from '@/lib/ErrorBoundary';
@@ -47,6 +54,13 @@ export interface TimeGridProps {
   readonly jumpToNow?: number | undefined;
   /** Clicking an empty spot of a day starts a new event there (`time` is `HH:mm`, on the half hour). */
   readonly onCreateAt: (date: PlainDate, time: string, point?: ClickPoint) => void;
+  /**
+   * A mouse swept a span on an empty day: start a new event from `start` to `end` (`HH:mm`, in
+   * quarter hours). Touch keeps scrolling; it never sweeps (D-135).
+   */
+  readonly onCreateRange?:
+    | ((date: PlainDate, start: string, end: string, point?: ClickPoint) => void)
+    | undefined;
   /** Touching an empty spot of the all-day strip starts an all-day event on that day (D-061). */
   readonly onCreateAllDay?: ((date: PlainDate, point?: ClickPoint) => void) | undefined;
   /** A block was dragged somewhere else: move this occurrence by that many days/minutes. */
@@ -59,6 +73,9 @@ export interface TimeGridProps {
 type Vars = CSSProperties & Record<`--${string}`, string | number>;
 
 const pad = (n: number): string => String(n).padStart(2, '0');
+/** Minutes since midnight as `HH:mm`; the day's end (1440) is 23:59, the last minute there is. */
+const clockText = (minutes: number): string =>
+  minutes >= 1440 ? '23:59' : `${pad(Math.floor(minutes / 60))}:${pad(minutes % 60)}`;
 
 export function TimeGrid({
   model,
@@ -69,6 +86,7 @@ export function TimeGrid({
   onOpenEvent,
   jumpToNow,
   onCreateAt,
+  onCreateRange,
   onCreateAllDay,
   onMoveEvent,
   onResizeEvent,
@@ -103,6 +121,10 @@ export function TimeGrid({
   }, [firstHour]);
 
   // Only a change after the first draw is a request: opening the view uses the instant placement.
+  // A mouse sweeping out a new event on an empty day (D-135).
+  const sweep = useRef<{ date: PlainDate; y0: number; active: boolean } | null>(null);
+  const sweptClick = useRef(false);
+  const [swept, setSwept] = useState<{ date: PlainDate; start: number; end: number } | null>(null);
   const seenJump = useRef(jumpToNow);
   useEffect(() => {
     if (jumpToNow === seenJump.current) return;
@@ -257,7 +279,49 @@ export function TimeGrid({
                   key={d.date}
                   className="tg-col"
                   data-today={d.date === today ? 'true' : undefined}
+                  onPointerDown={(e) => {
+                    // A mouse only, on the empty column itself: a finger on it scrolls (D-135).
+                    if (!onCreateRange || e.pointerType !== 'mouse' || e.button !== 0) return;
+                    if (e.target !== e.currentTarget) return;
+                    sweep.current = { date: d.date, y0: e.clientY, active: false };
+                    e.currentTarget.setPointerCapture(e.pointerId);
+                  }}
+                  onPointerMove={(e) => {
+                    const s = sweep.current;
+                    if (!s || s.date !== d.date) return;
+                    if (!s.active && Math.abs(e.clientY - s.y0) < MOUSE_SLOP_PX) return;
+                    s.active = true;
+                    const box = e.currentTarget.getBoundingClientRect();
+                    setSwept({
+                      date: d.date,
+                      ...createRange(s.y0 - box.top, e.clientY - box.top, box.height),
+                    });
+                  }}
+                  onPointerUp={(e) => {
+                    const s = sweep.current;
+                    sweep.current = null;
+                    if (e.currentTarget.hasPointerCapture(e.pointerId)) {
+                      e.currentTarget.releasePointerCapture(e.pointerId);
+                    }
+                    if (!s?.active || !onCreateRange) return;
+                    const box = e.currentTarget.getBoundingClientRect();
+                    const range = createRange(s.y0 - box.top, e.clientY - box.top, box.height);
+                    setSwept(null);
+                    sweptClick.current = true; // the click that follows is not a tap
+                    onCreateRange(d.date, clockText(range.start), clockText(range.end), {
+                      x: e.clientX,
+                      y: e.clientY,
+                    });
+                  }}
+                  onPointerCancel={() => {
+                    sweep.current = null;
+                    setSwept(null);
+                  }}
                   onClick={(e) => {
+                    if (sweptClick.current) {
+                      sweptClick.current = false;
+                      return;
+                    }
                     // Only a click on the empty column itself, never on an event inside it.
                     if (e.target !== e.currentTarget) return;
                     const box = e.currentTarget.getBoundingClientRect();
@@ -288,6 +352,16 @@ export function TimeGrid({
                       />
                     </ErrorBoundary>
                   ))}
+                  {swept?.date === d.date && (
+                    <div
+                      className="tg-sweep"
+                      aria-hidden="true"
+                      style={{
+                        insetBlockStart: `${(swept.start / 1440) * 100}%`,
+                        blockSize: `${((swept.end - swept.start) / 1440) * 100}%`,
+                      }}
+                    />
+                  )}
                   {now !== null && (
                     <div
                       className="now-line"

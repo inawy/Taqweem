@@ -534,6 +534,31 @@ test.describe('on a phone', () => {
     await expect(page.locator('.month-split .month')).toBeInViewport();
   });
 
+  test('sweeping a span of an empty day with the mouse starts an event for that span (D-135)', async ({
+    page,
+  }) => {
+    await page.goto('/');
+    await chooseView(page, 'Day');
+    const col = page.locator('.tg-col').first();
+    await expect(col).toBeVisible();
+    await page.locator('.tg-scroll').evaluate((el) => el.scrollTo(0, 400));
+    const box = await col.boundingBox();
+    if (!box) throw new Error('the day has no box');
+    const hour = box.height / 24;
+    const x = box.x + box.width / 2;
+    await page.mouse.move(x, box.y + 10 * hour + 2);
+    await page.mouse.down();
+    await page.mouse.move(x, box.y + 11 * hour, { steps: 6 });
+    await expect(page.locator('.tg-sweep')).toBeVisible();
+    await page.mouse.move(x, box.y + 12 * hour - 2, { steps: 6 });
+    await page.mouse.up();
+    const dialog = page.getByRole('dialog', { name: 'New event' });
+    await expect(dialog).toBeVisible();
+    await expect(dialog.getByLabel('Starts · Time')).toHaveValue('10:00');
+    await expect(dialog.getByLabel('Ends · Time')).toHaveValue('12:00');
+    await expect(page.locator('.tg-sweep')).toHaveCount(0);
+  });
+
   test('a tap on an empty spot of the day starts an event at that time (D-060)', async ({
     page,
   }) => {

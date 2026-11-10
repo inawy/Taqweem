@@ -9,7 +9,7 @@ import {
   resizeStartDraft,
 } from '@/features/events';
 import type { Draft } from '@/features/events';
-import { dragDelta, keyAction } from '@/features/timegrid';
+import { createRange, dragDelta, keyAction } from '@/features/timegrid';
 
 const timed = (over: Partial<Draft> = {}): Draft => ({
   ...draftForNew({ date: '2026-10-20', time: '09:00', calendarId: 'cal', tzid: 'Asia/Riyadh' }),
@@ -243,5 +243,29 @@ describe('resizeStartDaysDraft', () => {
     });
     const d = timed();
     expect(resizeStartDaysDraft(d, 0)).toBe(d);
+  });
+});
+
+describe('createRange (D-135)', () => {
+  const H = 1152; // a day column: 24 hours of 48px
+  const at = (hours: number) => (hours / 24) * H;
+
+  it('catches the sweep outward to quarter hours', () => {
+    expect(createRange(at(10) + 2, at(12) - 2, H)).toEqual({ start: 600, end: 720 });
+    expect(createRange(at(9.3), at(10.1), H)).toEqual({ start: 555, end: 615 });
+  });
+  it('is the same whichever way it was dragged', () => {
+    expect(createRange(at(12) - 2, at(10) + 2, H)).toEqual(createRange(at(10) + 2, at(12) - 2, H));
+  });
+  it('is at least one step long, even for a tiny sweep', () => {
+    expect(createRange(at(10), at(10), H)).toEqual({ start: 600, end: 615 });
+  });
+  it('stays inside the day', () => {
+    expect(createRange(-50, at(1), H)).toEqual({ start: 0, end: 60 });
+    expect(createRange(at(23), H + 80, H)).toEqual({ start: 1380, end: 1440 });
+    expect(createRange(H + 10, H + 90, H)).toEqual({ start: 1425, end: 1440 });
+  });
+  it('answers a harmless span when the column has no height yet', () => {
+    expect(createRange(5, 50, 0)).toEqual({ start: 0, end: 15 });
   });
 });

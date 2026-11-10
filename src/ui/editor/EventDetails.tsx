@@ -71,7 +71,7 @@ export function EventDetails({
         <div className="ed-head sheet-grip">
           <span
             className="details-bar"
-            style={{ background: calendarColorVars(calendar?.color ?? 'gray').bar }}
+            style={{ background: calendarColorVars(event.color ?? calendar?.color ?? 'gray').bar }}
             aria-hidden="true"
           />
           <h2 id={titleId} className="details-title">

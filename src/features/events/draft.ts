@@ -195,17 +195,18 @@ export type DraftError =
 
 const MAX_TITLE = 500;
 
-/** A new event on `date`; timed events default to one hour from `time`. */
+/** A new event on `date`; timed events last `minutes` (default one hour) from `time`. */
 export function draftForNew(input: {
   date: string;
   time?: string;
+  minutes?: number;
   calendarId: string;
   tzid: string;
   allDay?: boolean;
 }): Draft {
   const time = input.time ?? '09:00';
   const startMinutes = Number(time.slice(0, 2)) * 60 + Number(time.slice(3, 5));
-  const endMinutes = Math.min(startMinutes + 60, 23 * 60 + 59);
+  const endMinutes = Math.min(startMinutes + (input.minutes ?? 60), 23 * 60 + 59);
   const pad = (n: number): string => String(n).padStart(2, '0');
   return {
     title: '',

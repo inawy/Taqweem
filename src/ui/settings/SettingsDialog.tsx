@@ -4,8 +4,20 @@ import type { IsoWeekday, Numerals } from '@/core/time';
 import { useT } from '@/features/i18n';
 import type { MessageKey } from '@/features/i18n';
 import { SECOND_ZONES, zoneName } from '@/features/timegrid';
-import { DEFAULT_VIEWS, WEEKEND_HIDING, useSettings, workHoursRange } from '@/features/settings';
-import type { DefaultView, Locale, ThemePreference, WeekendHiding } from '@/features/settings';
+import {
+  DEFAULT_DURATIONS,
+  DEFAULT_VIEWS,
+  WEEKEND_HIDING,
+  useSettings,
+  workHoursRange,
+} from '@/features/settings';
+import type {
+  DefaultDuration,
+  DefaultView,
+  Locale,
+  ThemePreference,
+  WeekendHiding,
+} from '@/features/settings';
 import { trapTab } from '@/lib/focusTrap';
 import { CloseIcon } from '@/ui/shell/Icons';
 import { useRestoreFocus } from '@/ui/shell/useRestoreFocus';
@@ -30,6 +42,17 @@ const WEEKEND_LABELS: Record<WeekendHiding, MessageKey> = {
   'fri-sat': 'hideWeekendFriSat',
   'sat-sun': 'hideWeekendSatSun',
 };
+
+/** "30 minutes", "1.5 hours": the platform's own unit names in the page's language and numerals. */
+function durationText(minutes: number, locale: string, numerals: string): string {
+  const long = minutes >= 60;
+  return new Intl.NumberFormat(locale, {
+    style: 'unit',
+    unit: long ? 'hour' : 'minute',
+    unitDisplay: 'long',
+    numberingSystem: numerals,
+  }).format(long ? minutes / 60 : minutes);
+}
 
 const hourText = (h: number): string => `${String(h).padStart(2, '0')}:00`;
 const range = (from: number, to: number): number[] =>
@@ -165,6 +188,21 @@ export function SettingsDialog({ onClose }: SettingsDialogProps) {
                     {zoneName(zone)}
                   </option>
                 ))}
+            </select>
+          </label>
+          <label className="field">
+            <span>{t('defaultDurationLabel')}</span>
+            <select
+              value={settings.defaultDuration}
+              onChange={(e) =>
+                update({ defaultDuration: Number(e.currentTarget.value) as DefaultDuration })
+              }
+            >
+              {DEFAULT_DURATIONS.map((m) => (
+                <option key={m} value={m}>
+                  {durationText(m, settings.locale, settings.numerals)}
+                </option>
+              ))}
             </select>
           </label>
           <label className="field">

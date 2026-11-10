@@ -22,6 +22,8 @@ export interface QuickAddProps {
   readonly calendars: readonly Calendar[];
   /** Today, so words like "بكرة" and "الخميس" mean a real day. */
   readonly today: PlainDate;
+  /** How long a timed event lasts when the text gives a time to an all-day start (D-134). */
+  readonly defaultMinutes?: number | undefined;
   /** Formats a draft's day and time: "Tuesday, October 20, 2026 · 9:00 AM – 10:00 AM". */
   readonly when: (draft: Draft) => string;
   /** Saves; resolves false when it could not (what was typed stays). */
@@ -42,6 +44,7 @@ export function QuickAdd({
   initial,
   calendars,
   today,
+  defaultMinutes,
   when,
   onSave,
   onMore,
@@ -60,7 +63,7 @@ export function QuickAdd({
   // Words in the title that name a day or a time ("اجتماع الخميس 5 مساءً") set the start, and are
   // left out of the title; what was understood shows in the line under it (D-108).
   const said = parseQuickText(title, today);
-  const draft: Draft = applyQuickText({ ...initial, calendarId }, said);
+  const draft: Draft = applyQuickText({ ...initial, calendarId }, said, defaultMinutes);
   const calendar = calendars.find((c) => c.id === calendarId);
   const [place, setPlace] = useState<CSSProperties | undefined>(undefined);
 

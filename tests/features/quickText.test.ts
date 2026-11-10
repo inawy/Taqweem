@@ -89,6 +89,11 @@ describe('applyQuickText', () => {
     });
   });
 
+  it('uses the chosen new-event length for that conversion (D-134)', () => {
+    const out = applyQuickText({ ...allDay }, parse('Lunch friday 1pm'), 30);
+    expect(out).toMatchObject({ startTime: '13:00', endTime: '13:30' });
+  });
+
   it('only moves the day of an all-day draft when no time is said', () => {
     const out = applyQuickText({ ...allDay }, parse('Trip friday'));
     expect(out).toMatchObject({ allDay: true, startDate: '2026-11-06', endDate: '2026-11-06' });

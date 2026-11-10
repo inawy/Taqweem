@@ -1,6 +1,7 @@
 export {
   DEFAULT_VIEWS,
   SETTINGS_KEY,
+  DEFAULT_DURATIONS,
   WEEKEND_HIDING,
   applyToDocument,
   defaultSettings,
@@ -16,6 +17,7 @@ export type {
   ReadableStorage,
   Settings,
   ThemePreference,
+  DefaultDuration,
   WeekendHiding,
   WorkHours,
   WritableStorage,

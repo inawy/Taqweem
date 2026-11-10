@@ -36,6 +36,10 @@ export function workHoursRange(w: WorkHours): { start: number; end: number } | u
   return start < end && end <= 24 ? { start, end } : undefined;
 }
 
+/** The lengths offered for a new event, in minutes. */
+export const DEFAULT_DURATIONS = [15, 30, 45, 60, 90, 120] as const;
+export type DefaultDuration = (typeof DEFAULT_DURATIONS)[number];
+
 export interface Settings {
   readonly locale: Locale;
   readonly theme: ThemePreference;
@@ -51,6 +55,8 @@ export interface Settings {
   /** A second clock beside the hours of the day and week views: an IANA zone, or '' for none. */
   readonly secondZone: string;
   readonly workHours: WorkHours;
+  /** How long a new timed event lasts, in minutes (D-134). */
+  readonly defaultDuration: DefaultDuration;
 }
 
 export const SETTINGS_KEY = 'nawy-today:settings:v1';
@@ -74,6 +80,7 @@ export function defaultSettings(locale: Locale): Settings {
     hideWeekend: 'none',
     secondZone: '',
     workHours: 'off',
+    defaultDuration: 60,
   };
 }
 
@@ -105,6 +112,9 @@ export function parseSettings(raw: unknown, fallbackLocale: Locale): Settings {
       typeof o['secondZone'] === 'string' && (o['secondZone'] === '' || isTimeZone(o['secondZone']))
         ? o['secondZone']
         : d.secondZone,
+    defaultDuration: isOneOf(o['defaultDuration'], DEFAULT_DURATIONS)
+      ? o['defaultDuration']
+      : d.defaultDuration,
     workHours:
       typeof o['workHours'] === 'string' &&
       (o['workHours'] === 'off' || workHoursRange(o['workHours']) !== undefined)

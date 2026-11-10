@@ -216,6 +216,7 @@ function Calendar({
     hour12: settings.hour12,
     weekStart: settings.weekStart,
     today,
+    defaultMinutes: settings.defaultDuration,
   });
 
   // Only the views on screen are computed: each one scans every event, so building all of them on

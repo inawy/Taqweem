@@ -34,6 +34,8 @@ export interface EventEditorProps {
   readonly weekStart: IsoWeekday;
   /** Today: with it, a new event offers to read a day and time out of its title (D-110). */
   readonly today?: PlainDate | undefined;
+  /** How long a typed time makes an all-day draft (D-134); an hour when omitted. */
+  readonly defaultMinutes?: number | undefined;
   /** Called with a draft that already passed `draftToFields`. `null` message = user cancelled. */
   readonly onSave: (draft: Draft) => Promise<SaveOutcome>;
   readonly onDelete?: (() => void) | undefined;
@@ -93,6 +95,7 @@ export function EventEditor({
   fmt,
   weekStart,
   today,
+  defaultMinutes,
   onSave,
   onDelete,
   onClose,
@@ -245,7 +248,7 @@ export function EventEditor({
                 type="button"
                 className="btn ed-suggest"
                 onClick={() => {
-                  setDraft((d) => applyQuickText(d, said));
+                  setDraft((d) => applyQuickText(d, said, defaultMinutes));
                   titleRef.current?.focus();
                 }}
               >

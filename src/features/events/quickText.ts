@@ -257,16 +257,17 @@ export function parseQuickText(line: string, today: PlainDate): QuickText {
 
 /**
  * The draft with what the text said applied: the day moves it (same length), a time moves the
- * start; a time on an all-day draft makes it a one-hour event at that time on that day.
+ * start; a time on an all-day draft makes it an event of `minutes` (an hour by default) at that time
+ * on that day.
  */
-export function applyQuickText(draft: Draft, said: QuickText): Draft {
+export function applyQuickText(draft: Draft, said: QuickText, minutes = 60): Draft {
   const titled: Draft = { ...draft, title: said.title.trim() };
   if (said.date === undefined && said.time === undefined) return titled;
   if (said.time !== undefined && draft.allDay) {
     const day = said.date ?? (isValidDate(draft.startDate) ? draft.startDate : undefined);
     if (day === undefined) return titled;
     const [h = 0, m = 0] = said.time.split(':').map(Number);
-    const end = Math.min(h * 60 + m + 60, 23 * 60 + 59);
+    const end = Math.min(h * 60 + m + minutes, 23 * 60 + 59);
     const hh = String(Math.floor(end / 60)).padStart(2, '0');
     const mm = String(end % 60).padStart(2, '0');
     return {

@@ -278,6 +278,26 @@ describe('withStart', () => {
   });
 });
 
+describe('draftForNew length (D-134)', () => {
+  const at = (minutes?: number, time = '09:00') =>
+    draftForNew({
+      date: '2026-10-13',
+      time,
+      calendarId: 'c',
+      tzid: 'Asia/Riyadh',
+      ...(minutes !== undefined && { minutes }),
+    });
+  it('lasts an hour unless told otherwise, and as told when told', () => {
+    expect(at().endTime).toBe('10:00');
+    expect(at(30).endTime).toBe('09:30');
+    expect(at(120).endTime).toBe('11:00');
+    expect(at(15, '09:50').endTime).toBe('10:05');
+  });
+  it('never runs past the end of the day', () => {
+    expect(at(120, '23:00').endTime).toBe('23:59');
+  });
+});
+
 describe('copyDraft (D-131)', () => {
   it('keeps every field but never repeats', () => {
     const series = fresh({

@@ -45,6 +45,7 @@ describe('parseSettings is lenient field by field', () => {
       hideWeekend: 'fri-sat',
       secondZone: 'Africa/Cairo',
       workHours: '9-17',
+      defaultDuration: 30,
     };
     expect(parseSettings(s, 'ar')).toEqual(s);
   });
@@ -169,6 +170,16 @@ describe('secondZone (D-122)', () => {
     expect(parseSettings({ secondZone: 'Mars/Olympus' }, 'ar').secondZone).toBe('');
     expect(parseSettings({ secondZone: 5 }, 'ar').secondZone).toBe('');
     expect(parseSettings({ secondZone: '' }, 'ar').secondZone).toBe('');
+  });
+});
+
+describe('defaultDuration (D-134)', () => {
+  it('is an hour by default and accepts only the offered lengths', () => {
+    expect(defaultSettings('ar').defaultDuration).toBe(60);
+    expect(parseSettings({ defaultDuration: 90 }, 'ar').defaultDuration).toBe(90);
+    for (const bad of [0, 10, 61, -30, '30', null]) {
+      expect(parseSettings({ defaultDuration: bad }, 'ar').defaultDuration).toBe(60);
+    }
   });
 });
 

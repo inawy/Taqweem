@@ -64,6 +64,8 @@ export interface EventFlowInput {
   readonly weekStart: IsoWeekday;
   /** Today's date, for reading "tomorrow" and weekday names in the quick card. */
   readonly today: PlainDate;
+  /** How long a new timed event lasts, in minutes (D-134). */
+  readonly defaultMinutes: number;
 }
 
 export interface EventFlow {
@@ -104,6 +106,7 @@ export function useEventFlow({
   hour12,
   weekStart,
   today,
+  defaultMinutes,
 }: EventFlowInput): EventFlow {
   const t = useT();
   const [editing, setEditing] = useState<Editing | null>(null);
@@ -168,6 +171,7 @@ export function useEventFlow({
           date,
           ...(time !== undefined && { time }),
           ...(options?.allDay && { allDay: true }),
+          minutes: defaultMinutes,
           calendarId: calendar.id,
           tzid: tz,
         });
@@ -175,7 +179,7 @@ export function useEventFlow({
         else setEditing({ mode: 'new', id: counter.current, draft });
       })();
     },
-    [store, calendars, t, notify, tz],
+    [store, calendars, t, notify, tz, defaultMinutes],
   );
 
   const openEvent = useCallback(
@@ -462,6 +466,7 @@ export function useEventFlow({
           initial={quick.draft}
           calendars={calendars}
           today={today}
+          defaultMinutes={defaultMinutes}
           when={quickWhen}
           point={quick.point}
           onSave={quickSave}
@@ -478,6 +483,7 @@ export function useEventFlow({
           fmt={fmt}
           weekStart={weekStart}
           today={editing.mode === 'new' ? today : undefined}
+          defaultMinutes={defaultMinutes}
           onSave={save}
           onDelete={editing.mode === 'edit' ? () => void remove() : undefined}
           onClose={closeEditor}

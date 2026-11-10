@@ -191,19 +191,21 @@ describe('event colour (D-132)', () => {
       'true',
     );
     expect(own.getAttribute('aria-checked')).toBe('false');
+    type('Title', 'Dentist 2'); // also tells us when the save has reached the screen
     fireEvent.click(within(dialog).getByRole('button', { name: 'Save' }));
-    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
+    await screen.findByRole('button', { name: /Dentist 2/ });
 
-    fireEvent.click(screen.getByRole('button', { name: /Dentist/ }));
+    fireEvent.click(screen.getByRole('button', { name: /Dentist 2/ }));
     fireEvent.click(await screen.findByRole('button', { name: 'Edit event' }));
     const again = await screen.findByRole('dialog', { name: 'Edit event' });
     expect(within(again).getByRole('radio', { name: 'Red' }).getAttribute('aria-checked')).toBe(
       'true',
     );
     fireEvent.click(within(again).getByRole('radio', { name: 'Calendar color' }));
+    type('Title', 'Dentist 3');
     fireEvent.click(within(again).getByRole('button', { name: 'Save' }));
-    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
-    fireEvent.click(screen.getByRole('button', { name: /Dentist/ }));
+    await screen.findByRole('button', { name: /Dentist 3/ });
+    fireEvent.click(screen.getByRole('button', { name: /Dentist 3/ }));
     fireEvent.click(await screen.findByRole('button', { name: 'Edit event' }));
     const last = await screen.findByRole('dialog', { name: 'Edit event' });
     expect(

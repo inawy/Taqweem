@@ -5,12 +5,7 @@ import { useT } from '@/features/i18n';
 import type { MessageKey } from '@/features/i18n';
 import { SECOND_ZONES, zoneName } from '@/features/timegrid';
 import { DEFAULT_VIEWS, WEEKEND_HIDING, useSettings, workHoursRange } from '@/features/settings';
-import type {
-  DefaultView,
-  Locale,
-  ThemePreference,
-  WeekendHiding,
-} from '@/features/settings';
+import type { DefaultView, Locale, ThemePreference, WeekendHiding } from '@/features/settings';
 import { trapTab } from '@/lib/focusTrap';
 import { CloseIcon } from '@/ui/shell/Icons';
 import { useRestoreFocus } from '@/ui/shell/useRestoreFocus';

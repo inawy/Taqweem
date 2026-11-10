@@ -50,9 +50,9 @@ describe('settings live in their own dialog (D-095)', () => {
     expect(until.value).toBe('17');
     expect(Array.from(until.options).map((o) => o.value)[0]).toBe('10');
     fireEvent.change(until, { target: { value: '15' } });
-    expect(
-      (within(dialog).getByLabelText('Working hours until') as HTMLSelectElement).value,
-    ).toBe('15');
+    expect((within(dialog).getByLabelText('Working hours until') as HTMLSelectElement).value).toBe(
+      '15',
+    );
     fireEvent.change(within(dialog).getByLabelText(/^Working hours from/), {
       target: { value: 'off' },
     });

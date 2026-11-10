@@ -112,9 +112,7 @@ export function parseSettings(raw: unknown, fallbackLocale: Locale): Settings {
       typeof o['secondZone'] === 'string' && (o['secondZone'] === '' || isTimeZone(o['secondZone']))
         ? o['secondZone']
         : d.secondZone,
-    defaultDuration: isOneOf(o['defaultDuration'], DEFAULT_DURATIONS)
-      ? o['defaultDuration']
-      : d.defaultDuration,
+    defaultDuration: DEFAULT_DURATIONS.find((m) => m === o['defaultDuration']) ?? d.defaultDuration,
     workHours:
       typeof o['workHours'] === 'string' &&
       (o['workHours'] === 'off' || workHoursRange(o['workHours']) !== undefined)

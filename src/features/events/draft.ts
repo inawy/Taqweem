@@ -255,6 +255,14 @@ export function copyDraft(draft: Draft): Draft {
   return { ...draft, repeat: NO_REPEAT };
 }
 
+/** The draft with this colour for the event alone, or none (it follows its calendar again). */
+export function withColor(draft: Draft, color: string | undefined): Draft {
+  const next: Draft = { ...draft };
+  if (color === undefined) delete next.color;
+  else next.color = color;
+  return next;
+}
+
 export type FieldsResult = { ok: true; fields: NewEvent } | { ok: false; error: DraftError };
 
 /** Form → storable fields. Every failure is a named reason the UI can show next to the field. */

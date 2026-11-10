@@ -175,6 +175,43 @@ describe('edit and delete', () => {
   });
 });
 
+describe('event colour (D-132)', () => {
+  it('picks a colour for one event and goes back to the calendar colour', async () => {
+    await seed(async (store, calendarId) => {
+      await store.createEvent(makeNewEvent({ calendarId, title: 'Dentist' }));
+    });
+    open();
+    fireEvent.click(await screen.findByRole('button', { name: /Dentist/ }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Edit event' }));
+    const dialog = await screen.findByRole('dialog', { name: 'Edit event' });
+    const own = within(dialog).getByRole('radio', { name: 'Calendar color' });
+    expect(own.getAttribute('aria-checked')).toBe('true');
+    fireEvent.click(within(dialog).getByRole('radio', { name: 'Red' }));
+    expect(within(dialog).getByRole('radio', { name: 'Red' }).getAttribute('aria-checked')).toBe(
+      'true',
+    );
+    expect(own.getAttribute('aria-checked')).toBe('false');
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Save' }));
+    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
+
+    fireEvent.click(screen.getByRole('button', { name: /Dentist/ }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Edit event' }));
+    const again = await screen.findByRole('dialog', { name: 'Edit event' });
+    expect(within(again).getByRole('radio', { name: 'Red' }).getAttribute('aria-checked')).toBe(
+      'true',
+    );
+    fireEvent.click(within(again).getByRole('radio', { name: 'Calendar color' }));
+    fireEvent.click(within(again).getByRole('button', { name: 'Save' }));
+    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
+    fireEvent.click(screen.getByRole('button', { name: /Dentist/ }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Edit event' }));
+    const last = await screen.findByRole('dialog', { name: 'Edit event' });
+    expect(
+      within(last).getByRole('radio', { name: 'Calendar color' }).getAttribute('aria-checked'),
+    ).toBe('true');
+  });
+});
+
 describe('duplicate (D-131)', () => {
   it('opens a new event that starts as a copy, and saving it adds a second one', async () => {
     await seed(async (store, calendarId) => {

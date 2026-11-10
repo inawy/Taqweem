@@ -8,6 +8,7 @@ import {
   isDirty,
   repeatFromRule,
   repeatToRule,
+  withColor,
   withStart,
 } from '@/features/events/draft';
 import type { Draft } from '@/features/events/draft';
@@ -288,5 +289,21 @@ describe('copyDraft (D-131)', () => {
     expect(copy).toEqual({ ...series, repeat: fresh().repeat });
     expect(copy.repeat.kind).toBe('none');
     expect(series.repeat.kind).toBe('daily'); // the original is untouched
+  });
+});
+
+describe('withColor (D-132)', () => {
+  it('sets a colour for this event, and clears it back to the calendar’s', () => {
+    const plain = fresh();
+    const red = withColor(plain, 'red');
+    expect(red.color).toBe('red');
+    expect(plain.color).toBeUndefined();
+    const back = withColor(red, undefined);
+    expect('color' in back).toBe(false);
+    expect(back).toEqual(plain);
+  });
+  it('is saved with the event and read back', () => {
+    const fields = draftToFields(withColor(fresh(), '#aabbcc'));
+    expect(fields.ok && fields.fields.color).toBe('#aabbcc');
   });
 });

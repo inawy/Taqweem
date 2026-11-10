@@ -9,20 +9,9 @@ import { useRestoreFocus } from '@/ui/shell/useRestoreFocus';
 import { useBackLayer } from '@/lib/useBackLayer';
 import { useVisualViewport } from '@/lib/useVisualViewport';
 import { CloseIcon } from '@/ui/shell/Icons';
+import { COLOR_NAMES } from '@/ui/theme/colorNames';
 import { calendarColorVars } from '@/ui/theme/calendarColor';
 import { CALENDAR_COLOR_IDS } from '@/ui/theme/tokens';
-import type { CalendarColorId } from '@/ui/theme/tokens';
-
-const COLOR_NAMES: Record<CalendarColorId, MessageKey> = {
-  blue: 'colorBlue',
-  red: 'colorRed',
-  green: 'colorGreen',
-  amber: 'colorAmber',
-  purple: 'colorPurple',
-  teal: 'colorTeal',
-  pink: 'colorPink',
-  gray: 'colorGray',
-};
 
 export interface CalendarDialogProps {
   /** The calendar being edited, or `undefined` for a new one. */

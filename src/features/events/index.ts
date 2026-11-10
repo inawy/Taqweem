@@ -6,6 +6,7 @@ export {
   draftFromEvent,
   draftToFields,
   isDirty,
+  withColor,
   withStart,
   repeatFromRule,
   repeatToRule,

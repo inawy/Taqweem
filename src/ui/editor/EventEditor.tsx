@@ -8,6 +8,7 @@ import {
   draftToFields,
   isDirty,
   parseQuickText,
+  withColor,
   withStart,
 } from '@/features/events';
 import type { Draft, DraftError } from '@/features/events';
@@ -18,6 +19,7 @@ import { useRestoreFocus } from '@/ui/shell/useRestoreFocus';
 import { useSwipeClose } from '@/ui/shell/useSwipeClose';
 import { useVisualViewport } from '@/lib/useVisualViewport';
 import { CloseIcon } from '@/ui/shell/Icons';
+import { EventColor } from './EventColor';
 import { RepeatFields } from './RepeatFields';
 import { islamicOccasion } from '@/features/view';
 
@@ -355,6 +357,15 @@ export function EventEditor({
                 ))}
               </select>
             </label>
+
+            <EventColor
+              value={draft.color}
+              calendarColor={calendars.find((c) => c.id === draft.calendarId)?.color ?? 'gray'}
+              onChange={(color) => {
+                setError(null);
+                setDraft((d) => withColor(d, color));
+              }}
+            />
 
             <label className="ed-field">
               <span>{t('location')}</span>

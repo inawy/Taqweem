@@ -268,6 +268,7 @@ const ar = {
   apply: 'تطبيق',
   applyFailed: 'تعذّر التطبيق ولم يتغيّر شيء. حاول مرة أخرى.',
   applyDone: 'تم. جديد: {added}، محدَّث: {updated}، محذوف: {removed}.',
+  importSkipped: 'تُرك {count} من أحداث الملف لأنه لا يُحوَّل (تاريخ أو فئة غير صالحة).',
   applyOrphans: 'وحُذف {count} حدث لأن تقويمه أو سلسلته لم تعد موجودة.',
   back: 'رجوع',
   icsTitle: 'ملفات ICS',
@@ -598,6 +599,8 @@ const en: Record<MessageKey, string> = {
   apply: 'Apply',
   applyFailed: 'Could not apply, and nothing changed. Try again.',
   applyDone: 'Done. New: {added}, updated: {updated}, deleted: {removed}.',
+  importSkipped:
+    '{count} event(s) in the file were left out: they cannot be converted (bad date or category).',
   applyOrphans:
     '{count} event(s) were also deleted because their calendar or series no longer exists.',
   back: 'Back',

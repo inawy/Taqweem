@@ -20,7 +20,12 @@ export const MAX_BACKUP_BYTES = 50 * 1024 * 1024;
 export type ReadFailure = 'too-big' | EnvelopeError['code'];
 
 export type ReadOutcome =
-  | { readonly ok: true; readonly envelope: Envelope }
+  | {
+      readonly ok: true;
+      readonly envelope: Envelope;
+      /** Events of a «تقويم» file that could not be converted and were left out (D-128). */
+      readonly skipped?: number;
+    }
   | { readonly ok: false; readonly failure: ReadFailure };
 
 function tryJson(text: string): unknown {
@@ -35,14 +40,21 @@ function tryJson(text: string): unknown {
 export function readBackupText(text: string, byteLength: number = text.length): ReadOutcome {
   if (byteLength > MAX_BACKUP_BYTES) return { ok: false, failure: 'too-big' };
   let parsed = parseEnvelope(text);
+  let skipped = 0;
   if (!parsed.ok && parsed.error.code === 'invalid-field') {
     // A backup from «تقويم» (D-125): same app id, an older, simpler shape.
     const raw = tryJson(text);
     if (isTaqweemBackup(raw)) {
-      parsed = parseEnvelopeValue(convertTaqweemBackup(raw, localTimeZone(), nowMs()).envelope);
+      const converted = convertTaqweemBackup(raw, localTimeZone(), nowMs());
+      skipped = converted.skipped;
+      parsed = parseEnvelopeValue(converted.envelope);
     }
   }
-  if (parsed.ok) return { ok: true, envelope: parsed.value };
+  if (parsed.ok) {
+    return skipped > 0
+      ? { ok: true, envelope: parsed.value, skipped }
+      : { ok: true, envelope: parsed.value };
+  }
   // JSON with no `app` field at all is just some file, not "another app's backup".
   const error = parsed.error;
   if (error.code === 'wrong-app' && error.found === undefined) {

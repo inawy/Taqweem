@@ -100,4 +100,11 @@ describe('«تقويم» backups', () => {
     expect(read.ok).toBe(true);
     expect(read.ok && read.envelope.events).toHaveLength(1);
   });
+
+  it('tells the reader how many events were left out, and says nothing for a clean file', () => {
+    const dirty = readBackupText(JSON.stringify(file([base, { ...base, id: 'x', date: 'nope' }])));
+    expect(dirty.ok && dirty.skipped).toBe(1);
+    const clean = readBackupText(JSON.stringify(file([base])));
+    expect(clean.ok && clean.skipped).toBeUndefined();
+  });
 });

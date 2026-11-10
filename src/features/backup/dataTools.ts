@@ -43,6 +43,8 @@ export interface Inspection {
   readonly replace: ReplaceSummary;
   /** Set for an .ics file: it can only be merged (never replace), and these things were left out. */
   readonly ics?: { readonly calendarName: string; readonly report: IcsImportReport };
+  /** Events of a «تقويم» file left out because they could not be converted (D-128). */
+  readonly skipped?: number;
 }
 
 export type InspectOutcome =
@@ -178,7 +180,12 @@ export function createDataTools(deps: DataToolsDeps): DataTools {
     async inspectFile(name, text, byteLength) {
       const read = readBackupText(text, byteLength);
       if (!read.ok) return { ok: false, failure: read.failure };
-      return { ok: true, inspection: await inspect({ kind: 'file', name }, read.envelope) };
+      const inspection = await inspect({ kind: 'file', name }, read.envelope);
+      return {
+        ok: true,
+        inspection:
+          read.skipped === undefined ? inspection : { ...inspection, skipped: read.skipped },
+      };
     },
 
     async inspectSnapshot(id) {

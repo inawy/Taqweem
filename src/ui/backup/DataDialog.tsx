@@ -455,6 +455,10 @@ function Preview({
         </>
       )}
 
+      {inspection.skipped !== undefined && inspection.skipped > 0 && (
+        <p role="status">{t('importSkipped', { count: num(inspection.skipped) })}</p>
+      )}
+
       {/* An .ics file can only be added to what is here, so there is no choice to show. */}
       <fieldset className="data-modes" hidden={inspection.ics !== undefined}>
         <label className="data-mode">

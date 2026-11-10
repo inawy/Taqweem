@@ -403,13 +403,8 @@ function Calendar({
       ? t('weekNumber', { n: count(weekNumberOfRow(weekDays(anchor, settings.weekStart)) ?? 0) })
       : undefined;
   const hijriText = settings.hijri
-    ? hijriSubtitle(
-        view,
-        anchor,
-        settings.weekStart,
-        fmt,
-        hiddenWeekdays(settings.hideWeekend),
-      ) + occasionSuffix
+    ? hijriSubtitle(view, anchor, settings.weekStart, fmt, hiddenWeekdays(settings.hideWeekend)) +
+      occasionSuffix
     : undefined;
   const subtitle = [weekLabel, hijriText].filter(Boolean).join(' · ') || undefined;
 

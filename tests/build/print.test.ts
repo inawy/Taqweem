@@ -36,6 +36,10 @@ describe('print stylesheet', () => {
     expect(css).toMatch(/\.now-line \{[^}]*display: none/);
   });
 
+  it('draws the hour lines as 24 equal slices, not a pixel-repeating gradient', () => {
+    expect(css).toMatch(/\.tg-col \{[^}]*background-size: 100% calc\(100% \/ 24\)/);
+  });
+
   it('uses logical properties only', () => {
     expect(css).not.toMatch(
       /\b(left|right|margin-left|margin-right|padding-left|padding-right)\s*:/,

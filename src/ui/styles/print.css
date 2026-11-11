@@ -74,6 +74,18 @@
     break-inside: avoid;
   }
 
+  /* The hour lines are a gradient repeating every 30px; printers round that unevenly, so some
+     hours lose their line. Draw them as 24 equal slices of the column instead, like the labels. */
+  .tg-col {
+    background-image: linear-gradient(
+      to bottom,
+      transparent calc(100% - 1px),
+      var(--nawy-color-border) calc(100% - 1px)
+    );
+    background-size: 100% calc(100% / 24);
+    background-repeat: repeat-y;
+  }
+
   .now-line {
     display: none;
   }

@@ -31,6 +31,8 @@ describe('print stylesheet', () => {
   });
 
   it('uses logical properties only', () => {
-    expect(css).not.toMatch(/\b(left|right|margin-left|margin-right|padding-left|padding-right)\s*:/);
+    expect(css).not.toMatch(
+      /\b(left|right|margin-left|margin-right|padding-left|padding-right)\s*:/,
+    );
   });
 });

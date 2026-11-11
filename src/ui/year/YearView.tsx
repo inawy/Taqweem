@@ -82,6 +82,7 @@ export function YearView({
           today={today}
           stop={stop}
           fmt={fmt}
+          weekend={weekend}
           buttons={buttons.current}
           onOpenDay={onOpenDay}
           onOpenMonth={onOpenMonth}
@@ -97,6 +98,7 @@ function MonthCard({
   today,
   stop,
   fmt,
+  weekend,
   buttons,
   onOpenDay,
   onOpenMonth,
@@ -106,6 +108,7 @@ function MonthCard({
   readonly today: PlainDate;
   readonly stop: PlainDate;
   readonly fmt: FormatOptions;
+  readonly weekend: WeekendHiding;
   readonly buttons: Map<string, HTMLButtonElement>;
   readonly onOpenDay: (date: PlainDate) => void;
   readonly onOpenMonth: (date: PlainDate) => void;

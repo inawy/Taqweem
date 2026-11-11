@@ -59,8 +59,7 @@ export interface TimeGridProps {
    * quarter hours). Touch keeps scrolling; it never sweeps (D-135).
    */
   readonly onCreateRange?:
-    | ((date: PlainDate, start: string, end: string, point?: ClickPoint) => void)
-    | undefined;
+    ((date: PlainDate, start: string, end: string, point?: ClickPoint) => void) | undefined;
   /** Touching an empty spot of the all-day strip starts an all-day event on that day (D-061). */
   readonly onCreateAllDay?: ((date: PlainDate, point?: ClickPoint) => void) | undefined;
   /** A block was dragged somewhere else: move this occurrence by that many days/minutes. */

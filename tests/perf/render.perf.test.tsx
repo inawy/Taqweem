@@ -78,7 +78,6 @@ describe('render cost with a busy calendar (D-138)', () => {
     });
   });
 
-
   it('opens, moves through months, and changes view', async () => {
     const name = `perf-${Math.random().toString(36).slice(2)}`;
     await seeded(name, 400);

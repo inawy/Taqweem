@@ -1,5 +1,6 @@
 export {
   hiddenWeekdays,
+  isWeekend,
   hijriSubtitle,
   shiftAnchor,
   splitTitle,

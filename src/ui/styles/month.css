@@ -57,6 +57,10 @@
   text-align: center;
 }
 
+.day[data-weekend='true'] {
+  background: color-mix(in srgb, var(--nawy-color-surface-2) 60%, transparent);
+}
+
 .day:first-child {
   border-inline-start: 0;
 }

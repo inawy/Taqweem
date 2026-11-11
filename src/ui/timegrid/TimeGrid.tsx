@@ -21,6 +21,7 @@ import {
   zoneName,
 } from '@/features/timegrid';
 import type { AllDayBar, DragDelta, TimeGridModel, TimedBlock } from '@/features/timegrid';
+import { isWeekend } from '@/features/view';
 import { useRefocus } from '@/lib/useRefocus';
 import { ErrorBoundary } from '@/lib/ErrorBoundary';
 import { calendarColorVars } from '@/ui/theme/calendarColor';
@@ -278,6 +279,7 @@ export function TimeGrid({
                   key={d.date}
                   className="tg-col"
                   data-today={d.date === today ? 'true' : undefined}
+                  data-weekend={isWeekend(d.date, settings.weekend) ? 'true' : undefined}
                   onPointerDown={(e) => {
                     // A mouse only, on the empty column itself: a finger on it scrolls (D-135).
                     if (!onCreateRange || e.pointerType !== 'mouse' || e.button !== 0) return;

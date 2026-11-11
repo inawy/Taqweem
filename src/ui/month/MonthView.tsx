@@ -18,7 +18,7 @@ import type { MonthBar, MonthModel, WeekModel } from '@/features/month';
 import { useT } from '@/features/i18n';
 import { useSettings } from '@/features/settings';
 import { keyAction } from '@/features/timegrid';
-import { islamicOccasion, verticalSwipeIntent } from '@/features/view';
+import { isWeekend, islamicOccasion, verticalSwipeIntent } from '@/features/view';
 import type { SwipeIntent } from '@/features/view';
 import type { DragDelta } from '@/features/timegrid';
 import { calendarColorVars } from '@/ui/theme/calendarColor';
@@ -202,6 +202,7 @@ function WeekRow({
             className="day"
             data-outside={inMonth ? undefined : 'true'}
             data-today={day === today ? 'true' : undefined}
+            data-weekend={isWeekend(day, settings.weekend) ? 'true' : undefined}
             data-selected={day === selected ? 'true' : undefined}
             style={{ gridColumn: col + 1 } as Vars}
           >

@@ -48,6 +48,18 @@ const view = (m: MonthModel, locale: 'ar' | 'en' = 'en', extra: object = {}) =>
     </SettingsProvider>,
   );
 
+describe('MonthView weekend tint (D-136)', () => {
+  const tinted = (c: HTMLElement) => c.querySelectorAll('.day[data-weekend="true"]').length;
+  it('tints the two weekend days of every row (six rows here)', () => {
+    expect(tinted(view(model([])).container)).toBe(12); // English: Saturday and Sunday
+    cleanup();
+    expect(tinted(view(model([]), 'ar').container)).toBe(12); // Arabic: Friday and Saturday
+  });
+  it('tints nothing when the choice is none', () => {
+    expect(tinted(view(model([]), 'en', { weekend: 'none' }).container)).toBe(0);
+  });
+});
+
 describe('MonthView week numbers (D-133)', () => {
   it('shows no numbers by default', () => {
     expect(view(model([])).container.querySelectorAll('.week-no')).toHaveLength(0);

@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   hiddenWeekdays,
   hijriSubtitle,
+  isWeekend,
   shiftAnchor,
   shortcutFor,
   splitTitle,
@@ -188,5 +189,15 @@ describe('visibleDays with hidden weekdays (D-120)', () => {
     expect(full).not.toBe(work);
     expect(work).toContain('12');
     expect(work).toContain('16');
+  });
+});
+
+describe('isWeekend (D-136)', () => {
+  it('names the chosen weekend days, and nothing for none', () => {
+    // 2026-11-13 is a Friday, 14 a Saturday, 15 a Sunday, 16 a Monday.
+    const days = ['2026-11-13', '2026-11-14', '2026-11-15', '2026-11-16'];
+    expect(days.map((d) => isWeekend(d, 'fri-sat'))).toEqual([true, true, false, false]);
+    expect(days.map((d) => isWeekend(d, 'sat-sun'))).toEqual([false, true, true, false]);
+    expect(days.map((d) => isWeekend(d, 'none'))).toEqual([false, false, false, false]);
   });
 });

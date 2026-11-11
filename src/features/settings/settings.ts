@@ -52,6 +52,8 @@ export interface Settings {
   readonly numerals: Numerals;
   readonly defaultView: DefaultView;
   readonly hideWeekend: WeekendHiding;
+  /** Which weekdays are tinted as the weekend (D-136); the same three choices. */
+  readonly weekend: WeekendHiding;
   /** A second clock beside the hours of the day and week views: an IANA zone, or '' for none. */
   readonly secondZone: string;
   readonly workHours: WorkHours;
@@ -78,6 +80,7 @@ export function defaultSettings(locale: Locale): Settings {
     numerals: 'latn',
     defaultView: 'auto',
     hideWeekend: 'none',
+    weekend: locale === 'ar' ? 'fri-sat' : 'sat-sun', // Friday–Saturday in the Arab region
     secondZone: '',
     workHours: 'off',
     defaultDuration: 60,
@@ -108,6 +111,7 @@ export function parseSettings(raw: unknown, fallbackLocale: Locale): Settings {
     numerals: isOneOf(o['numerals'], ['latn', 'arab'] as const) ? o['numerals'] : d.numerals,
     defaultView: isOneOf(o['defaultView'], DEFAULT_VIEWS) ? o['defaultView'] : d.defaultView,
     hideWeekend: isOneOf(o['hideWeekend'], WEEKEND_HIDING) ? o['hideWeekend'] : d.hideWeekend,
+    weekend: isOneOf(o['weekend'], WEEKEND_HIDING) ? o['weekend'] : d.weekend,
     secondZone:
       typeof o['secondZone'] === 'string' && (o['secondZone'] === '' || isTimeZone(o['secondZone']))
         ? o['secondZone']

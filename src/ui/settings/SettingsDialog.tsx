@@ -175,6 +175,19 @@ export function SettingsDialog({ onClose }: SettingsDialogProps) {
             </select>
           </label>
           <label className="field">
+            <span>{t('weekendLabel')}</span>
+            <select
+              value={settings.weekend}
+              onChange={(e) => update({ weekend: e.currentTarget.value as WeekendHiding })}
+            >
+              {WEEKEND_HIDING.map((value) => (
+                <option key={value} value={value}>
+                  {value === 'none' ? t('weekendNone') : t(WEEKEND_LABELS[value])}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="field">
             <span>{t('secondZoneLabel')}</span>
             <select
               value={settings.secondZone}

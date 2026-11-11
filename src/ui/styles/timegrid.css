@@ -159,6 +159,10 @@ button.tg-headcell:hover {
   );
 }
 
+.tg-col[data-weekend='true'] {
+  background-color: color-mix(in srgb, var(--nawy-color-surface-2) 60%, transparent);
+}
+
 .tg-sweep {
   position: absolute;
   inset-inline: 2px;

@@ -43,6 +43,7 @@ describe('parseSettings is lenient field by field', () => {
       numerals: 'arab',
       defaultView: 'week',
       hideWeekend: 'fri-sat',
+      weekend: 'sat-sun',
       secondZone: 'Africa/Cairo',
       workHours: '9-17',
       defaultDuration: 30,
@@ -170,6 +171,16 @@ describe('secondZone (D-122)', () => {
     expect(parseSettings({ secondZone: 'Mars/Olympus' }, 'ar').secondZone).toBe('');
     expect(parseSettings({ secondZone: 5 }, 'ar').secondZone).toBe('');
     expect(parseSettings({ secondZone: '' }, 'ar').secondZone).toBe('');
+  });
+});
+
+describe('weekend (D-136)', () => {
+  it('follows the language until chosen, and accepts only the three choices', () => {
+    expect(defaultSettings('ar').weekend).toBe('fri-sat');
+    expect(defaultSettings('en').weekend).toBe('sat-sun');
+    expect(parseSettings({ weekend: 'none' }, 'ar').weekend).toBe('none');
+    expect(parseSettings({ weekend: 'sun-mon' }, 'ar').weekend).toBe('fri-sat');
+    expect(parseSettings({ weekend: 6 }, 'en').weekend).toBe('sat-sun');
   });
 });
 

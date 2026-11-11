@@ -37,6 +37,11 @@ export function hiddenWeekdays(choice: 'none' | 'fri-sat' | 'sat-sun'): readonly
   return choice === 'fri-sat' ? [5, 6] : choice === 'sat-sun' ? [6, 7] : [];
 }
 
+/** Whether this date falls on the weekend the person chose (D-136). */
+export function isWeekend(date: PlainDate, choice: 'none' | 'fri-sat' | 'sat-sun'): boolean {
+  return hiddenWeekdays(choice).includes(weekdayOf(date));
+}
+
 /**
  * The days a view shows for an anchor: 1, 3 starting at the anchor, or the week (7, less any
  * `hidden` weekdays; never empty).

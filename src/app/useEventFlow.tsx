@@ -155,7 +155,12 @@ export function useEventFlow({
     (
       date: PlainDate,
       time?: string,
-      options?: { allDay?: boolean; quick?: boolean; point?: { x: number; y: number } },
+      options?: {
+        allDay?: boolean;
+        quick?: boolean;
+        point?: { x: number; y: number };
+        endTime?: string;
+      },
     ) => {
       if (!store) return;
       void (async () => {

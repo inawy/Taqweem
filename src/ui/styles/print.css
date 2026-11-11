@@ -1,0 +1,72 @@
+/* Printing (D-142): the title and the grid, on white, with none of the app's controls. */
+@media print {
+  @page {
+    margin: 12mm;
+  }
+
+  html,
+  body {
+    background: #fff;
+    color: #000;
+    block-size: auto;
+    overflow: visible;
+  }
+
+  .shell {
+    display: block;
+    block-size: auto;
+    padding: 0;
+  }
+
+  .main,
+  .view-anim,
+  .tg,
+  .tg-scroll,
+  .month,
+  .month-wrap {
+    display: block;
+    block-size: auto;
+    min-block-size: 0;
+    overflow: visible;
+    transform: none;
+  }
+
+  /* Only the title stays of the top bar; every control in it goes. */
+  .topbar {
+    position: static;
+    border: 0;
+    padding: 0;
+    background: none;
+  }
+
+  .topbar > :not(.topbar-title),
+  .sidebar,
+  .backdrop,
+  .view-scrim,
+  .skip-link,
+  .fab,
+  .toast,
+  .banner,
+  .modal-backdrop {
+    display: none !important;
+  }
+
+  .topbar-title {
+    margin: 0 0 8px;
+    overflow: visible;
+    white-space: normal;
+  }
+
+  /* Keep colours (event bars) that the browser would otherwise strip to save ink. */
+  * {
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+
+  .week,
+  .block,
+  .bar,
+  .tg-row {
+    break-inside: avoid;
+  }
+}

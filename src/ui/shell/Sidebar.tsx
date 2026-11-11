@@ -111,6 +111,9 @@ export function Sidebar({
             {t('dataTitle')}
           </button>
         )}
+        <button type="button" className="btn" onClick={() => window.print()}>
+          {t('printView')}
+        </button>
         {onOpenShortcuts && (
           <button type="button" className="btn shortcuts-btn" onClick={onOpenShortcuts}>
             {t('shortcutsOpen')}

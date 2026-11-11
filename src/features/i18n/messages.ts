@@ -224,6 +224,7 @@ const ar = {
   aboutLicH: 'تراخيص',
   aboutLic: 'الخط: Cairo بترخيص OFL 1.1، وهو مضمَّن في التطبيق ولا يُحمَّل من الإنترنت.',
   aboutBuild: 'النسخة',
+  printView: 'طباعة العرض الحالي',
   goToDate: 'الانتقال إلى تاريخ',
   goToGo: 'انتقال',
   goToInvalid: 'اكتب تاريخًا صحيحًا.',
@@ -563,6 +564,7 @@ const en: Record<MessageKey, string> = {
   aboutLic:
     'Font: Cairo, licensed under OFL 1.1. It is bundled with the app and not loaded from the internet.',
   aboutBuild: 'Build',
+  printView: 'Print this view',
   goToDate: 'Go to date',
   goToGo: 'Go',
   goToInvalid: 'Enter a valid date.',

@@ -3,7 +3,8 @@ import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vitest';
 import { App } from '@/app/App';
 import { createDb, createStore } from '@/data';
-import { makeNewEvent } from '../helpers/factories';
+import { buildMonthModel } from '@/features/month';
+import { makeCalendar, makeEvent, makeNewEvent } from '../helpers/factories';
 
 // Measures what the views cost with a busy calendar (D-138). jsdom has no layout or paint, so the
 // numbers are the JavaScript side only (building models and React's render): good for comparing a
@@ -51,6 +52,33 @@ async function seeded(name: string, count: number) {
 }
 
 describe('render cost with a busy calendar (D-138)', () => {
+  it('building the month model alone (no React, no DOM)', () => {
+    const events = Array.from({ length: 400 }, (_, i) => {
+      const day = String((i % 28) + 1).padStart(2, '0');
+      const hour = String(8 + (i % 10)).padStart(2, '0');
+      const nextHour = String(9 + (i % 10)).padStart(2, '0');
+      return makeEvent({
+        id: `e${i}`,
+        start: `2026-10-${day}T${hour}:00`,
+        end: `2026-10-${day}T${nextHour}:00`,
+        ...(i % 8 === 0 && { rrule: 'FREQ=WEEKLY;COUNT=40' }),
+      });
+    });
+    time('buildMonthModel × 6 (400 events)', () => {
+      for (let month = 5; month <= 10; month += 1) {
+        buildMonthModel({
+          calendars: [makeCalendar()],
+          events,
+          year: 2026,
+          month,
+          weekStart: 6,
+          maxLanes: 3,
+        });
+      }
+    });
+  });
+
+
   it('opens, moves through months, and changes view', async () => {
     const name = `perf-${Math.random().toString(36).slice(2)}`;
     await seeded(name, 400);

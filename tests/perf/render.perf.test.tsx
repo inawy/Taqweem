@@ -87,9 +87,11 @@ describe('render cost with a busy calendar (D-138)', () => {
     await screen.findAllByText(/Event \d+/, undefined, { timeout: 20_000 });
     console.log(`RENDERPERF open (400 events): ${(performance.now() - opened).toFixed(0)} ms`);
 
-    const next = () => screen.getByRole('button', { name: /^Next/ });
+    // getByRole walks the whole accessibility tree, which is slow in jsdom: look the button up
+    // once, outside the timing, so the number is the render and not the query.
+    const nextButton = screen.getByRole('button', { name: /^Next/ });
     const monthMs = time('6 × next month', () => {
-      for (let i = 0; i < 6; i += 1) fireEvent.click(next());
+      for (let i = 0; i < 6; i += 1) fireEvent.click(nextButton);
     });
     const press = (code: string) => fireEvent.keyDown(window, { code });
     const weekMs = time('month → week', () => press('KeyW'));

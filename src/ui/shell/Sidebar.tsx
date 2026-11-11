@@ -14,6 +14,7 @@ export interface SidebarProps {
   readonly onOpenSettings?: (() => void) | undefined;
   readonly onOpenData?: (() => void) | undefined;
   readonly onOpenShortcuts?: (() => void) | undefined;
+  readonly onOpenGoTo?: (() => void) | undefined;
   readonly onOpenAbout?: (() => void) | undefined;
   /** Lets the person jump to a date from a small month. */
   readonly mini?:
@@ -37,6 +38,7 @@ export function Sidebar({
   onOpenSettings,
   onOpenData,
   onOpenShortcuts,
+  onOpenGoTo,
   onOpenAbout,
   mini,
   onNewCalendar,
@@ -49,6 +51,11 @@ export function Sidebar({
   return (
     <div className="sidebar-body">
       {mini && <MiniMonth {...mini} weekStart={settings.weekStart} weekend={settings.weekend} />}
+      {onOpenGoTo && (
+        <button type="button" className="btn goto-btn" onClick={onOpenGoTo}>
+          {t('goToDate')}
+        </button>
+      )}
       <section aria-labelledby="calendars-heading">
         <h2 id="calendars-heading" className="sidebar-heading">
           {t('calendars')}

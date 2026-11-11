@@ -224,6 +224,9 @@ const ar = {
   aboutLicH: 'تراخيص',
   aboutLic: 'الخط: Cairo بترخيص OFL 1.1، وهو مضمَّن في التطبيق ولا يُحمَّل من الإنترنت.',
   aboutBuild: 'النسخة',
+  goToDate: 'الانتقال إلى تاريخ',
+  goToGo: 'انتقال',
+  goToInvalid: 'اكتب تاريخًا صحيحًا.',
   shortcutsOpen: 'اختصارات لوحة المفاتيح',
   shortcutsTitle: 'اختصارات لوحة المفاتيح',
   shortcutsNote: 'تعمل على المفتاح الفعلي، فهي نفسها بأي لغة إدخال. لا تعمل أثناء الكتابة في خانة.',
@@ -560,6 +563,9 @@ const en: Record<MessageKey, string> = {
   aboutLic:
     'Font: Cairo, licensed under OFL 1.1. It is bundled with the app and not loaded from the internet.',
   aboutBuild: 'Build',
+  goToDate: 'Go to date',
+  goToGo: 'Go',
+  goToInvalid: 'Enter a valid date.',
   shortcutsOpen: 'Keyboard shortcuts',
   shortcutsTitle: 'Keyboard shortcuts',
   shortcutsNote:

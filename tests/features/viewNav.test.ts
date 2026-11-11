@@ -76,6 +76,7 @@ describe('shortcutFor', () => {
 
   it('maps physical keys, so an Arabic layout works too', () => {
     expect(shortcutFor(key('KeyT'))).toEqual({ kind: 'today' });
+    expect(shortcutFor(key('KeyG'))).toEqual({ kind: 'goto' });
     expect(shortcutFor(key('KeyP'))).toEqual({ kind: 'previous' });
     expect(shortcutFor(key('KeyN'))).toEqual({ kind: 'next' });
     expect(shortcutFor(key('KeyD'))).toEqual({ kind: 'view', view: 'day' });

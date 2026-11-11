@@ -19,6 +19,7 @@ export const SHORTCUT_GROUPS: readonly ShortcutGroup[] = [
     title: 'scGroupGo',
     rows: [
       { keys: ['T'], label: 'today' },
+      { keys: ['G'], label: 'goToDate' },
       { keys: ['P'], label: 'scPrevious' },
       { keys: ['N'], label: 'scNext' },
       { keys: ['A'], label: 'viewAgenda' },

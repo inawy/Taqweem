@@ -7,6 +7,7 @@ export type ShortcutAction =
   | { kind: 'next' }
   | { kind: 'create' }
   | { kind: 'search' }
+  | { kind: 'goto' }
   | { kind: 'help' }
   | { kind: 'view'; view: ViewKind };
 
@@ -16,6 +17,7 @@ const BY_CODE: Record<string, ShortcutAction> = {
   KeyN: { kind: 'next' },
   KeyC: { kind: 'create' },
   Slash: { kind: 'search' },
+  KeyG: { kind: 'goto' },
   KeyA: { kind: 'view', view: 'agenda' },
   KeyD: { kind: 'view', view: 'day' },
   KeyX: { kind: 'view', view: 'days3' },

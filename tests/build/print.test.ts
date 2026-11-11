@@ -40,6 +40,11 @@ describe('print stylesheet', () => {
     expect(css).toMatch(/\.tg-col \{[^}]*background-size: 100% calc\(100% \/ 24\)/);
   });
 
+  it('prints the year three months across and never cuts a month in half', () => {
+    expect(css).toMatch(/\.year \{[^}]*repeat\(3, minmax\(0, 1fr\)\)/);
+    expect(css).toMatch(/\.year-month \{[^}]*break-inside: avoid/);
+  });
+
   it('uses logical properties only', () => {
     expect(css).not.toMatch(
       /\b(left|right|margin-left|margin-right|padding-left|padding-right)\s*:/,

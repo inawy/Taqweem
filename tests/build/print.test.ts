@@ -45,6 +45,11 @@ describe('print stylesheet', () => {
     expect(css).toMatch(/\.year-month \{[^}]*break-inside: avoid/);
   });
 
+  it('drops the touch sizes in the year so four rows of months fit', () => {
+    expect(css).toMatch(/\.year-day \{[^}]*min-block-size: 22px/);
+    expect(css).toMatch(/\.year-month-open \{[^}]*min-block-size: 28px/);
+  });
+
   it('uses logical properties only', () => {
     expect(css).not.toMatch(
       /\b(left|right|margin-left|margin-right|padding-left|padding-right)\s*:/,

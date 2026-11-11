@@ -98,6 +98,16 @@
     break-inside: avoid;
   }
 
+  /* The touch sizes (34px days, a 44px title) are for fingers: with them the fourth row of months
+     still fell to a second page. Paper needs no tap target. */
+  .year-day {
+    min-block-size: 22px;
+  }
+
+  .year-month-open {
+    min-block-size: 28px;
+  }
+
   .now-line {
     display: none;
   }

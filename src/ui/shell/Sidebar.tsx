@@ -48,7 +48,7 @@ export function Sidebar({
 
   return (
     <div className="sidebar-body">
-      {mini && <MiniMonth {...mini} weekStart={settings.weekStart} />}
+      {mini && <MiniMonth {...mini} weekStart={settings.weekStart} weekend={settings.weekend} />}
       <section aria-labelledby="calendars-heading">
         <h2 id="calendars-heading" className="sidebar-heading">
           {t('calendars')}

@@ -78,6 +78,10 @@ button.year-day:hover {
   inline-size: 12px;
 }
 
+.year-day[data-weekend='true'] {
+  background: color-mix(in srgb, var(--nawy-color-surface-2) 60%, transparent);
+}
+
 .year-day[data-today] {
   background: var(--nawy-color-accent-fill);
   color: var(--nawy-color-on-accent-fill);

@@ -463,6 +463,10 @@
   background: color-mix(in srgb, var(--nawy-color-text) 8%, transparent);
 }
 
+.mini-day[data-weekend='true'] {
+  background: color-mix(in srgb, var(--nawy-color-surface-2) 60%, transparent);
+}
+
 .mini-day[data-outside='true'] {
   color: var(--nawy-color-text-muted);
 }

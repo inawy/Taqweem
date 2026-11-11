@@ -541,6 +541,7 @@ function Calendar({
             today={today}
             anchor={anchor}
             fmt={fmt}
+            weekend={settings.weekend}
             onOpenDay={openDay}
             onOpenMonth={(date) => {
               setAnchor(date);

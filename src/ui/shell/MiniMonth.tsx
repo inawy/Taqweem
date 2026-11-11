@@ -13,6 +13,8 @@ import {
 import type { FormatOptions, IsoWeekday, PlainDate } from '@/core/time';
 import { useT } from '@/features/i18n';
 import { monthOf, shiftMonth } from '@/features/month';
+import type { WeekendHiding } from '@/features/settings';
+import { isWeekend } from '@/features/view';
 import { ChevronIcon } from './Icons';
 
 export interface MiniMonthProps {
@@ -21,11 +23,20 @@ export interface MiniMonthProps {
   readonly today: PlainDate;
   readonly weekStart: IsoWeekday;
   readonly fmt: FormatOptions;
+  /** Which weekdays are tinted as the weekend (D-137); none when omitted. */
+  readonly weekend?: WeekendHiding | undefined;
   readonly onPick: (date: PlainDate) => void;
 }
 
 /** A small month for jumping to a date: browsing it never moves the main view until a day is picked. */
-export function MiniMonth({ anchor, today, weekStart, fmt, onPick }: MiniMonthProps) {
+export function MiniMonth({
+  anchor,
+  today,
+  weekStart,
+  fmt,
+  weekend = 'none',
+  onPick,
+}: MiniMonthProps) {
   const t = useT();
   const [delta, setDelta] = useState(0);
   const [seen, setSeen] = useState(anchor);
@@ -108,6 +119,7 @@ export function MiniMonth({ anchor, today, weekStart, fmt, onPick }: MiniMonthPr
             tabIndex={day === stop ? 0 : -1}
             data-outside={dateParts(day).month === shown.month ? undefined : 'true'}
             data-today={day === today ? 'true' : undefined}
+            data-weekend={isWeekend(day, weekend) ? 'true' : undefined}
             data-selected={day === anchor ? 'true' : undefined}
             aria-label={`${formatDayOfMonth(day, fmt)}, ${formatDate(day, fmt, 'full')}`}
             aria-current={day === today ? 'date' : undefined}

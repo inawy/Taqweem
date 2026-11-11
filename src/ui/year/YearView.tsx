@@ -9,6 +9,8 @@ import {
 } from '@/core/time';
 import type { FormatOptions, PlainDate } from '@/core/time';
 import { useT } from '@/features/i18n';
+import type { WeekendHiding } from '@/features/settings';
+import { isWeekend } from '@/features/view';
 import type { YearModel, YearMonth } from '@/features/year';
 
 export interface YearViewProps {
@@ -17,6 +19,8 @@ export interface YearViewProps {
   /** The day the rest of the app is on: it is the one tab stop of the whole year. */
   readonly anchor: PlainDate;
   readonly fmt: FormatOptions;
+  /** Which weekdays are tinted as the weekend (D-137); none when omitted. */
+  readonly weekend?: WeekendHiding | undefined;
   /** Touching a day opens it. */
   readonly onOpenDay: (date: PlainDate) => void;
   /** Touching a month's name opens that month. */
@@ -24,7 +28,15 @@ export interface YearViewProps {
 }
 
 /** Twelve small months. A dot under a day means it has events; touching it opens the day. */
-export function YearView({ model, today, anchor, fmt, onOpenDay, onOpenMonth }: YearViewProps) {
+export function YearView({
+  model,
+  today,
+  anchor,
+  fmt,
+  weekend = 'none',
+  onOpenDay,
+  onOpenMonth,
+}: YearViewProps) {
   const buttons = useRef(new Map<string, HTMLButtonElement>());
   const inYear = model.months.some((m) =>
     m.weeks.some((w) => w.some((d) => d.inMonth && d.date === anchor)),
@@ -129,6 +141,7 @@ function MonthCard({
                   className="year-day"
                   data-day={day.date}
                   data-today={day.date === today ? 'true' : undefined}
+                  data-weekend={isWeekend(day.date, weekend) ? 'true' : undefined}
                   data-busy={day.count === 0 ? undefined : day.count > 2 ? 'many' : 'some'}
                   tabIndex={day.date === stop ? 0 : -1}
                   aria-label={

@@ -55,6 +55,24 @@ describe('the year view (D-069)', () => {
     expect(quiet.getAttribute('data-busy')).toBeNull();
   });
 
+  it('tints the weekend in the year and in the side month (D-137)', async () => {
+    await seed();
+    open();
+    await screen.findByRole('heading', { level: 1, name: 'October 2026' });
+    fireEvent.keyDown(window, { code: 'KeyY' });
+    const october = year().getByRole('region', { name: 'October 2026' });
+    const weekendIn = (root: ParentNode, date: string) =>
+      root.querySelector(`[data-day="${date}"]`)?.getAttribute('data-weekend');
+    // English: Saturday and Sunday. 3 Oct 2026 is a Saturday, 4 a Sunday, 5 a Monday.
+    expect(weekendIn(october, '2026-10-03')).toBe('true');
+    expect(weekendIn(october, '2026-10-04')).toBe('true');
+    expect(weekendIn(october, '2026-10-05')).toBeNull();
+    const mini = document.querySelector('.mini');
+    expect(mini).not.toBeNull();
+    expect(weekendIn(mini as HTMLElement, '2026-10-03')).toBe('true');
+    expect(weekendIn(mini as HTMLElement, '2026-10-05')).toBeNull();
+  });
+
   it('touching a day opens it, and touching a month name opens that month', async () => {
     await seed();
     open();

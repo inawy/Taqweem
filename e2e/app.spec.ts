@@ -620,7 +620,7 @@ test.describe('on a phone', () => {
 
     await page.getByRole('button', { name: 'Menu', exact: true }).click();
     await page.getByRole('button', { name: 'About and privacy' }).click();
-    const dialog = page.getByRole('dialog', { name: 'About Nawy Today' });
+    const dialog = page.getByRole('dialog', { name: 'About Nawy Calendar' });
     await expect(dialog).toBeVisible();
     await settled();
     const grip = await dialog.locator('.sheet-grip').boundingBox();
@@ -775,7 +775,7 @@ test.describe('on a phone', () => {
     for (const direction of [-1, 1]) {
       await page.getByRole('button', { name: 'Menu', exact: true }).click();
       await page.getByRole('button', { name: 'About and privacy' }).click();
-      const dialog = page.getByRole('dialog', { name: 'About Nawy Today' });
+      const dialog = page.getByRole('dialog', { name: 'About Nawy Calendar' });
       await expect(dialog).toBeVisible();
       await page.waitForTimeout(400); // the sheet has slid in
       expect(await dialog.evaluate((el) => getComputedStyle(el).boxShadow)).toBe('none');
@@ -807,10 +807,10 @@ test.describe('on a phone', () => {
     await expect(page.locator('.shell')).toHaveAttribute('data-drawer', 'open');
     expect(await behaviour()).toEqual({ root: 'contain', body: 'contain' });
     await page.getByRole('button', { name: 'About and privacy' }).click();
-    await expect(page.getByRole('dialog', { name: 'About Nawy Today' })).toBeVisible();
+    await expect(page.getByRole('dialog', { name: 'About Nawy Calendar' })).toBeVisible();
     expect(await behaviour()).toEqual({ root: 'contain', body: 'contain' });
     await page.keyboard.press('Escape');
-    await expect(page.getByRole('dialog', { name: 'About Nawy Today' })).toBeHidden();
+    await expect(page.getByRole('dialog', { name: 'About Nawy Calendar' })).toBeHidden();
     expect(await behaviour()).toEqual({ root: 'auto', body: 'auto' });
   });
 
@@ -821,7 +821,7 @@ test.describe('on a phone', () => {
     const cdp = await page.context().newCDPSession(page);
     await page.getByRole('button', { name: 'Menu', exact: true }).click();
     await page.getByRole('button', { name: 'About and privacy' }).click();
-    const dialog = page.getByRole('dialog', { name: 'About Nawy Today' });
+    const dialog = page.getByRole('dialog', { name: 'About Nawy Calendar' });
     await expect(dialog).toBeVisible();
     await page.waitForTimeout(400); // the sheet has slid in
     const box = await dialog.boundingBox();

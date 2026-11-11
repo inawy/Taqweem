@@ -1,7 +1,7 @@
 import type { Locale } from '@/features/settings';
 
 const ar = {
-  appName: 'ناوي توداي',
+  appName: 'تقويم ناوي',
   tagline: 'يومك بطريقتك.',
   today: 'اليوم',
   previousMonth: 'الشهر السابق',
@@ -206,7 +206,7 @@ const ar = {
   eventMoved: 'تم نقل الحدث',
   eventResized: 'تم تغيير مدة الحدث',
   aboutOpen: 'عن التطبيق والخصوصية',
-  aboutTitle: 'عن ناوي توداي',
+  aboutTitle: 'عن تقويم ناوي',
   aboutWhatH: 'ما هو',
   aboutWhat: 'تقويم شخصي يعمل على جهازك. لا حساب ولا خادم.',
   aboutDataH: 'أين بياناتك',
@@ -250,9 +250,9 @@ const ar = {
   lastBackup: 'آخر نسخة: {date}',
   neverBackedUp: 'لم تُحفظ نسخة احتياطية بعد.',
   importTitle: 'استيراد من ملف',
-  importHelp: 'اختر ملف نسخة احتياطية من ناوي توداي. نعرض لك ما سيتغيّر قبل أن نكتب أي شيء.',
+  importHelp: 'اختر ملف نسخة احتياطية من تقويم ناوي. نعرض لك ما سيتغيّر قبل أن نكتب أي شيء.',
   importChoose: 'اختيار ملف…',
-  importNotBackup: 'هذا الملف ليس نسخة احتياطية من ناوي توداي.',
+  importNotBackup: 'هذا الملف ليس نسخة احتياطية من تقويم ناوي.',
   importWrongApp: 'هذا الملف من تطبيق آخر.',
   importNewer: 'هذا الملف من إصدار أحدث من التطبيق. حدّث التطبيق ثم أعد المحاولة.',
   importTooBig: 'الملف أكبر من أن يكون نسخة احتياطية.',
@@ -335,7 +335,7 @@ const ar = {
 export type MessageKey = keyof typeof ar;
 
 const en: Record<MessageKey, string> = {
-  appName: 'Nawy Today',
+  appName: 'Nawy Calendar',
   tagline: 'Your day, your way.',
   today: 'Today',
   previousMonth: 'Previous month',
@@ -541,7 +541,7 @@ const en: Record<MessageKey, string> = {
   eventMoved: 'Event moved',
   eventResized: 'Event length changed',
   aboutOpen: 'About and privacy',
-  aboutTitle: 'About Nawy Today',
+  aboutTitle: 'About Nawy Calendar',
   aboutWhatH: 'What it is',
   aboutWhat: 'A personal calendar that runs on your device. No account and no server.',
   aboutDataH: 'Where your data lives',
@@ -588,9 +588,9 @@ const en: Record<MessageKey, string> = {
   neverBackedUp: 'No backup file saved yet.',
   importTitle: 'Import from a file',
   importHelp:
-    'Choose a Nawy Today backup file. We show you what would change before anything is written.',
+    'Choose a Nawy Calendar backup file. We show you what would change before anything is written.',
   importChoose: 'Choose a file…',
-  importNotBackup: 'This file is not a Nawy Today backup.',
+  importNotBackup: 'This file is not a Nawy Calendar backup.',
   importWrongApp: 'This file comes from another app.',
   importNewer: 'This file comes from a newer version of the app. Update the app and try again.',
   importTooBig: 'The file is too large to be a backup.',

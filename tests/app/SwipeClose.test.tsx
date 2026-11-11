@@ -40,15 +40,15 @@ describe('closing by swiping (D-063)', () => {
     for (const where of ['.sheet-grip', '.about-text']) {
       fireEvent.click(await screen.findByRole('button', { name: 'Menu' }));
       fireEvent.click(await screen.findByRole('button', { name: 'About and privacy' }));
-      const dialog = await screen.findByRole('dialog', { name: 'About Nawy Today' });
+      const dialog = await screen.findByRole('dialog', { name: 'About Nawy Calendar' });
       swipe(dialog.querySelector(where) as Element, 0, 15); // too short, even as a flick: it stays
-      expect(screen.queryByRole('dialog', { name: 'About Nawy Today' })).toBeTruthy();
+      expect(screen.queryByRole('dialog', { name: 'About Nawy Calendar' })).toBeTruthy();
       swipe(dialog.querySelector(where) as Element, 0, 120);
       // It does not vanish: it glides out first (D-099), then it is gone.
       expect((dialog.parentElement as HTMLElement).style.backgroundColor).toBe('transparent');
       expect(dialog.style.transform).toContain('translate(');
       await waitFor(() =>
-        expect(screen.queryByRole('dialog', { name: 'About Nawy Today' })).toBeNull(),
+        expect(screen.queryByRole('dialog', { name: 'About Nawy Calendar' })).toBeNull(),
       );
     }
   });
@@ -57,15 +57,15 @@ describe('closing by swiping (D-063)', () => {
     open();
     fireEvent.click(await screen.findByRole('button', { name: 'Menu' }));
     fireEvent.click(await screen.findByRole('button', { name: 'About and privacy' }));
-    const dialog = await screen.findByRole('dialog', { name: 'About Nawy Today' });
+    const dialog = await screen.findByRole('dialog', { name: 'About Nawy Calendar' });
     const body = dialog.querySelector('.ed-body') as HTMLElement;
     Object.defineProperty(body, 'scrollTop', { value: 80, configurable: true });
     swipe(dialog.querySelector('.about-text') as Element, 0, 160);
-    expect(screen.queryByRole('dialog', { name: 'About Nawy Today' })).toBeTruthy();
+    expect(screen.queryByRole('dialog', { name: 'About Nawy Calendar' })).toBeTruthy();
     Object.defineProperty(body, 'scrollTop', { value: 0, configurable: true });
     swipe(dialog.querySelector('.about-text') as Element, 0, 160);
     await waitFor(() =>
-      expect(screen.queryByRole('dialog', { name: 'About Nawy Today' })).toBeNull(),
+      expect(screen.queryByRole('dialog', { name: 'About Nawy Calendar' })).toBeNull(),
     );
   });
 
@@ -74,13 +74,13 @@ describe('closing by swiping (D-063)', () => {
     for (const dx of [-120, 120]) {
       fireEvent.click(await screen.findByRole('button', { name: 'Menu' }));
       fireEvent.click(await screen.findByRole('button', { name: 'About and privacy' }));
-      const dialog = await screen.findByRole('dialog', { name: 'About Nawy Today' });
+      const dialog = await screen.findByRole('dialog', { name: 'About Nawy Calendar' });
       swipe(dialog.querySelector('.about-text') as Element, 15, 0); // too short, even as a flick: stays
-      expect(screen.queryByRole('dialog', { name: 'About Nawy Today' })).toBeTruthy();
+      expect(screen.queryByRole('dialog', { name: 'About Nawy Calendar' })).toBeTruthy();
       swipe(dialog.querySelector('.about-text') as Element, dx, 4);
       expect(dialog.style.transform).toContain(dx < 0 ? 'translate(-' : 'translate(');
       await waitFor(() =>
-        expect(screen.queryByRole('dialog', { name: 'About Nawy Today' })).toBeNull(),
+        expect(screen.queryByRole('dialog', { name: 'About Nawy Calendar' })).toBeNull(),
       );
     }
   });
@@ -147,7 +147,7 @@ describe('closing by swiping (D-063)', () => {
     open();
     fireEvent.click(await screen.findByRole('button', { name: 'Menu' }));
     fireEvent.click(await screen.findByRole('button', { name: 'About and privacy' }));
-    const dialog = await screen.findByRole('dialog', { name: 'About Nawy Today' });
+    const dialog = await screen.findByRole('dialog', { name: 'About Nawy Calendar' });
     const grip = dialog.querySelector('.sheet-grip') as HTMLElement;
     const at = (y: number) => ({ touches: [{ clientX: 200, clientY: y }] });
     fireEvent.touchStart(grip, at(100));
@@ -158,6 +158,6 @@ describe('closing by swiping (D-063)', () => {
     // Let go after only 15 px: too short to count as a throw, however quick the test is.
     fireEvent.touchEnd(grip, { changedTouches: [{ clientX: 200, clientY: 115 }] });
     expect(dialog.style.transform).toBe('');
-    expect(screen.queryByRole('dialog', { name: 'About Nawy Today' })).toBeTruthy();
+    expect(screen.queryByRole('dialog', { name: 'About Nawy Calendar' })).toBeTruthy();
   });
 });

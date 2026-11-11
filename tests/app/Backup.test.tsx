@@ -112,7 +112,7 @@ describe('data dialog', () => {
     open();
     const dialog = await openData();
     chooseFile(dialog, 'notes.json', '{"hello":"world"}');
-    expect(await within(dialog).findByText('This file is not a Nawy Today backup.')).toBeTruthy();
+    expect(await within(dialog).findByText('This file is not a Nawy Calendar backup.')).toBeTruthy();
     expect(within(dialog).queryByText('Preview before applying')).toBeNull();
   });
 

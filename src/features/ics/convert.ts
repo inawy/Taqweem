@@ -118,5 +118,5 @@ export function icsFileName(epochMs: number, zone: TimeZoneId): string {
 }
 
 export function eventsToIcs(calendars: readonly Calendar[], events: readonly CalEvent[]): string {
-  return serializeIcs({ calendars, events, name: 'Nawy Today' });
+  return serializeIcs({ calendars, events, name: 'Nawy Calendar' });
 }

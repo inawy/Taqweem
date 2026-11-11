@@ -30,6 +30,12 @@ describe('print stylesheet', () => {
     expect(css).toMatch(/\.tg-scroll[^{]*\{[^}]*overflow: visible/);
   });
 
+  it('shrinks the hour so a day or a week fits one page, and drops the now line', () => {
+    expect(css).toMatch(/\.tg \{[^}]*--hour-h: \d+px !important/);
+    expect(css).toMatch(/\.tg-body \{[^}]*break-inside: avoid/);
+    expect(css).toMatch(/\.now-line \{[^}]*display: none/);
+  });
+
   it('uses logical properties only', () => {
     expect(css).not.toMatch(
       /\b(left|right|margin-left|margin-right|padding-left|padding-right)\s*:/,

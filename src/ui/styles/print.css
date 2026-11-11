@@ -63,6 +63,21 @@
     -webkit-print-color-adjust: exact;
   }
 
+  /* A day or a week is 24 hours tall on screen (48px each); on paper that runs onto a second page
+     and the columns break apart. Shrink the hour so the whole day fits one page; events are placed
+     in percentages of it, so they follow. The "now" line means nothing on paper. */
+  .tg {
+    --hour-h: 30px !important;
+  }
+
+  .tg-body {
+    break-inside: avoid;
+  }
+
+  .now-line {
+    display: none;
+  }
+
   .week,
   .block,
   .bar,

@@ -430,7 +430,7 @@ function Calendar({
   const problems = active.problems;
 
   // On a single day, its Islamic occasion (if any) follows the Hijri date (D-107).
-  const dayOccasion = view === 'day' ? islamicOccasion(anchor) : undefined;
+  const dayOccasion = view === 'day' ? islamicOccasion(anchor, settings.hijriAdjust) : undefined;
   const occasionSuffix = dayOccasion ? ` · ${t(dayOccasion)}` : '';
 
   const weekLabel =
@@ -438,8 +438,14 @@ function Calendar({
       ? t('weekNumber', { n: count(weekNumberOfRow(weekDays(anchor, settings.weekStart)) ?? 0) })
       : undefined;
   const hijriText = settings.hijri
-    ? hijriSubtitle(view, anchor, settings.weekStart, fmt, hiddenWeekdays(settings.hideWeekend)) +
-      occasionSuffix
+    ? hijriSubtitle(
+        view,
+        anchor,
+        settings.weekStart,
+        fmt,
+        hiddenWeekdays(settings.hideWeekend),
+        settings.hijriAdjust,
+      ) + occasionSuffix
     : undefined;
   const subtitle = [weekLabel, hijriText].filter(Boolean).join(' · ') || undefined;
 

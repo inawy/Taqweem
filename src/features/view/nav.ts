@@ -93,23 +93,29 @@ export function hijriSubtitle(
   weekStart: IsoWeekday,
   fmt: FormatOptions,
   hidden: readonly IsoWeekday[] = [],
+  adjust = 0,
 ): string {
+  const move = (d: PlainDate): PlainDate => (adjust === 0 ? d : addDays(d, adjust));
   switch (view) {
     case 'agenda':
     case 'day':
-      return formatHijriDate(anchor, fmt);
+      return formatHijriDate(move(anchor), fmt);
     case 'days3':
     case 'week': {
       const days = visibleDays(view, anchor, weekStart, hidden);
-      return formatHijriSpan(days[0] as PlainDate, days[days.length - 1] as PlainDate, fmt);
+      return formatHijriSpan(
+        move(days[0] as PlainDate),
+        move(days[days.length - 1] as PlainDate),
+        fmt,
+      );
     }
     case 'month': {
       const first = `${anchor.slice(0, 8)}01` as PlainDate;
-      return formatHijriSpan(first, addDays(addMonths(first, 1), -1), fmt);
+      return formatHijriSpan(move(first), move(addDays(addMonths(first, 1), -1)), fmt);
     }
     case 'year': {
       const first = `${anchor.slice(0, 4)}-01-01` as PlainDate;
-      return formatHijriSpan(first, `${anchor.slice(0, 4)}-12-31` as PlainDate, fmt);
+      return formatHijriSpan(move(first), move(`${anchor.slice(0, 4)}-12-31` as PlainDate), fmt);
     }
   }
 }

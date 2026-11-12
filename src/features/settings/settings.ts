@@ -40,6 +40,10 @@ export function workHoursRange(w: WorkHours): { start: number; end: number } | u
 export const DEFAULT_DURATIONS = [15, 30, 45, 60, 90, 120] as const;
 export type DefaultDuration = (typeof DEFAULT_DURATIONS)[number];
 
+/** Days the Hijri date is moved by, to follow the local moon-sighting announcement (D-150). */
+export const HIJRI_ADJUSTS = [-2, -1, 0, 1, 2] as const;
+export type HijriAdjust = (typeof HIJRI_ADJUSTS)[number];
+
 export interface Settings {
   readonly locale: Locale;
   readonly theme: ThemePreference;
@@ -47,6 +51,8 @@ export interface Settings {
   readonly hour12: boolean;
   /** Show the Hijri date as a small secondary line (display only, D-016). */
   readonly hijri: boolean;
+  /** Move every Hijri date shown by this many days; display only, never stored (D-150). */
+  readonly hijriAdjust: HijriAdjust;
   /** Show ISO week numbers: a small number on each month row, and in the week view's title (D-133). */
   readonly weekNumbers: boolean;
   readonly numerals: Numerals;
@@ -76,6 +82,7 @@ export function defaultSettings(locale: Locale): Settings {
     weekStart: locale === 'ar' ? 6 : 1, // D-016: Saturday for Arabic, Monday for English
     hour12: true,
     hijri: false,
+    hijriAdjust: 0,
     weekNumbers: false,
     numerals: 'latn',
     defaultView: 'auto',
@@ -107,6 +114,7 @@ export function parseSettings(raw: unknown, fallbackLocale: Locale): Settings {
         : d.weekStart,
     hour12: typeof o['hour12'] === 'boolean' ? o['hour12'] : d.hour12,
     hijri: typeof o['hijri'] === 'boolean' ? o['hijri'] : d.hijri,
+    hijriAdjust: HIJRI_ADJUSTS.find((v) => v === o['hijriAdjust']) ?? d.hijriAdjust,
     weekNumbers: typeof o['weekNumbers'] === 'boolean' ? o['weekNumbers'] : d.weekNumbers,
     numerals: isOneOf(o['numerals'], ['latn', 'arab'] as const) ? o['numerals'] : d.numerals,
     defaultView: isOneOf(o['defaultView'], DEFAULT_VIEWS) ? o['defaultView'] : d.defaultView,

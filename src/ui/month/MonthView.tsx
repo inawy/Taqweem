@@ -4,6 +4,7 @@ import type { CSSProperties, RefObject } from 'react';
 import { ErrorBoundary } from '@/lib/ErrorBoundary';
 import { useRefocus } from '@/lib/useRefocus';
 import {
+  addDays,
   formatDate,
   formatDayOfMonth,
   formatHijriDate,
@@ -118,6 +119,7 @@ export function MonthView({
           fmt={fmt}
           timeFmt={timeFmt}
           hijri={settings.hijri}
+          hijriAdjust={settings.hijriAdjust}
           weekend={settings.weekend}
           weekNumber={settings.weekNumbers ? weekNumberOfRow(week.days) : undefined}
           onOpenDay={onOpenDay}
@@ -147,6 +149,8 @@ interface WeekRowProps {
   readonly timeFmt: TimeFormatOptions;
   /** Show the Hijri day under each day number (display only). */
   readonly hijri: boolean;
+  /** Days the Hijri date is moved by (D-150). */
+  readonly hijriAdjust: number;
   /** Which weekdays are tinted as the weekend (D-136). */
   readonly weekend: WeekendHiding;
   /** The ISO week number to show at the start of the row, when week numbers are on (D-133). */
@@ -171,6 +175,7 @@ function WeekRow({
   fmt,
   timeFmt,
   hijri,
+  hijriAdjust,
   weekend,
   weekNumber,
   onOpenDay,
@@ -184,7 +189,7 @@ function WeekRow({
   const t = useT();
   const rowRef = useRef<HTMLDivElement>(null);
   const occasionTitle = (day: PlainDate): string | undefined => {
-    const key = islamicOccasion(day);
+    const key = islamicOccasion(day, hijriAdjust);
     return key ? t(key) : undefined;
   };
   const occasionLabel = (day: PlainDate): string => {
@@ -216,7 +221,7 @@ function WeekRow({
               className="day-btn"
               aria-label={
                 hijri
-                  ? `${formatDate(day, fmt, 'full')} · ${formatHijriDate(day, fmt)}${occasionLabel(day)}`
+                  ? `${formatDate(day, fmt, 'full')} · ${formatHijriDate(addDays(day, hijriAdjust), fmt)}${occasionLabel(day)}`
                   : formatDate(day, fmt, 'full')
               }
               title={hijri ? occasionTitle(day) : undefined}
@@ -230,10 +235,10 @@ function WeekRow({
               {hijri && (
                 <span
                   className="hijri-num"
-                  data-occasion={islamicOccasion(day) ? 'true' : undefined}
+                  data-occasion={islamicOccasion(day, hijriAdjust) ? 'true' : undefined}
                   aria-hidden="true"
                 >
-                  {formatHijriDay(day, fmt)}
+                  {formatHijriDay(addDays(day, hijriAdjust), fmt)}
                 </span>
               )}
             </button>

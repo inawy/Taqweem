@@ -38,3 +38,22 @@ describe('islamicOccasion', () => {
     expect(all.get('occEidAdha')).toContain(addDays(arafah, 1));
   });
 });
+
+describe('Eid days, Tashreeq and the Hijri correction (D-150)', () => {
+  const days = (key: string): PlainDate[] => found().get(key) ?? [];
+
+  it('marks all three days of Eid al-Fitr, and the three days after Eid al-Adha as Tashreeq', () => {
+    const fitr = days('occEidFitr');
+    expect(fitr.slice(0, 3)).toEqual([0, 1, 2].map((n) => addDays(fitr[0] as PlainDate, n)));
+    const adha = days('occEidAdha')[0] as PlainDate;
+    expect(days('occTashreeq').slice(0, 3)).toEqual([1, 2, 3].map((n) => addDays(adha, n)));
+  });
+
+  it('moves every occasion by the correction: +1 shows Arafah a day earlier', () => {
+    const arafah = days('occArafah')[0] as PlainDate;
+    expect(islamicOccasion(arafah)).toBe('occArafah');
+    expect(islamicOccasion(addDays(arafah, -1), 1)).toBe('occArafah');
+    expect(islamicOccasion(arafah, 1)).toBe('occEidAdha');
+    expect(islamicOccasion(addDays(arafah, 1), -1)).toBe('occArafah');
+  });
+});

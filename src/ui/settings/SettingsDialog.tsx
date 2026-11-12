@@ -7,6 +7,7 @@ import { SECOND_ZONES, zoneName } from '@/features/timegrid';
 import {
   DEFAULT_DURATIONS,
   DEFAULT_VIEWS,
+  HIJRI_ADJUSTS,
   WEEKEND_HIDING,
   useSettings,
   workHoursRange,
@@ -14,6 +15,7 @@ import {
 import type {
   DefaultDuration,
   DefaultView,
+  HijriAdjust,
   Locale,
   ThemePreference,
   WeekendHiding,
@@ -52,6 +54,16 @@ function durationText(minutes: number, locale: string, numerals: string): string
     unitDisplay: 'long',
     numberingSystem: numerals,
   }).format(long ? minutes / 60 : minutes);
+}
+
+function adjustText(days: number, locale: string, numerals: string): string {
+  return new Intl.NumberFormat(locale, {
+    style: 'unit',
+    unit: 'day',
+    unitDisplay: 'long',
+    signDisplay: 'exceptZero',
+    numberingSystem: numerals,
+  }).format(days);
 }
 
 const hourText = (h: number): string => `${String(h).padStart(2, '0')}:00`;
@@ -284,6 +296,23 @@ export function SettingsDialog({ onClose }: SettingsDialogProps) {
             />
             <span>{t('hijriLabel')}</span>
           </label>
+          {settings.hijri && (
+            <label className="field">
+              <span>{t('hijriAdjustLabel')}</span>
+              <select
+                value={settings.hijriAdjust}
+                onChange={(e) =>
+                  update({ hijriAdjust: Number(e.currentTarget.value) as HijriAdjust })
+                }
+              >
+                {HIJRI_ADJUSTS.map((n) => (
+                  <option key={n} value={n}>
+                    {adjustText(n, settings.locale, settings.numerals)}
+                  </option>
+                ))}
+              </select>
+            </label>
+          )}
           <label className="ed-check">
             <input
               type="checkbox"

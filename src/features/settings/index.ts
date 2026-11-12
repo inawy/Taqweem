@@ -2,6 +2,7 @@ export {
   DEFAULT_VIEWS,
   SETTINGS_KEY,
   DEFAULT_DURATIONS,
+  HIJRI_ADJUSTS,
   WEEKEND_HIDING,
   applyToDocument,
   defaultSettings,
@@ -12,6 +13,7 @@ export {
   workHoursRange,
 } from './settings';
 export type {
+  HijriAdjust,
   DefaultView,
   Locale,
   ReadableStorage,

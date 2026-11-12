@@ -202,3 +202,13 @@ describe('isWeekend (D-136)', () => {
     expect(days.map((d) => isWeekend(d, 'none'))).toEqual([false, false, false, false]);
   });
 });
+
+describe('hijriSubtitle with a correction (D-150)', () => {
+  it('shows the Hijri date of the corrected day', () => {
+    const plain = hijriSubtitle('day', '2026-10-13', 6, ar);
+    expect(hijriSubtitle('day', '2026-10-13', 6, ar, [], 1)).toBe(
+      hijriSubtitle('day', '2026-10-14', 6, ar),
+    );
+    expect(hijriSubtitle('day', '2026-10-13', 6, ar, [], 0)).toBe(plain);
+  });
+});

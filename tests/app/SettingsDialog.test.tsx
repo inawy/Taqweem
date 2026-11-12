@@ -37,6 +37,19 @@ describe('settings live in their own dialog (D-095)', () => {
     expect(within(dialog).getByLabelText('Show Hijri date')).toBeTruthy();
   });
 
+  it('offers the Hijri correction only while the Hijri date is shown (D-150)', async () => {
+    open();
+    await screen.findByRole('heading', { level: 1 });
+    fireEvent.click(screen.getByRole('button', { name: 'Settings' }));
+    const dialog = screen.getByRole('dialog', { name: 'Settings' });
+    expect(within(dialog).queryByLabelText('Hijri date correction')).toBeNull();
+    fireEvent.click(within(dialog).getByLabelText('Show Hijri date'));
+    const select = within(dialog).getByLabelText('Hijri date correction') as HTMLSelectElement;
+    expect(select.value).toBe('0');
+    fireEvent.change(select, { target: { value: '-1' } });
+    expect(select.value).toBe('-1');
+  });
+
   it('working hours: choosing a start reveals an end that must be later (D-129)', async () => {
     open();
     await screen.findByRole('heading', { level: 1 });

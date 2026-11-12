@@ -292,7 +292,8 @@ export function expandEventsIn(
     e.tzid !== undefined &&
     e.tzid !== localZone &&
     isTimeZone(e.tzid);
-  if (localZone === undefined || !events.some(foreign)) return expandEvents(events, from, to, options);
+  if (localZone === undefined || !events.some(foreign))
+    return expandEvents(events, from, to, options);
 
   const padded = expandEvents(
     events,

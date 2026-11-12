@@ -64,12 +64,7 @@ export function buildMonthModel(input: MonthInput): MonthModel {
   const grid = monthGrid(input.year, input.month, input.weekStart);
   const first = grid[0]?.[0] as PlainDate;
   const last = grid[5]?.[6] as PlainDate;
-  const { occurrences, problems } = expandEventsIn(
-    events,
-    first,
-    addDays(last, 1),
-    input.timeZone,
-  );
+  const { occurrences, problems } = expandEventsIn(events, first, addDays(last, 1), input.timeZone);
 
   const byKey = new Map(occurrences.map((o) => [o.key, o]));
   const items = occurrences.flatMap((o) => {

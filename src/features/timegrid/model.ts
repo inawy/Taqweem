@@ -65,12 +65,7 @@ export function buildTimeGridModel(input: TimeGridInput): TimeGridModel {
     return { days: [], allDay: { bars: [], hidden: [] }, skipped, problems: [] };
   }
 
-  const { occurrences, problems } = expandEventsIn(
-    events,
-    first,
-    addDays(last, 1),
-    input.timeZone,
-  );
+  const { occurrences, problems } = expandEventsIn(events, first, addDays(last, 1), input.timeZone);
   const timed = occurrences.filter((o) => !o.event.allDay);
   const allDay = occurrences.filter((o) => o.event.allDay);
 

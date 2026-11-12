@@ -13,12 +13,17 @@ export type OccasionKey =
   | 'occEidAdha'
   | 'occTashreeq';
 
+/** Every day of Ramadan (the 30th only exists in a 30-day month). */
+const RAMADAN = Object.fromEntries(
+  Array.from({ length: 30 }, (_, i) => [`9-${i + 1}`, 'occRamadan' as const]),
+);
+
 const BY_MONTH_DAY: Readonly<Record<string, OccasionKey>> = {
+  ...RAMADAN,
   '1-1': 'occHijriNewYear',
   '1-10': 'occAshura',
   '3-12': 'occMawlid',
   '7-27': 'occIsra',
-  '9-1': 'occRamadan',
   '10-1': 'occEidFitr',
   '10-2': 'occEidFitr',
   '10-3': 'occEidFitr',

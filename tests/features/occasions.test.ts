@@ -86,3 +86,26 @@ describe('upcomingOccasions (D-151)', () => {
     expect(a && b && addDays(b.start, 1)).toBe(a?.start);
   });
 });
+
+describe('Ramadan as a whole month (D-152)', () => {
+  it('marks every day of it, 29 or 30, and nothing around it', () => {
+    const run = found().get('occRamadan') ?? [];
+    expect(run.length).toBeGreaterThanOrEqual(29);
+    expect(run.length).toBeLessThanOrEqual(60); // two Ramadans in 2026–2027
+    const first = run[0] as PlainDate;
+    expect(islamicOccasion(addDays(first, -1))).toBeUndefined();
+    expect(islamicOccasion(addDays(first, 15))).toBe('occRamadan');
+  });
+
+  it('is one range in the upcoming list, with Eid after it', () => {
+    const list = upcomingOccasions('2026-01-01' as PlainDate, 0, 40);
+    const ramadan = list.find((o) => o.key === 'occRamadan');
+    const fitr = list.find((o) => o.key === 'occEidFitr');
+    const days = Number(
+      (new Date(`${ramadan?.end}T00:00Z`).getTime() - new Date(`${ramadan?.start}T00:00Z`).getTime()) /
+        86_400_000,
+    );
+    expect([28, 29]).toContain(days);
+    expect(ramadan && fitr && addDays(ramadan.end, 1)).toBe(fitr?.start);
+  });
+});

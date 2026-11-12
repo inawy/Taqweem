@@ -64,9 +64,7 @@ describe('closing by swiping (D-063)', () => {
     expect(screen.queryByRole('dialog', { name: 'About Taqweem' })).toBeTruthy();
     Object.defineProperty(body, 'scrollTop', { value: 0, configurable: true });
     swipe(dialog.querySelector('.about-text') as Element, 0, 160);
-    await waitFor(() =>
-      expect(screen.queryByRole('dialog', { name: 'About Taqweem' })).toBeNull(),
-    );
+    await waitFor(() => expect(screen.queryByRole('dialog', { name: 'About Taqweem' })).toBeNull());
   });
 
   it('a sheet is thrown away sideways from anywhere on it, either way (D-099)', async () => {

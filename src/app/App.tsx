@@ -56,6 +56,7 @@ import { DataDialog } from '@/ui/backup/DataDialog';
 import { AboutDialog } from '@/ui/help/AboutDialog';
 import { SettingsDialog } from '@/ui/settings/SettingsDialog';
 import { GoToDialog } from '@/ui/help/GoToDialog';
+import { OccasionsDialog } from '@/ui/help/OccasionsDialog';
 import { ShortcutsDialog } from '@/ui/help/ShortcutsDialog';
 import { CalendarDialog } from '@/ui/calendars/CalendarDialog';
 import { CALENDAR_COLOR_IDS } from '@/ui/theme/tokens';
@@ -180,6 +181,7 @@ function Calendar({
   const [dataOpen, setDataOpen] = useState(false);
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
   const [goToOpen, setGoToOpen] = useState(false);
+  const [occasionsOpen, setOccasionsOpen] = useState(false);
   const [aboutOpen, setAboutOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const installer = useInstallPrompt();
@@ -371,6 +373,7 @@ function Calendar({
       !dataOpen &&
       !shortcutsOpen &&
       !goToOpen &&
+      !occasionsOpen &&
       !aboutOpen &&
       !settingsOpen &&
       calendarDialog === null,
@@ -384,12 +387,14 @@ function Calendar({
       dataOpen ||
       shortcutsOpen ||
       goToOpen ||
+      occasionsOpen ||
       aboutOpen ||
       settingsOpen,
     async () => {
       if (flow.dialogOpen) return flow.back();
       if (settingsOpen) setSettingsOpen(false);
       else if (aboutOpen) setAboutOpen(false);
+      else if (occasionsOpen) setOccasionsOpen(false);
       else if (goToOpen) setGoToOpen(false);
       else if (shortcutsOpen) setShortcutsOpen(false);
       else if (dataOpen) setDataOpen(false);
@@ -485,6 +490,10 @@ function Calendar({
       onEditCalendar={(id) => {
         setDrawerOpen(false);
         setCalendarDialog(id);
+      }}
+      onOpenOccasions={() => {
+        setDrawerOpen(false);
+        setOccasionsOpen(true);
       }}
       onOpenGoTo={() => {
         setDrawerOpen(false);
@@ -673,6 +682,18 @@ function Calendar({
           onSave={calendarData.saveCalendar}
           onDelete={calendarData.removeCalendar}
           onClose={() => setCalendarDialog(null)}
+        />
+      )}
+      {occasionsOpen && (
+        <OccasionsDialog
+          today={today}
+          fmt={fmt}
+          adjust={settings.hijriAdjust}
+          onGo={(date) => {
+            setAnchor(date);
+            setOccasionsOpen(false);
+          }}
+          onClose={() => setOccasionsOpen(false)}
         />
       )}
       {goToOpen && (

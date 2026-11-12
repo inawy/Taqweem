@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { addDays } from '@/core/time';
 import type { PlainDate } from '@/core/time';
-import { islamicOccasion } from '@/features/view';
+import { islamicOccasion, upcomingOccasions } from '@/features/view';
 
 /** Every date of 2026 and 2027 that carries an occasion, by name. */
 function found(): Map<string, PlainDate[]> {
@@ -55,5 +55,32 @@ describe('Eid days, Tashreeq and the Hijri correction (D-150)', () => {
     expect(islamicOccasion(addDays(arafah, -1), 1)).toBe('occArafah');
     expect(islamicOccasion(arafah, 1)).toBe('occEidAdha');
     expect(islamicOccasion(addDays(arafah, 1), -1)).toBe('occArafah');
+  });
+});
+
+describe('upcomingOccasions (D-151)', () => {
+  it('lists the next occasions in date order, none before the starting day', () => {
+    const list = upcomingOccasions('2026-10-13' as PlainDate);
+    expect(list.length).toBe(12);
+    expect(list[0]?.start ?? '').toBeGreaterThanOrEqual('2026-10-13');
+    const starts = list.map((o) => o.start);
+    expect([...starts].sort()).toEqual(starts);
+  });
+
+  it('puts the three days of Eid and of Tashreeq together as one range', () => {
+    const list = upcomingOccasions('2026-01-01' as PlainDate, 0, 40);
+    const fitr = list.find((o) => o.key === 'occEidFitr');
+    const tashreeq = list.find((o) => o.key === 'occTashreeq');
+    expect(fitr && addDays(fitr.start, 2)).toBe(fitr?.end);
+    expect(tashreeq && addDays(tashreeq.start, 2)).toBe(tashreeq?.end);
+    expect(fitr).toBeDefined();
+    expect(tashreeq).toBeDefined();
+  });
+
+  it('stops at the limit, and the correction moves the days', () => {
+    expect(upcomingOccasions('2026-01-01' as PlainDate, 0, 3)).toHaveLength(3);
+    const a = upcomingOccasions('2026-01-01' as PlainDate, 0, 1)[0];
+    const b = upcomingOccasions('2026-01-01' as PlainDate, 1, 1)[0];
+    expect(a && b && addDays(b.start, 1)).toBe(a?.start);
   });
 });

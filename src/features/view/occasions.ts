@@ -39,3 +39,33 @@ export function islamicOccasion(date: PlainDate, adjust = 0): OccasionKey | unde
   const hijri = hijriMonthDay(adjust === 0 ? date : addDays(date, adjust));
   return hijri ? BY_MONTH_DAY[`${hijri.month}-${hijri.day}`] : undefined;
 }
+
+export interface UpcomingOccasion {
+  readonly key: OccasionKey;
+  /** First and last day of it (the same for a one-day occasion). */
+  readonly start: PlainDate;
+  readonly end: PlainDate;
+}
+
+/** How far ahead to look: a Hijri year is about 354 days, so every occasion shows up once. */
+const LOOK_AHEAD_DAYS = 400;
+
+/**
+ * The Islamic occasions from `from` on, in order, with the days of one (the three days of Eid) put
+ * together as a range (D-151). `adjust` is the Hijri correction (D-150); `limit` caps the list.
+ */
+export function upcomingOccasions(from: PlainDate, adjust = 0, limit = 12): UpcomingOccasion[] {
+  const out: UpcomingOccasion[] = [];
+  for (let i = 0; i < LOOK_AHEAD_DAYS && out.length < limit; i += 1) {
+    const day = addDays(from, i);
+    const key = islamicOccasion(day, adjust);
+    if (!key) continue;
+    const last = out[out.length - 1];
+    if (last && last.key === key && addDays(last.end, 1) === day) {
+      out[out.length - 1] = { ...last, end: day };
+    } else {
+      out.push({ key, start: day, end: day });
+    }
+  }
+  return out;
+}

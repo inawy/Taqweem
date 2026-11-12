@@ -8,8 +8,8 @@ export {
   visibleDays,
 } from './nav';
 export type { ViewKind } from './nav';
-export { islamicOccasion } from './occasions';
-export type { OccasionKey } from './occasions';
+export { islamicOccasion, upcomingOccasions } from './occasions';
+export type { OccasionKey, UpcomingOccasion } from './occasions';
 export { shortcutFor, useShortcuts } from './shortcuts';
 export { SHORTCUT_GROUPS } from './help';
 export type { ShortcutGroup, ShortcutRow } from './help';

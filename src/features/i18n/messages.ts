@@ -92,6 +92,9 @@ const ar = {
   occArafah: 'يوم عرفة',
   occEidAdha: 'عيد الأضحى',
   occTashreeq: 'أيام التشريق',
+  upcomingOccasions: 'المناسبات القادمة',
+  upcomingNote:
+    'محسوبة من تقويم أم القرى، وقد تختلف في بلدك بيوم؛ يمكنك تصحيح ذلك من الإعدادات.',
   hijriAdjustLabel: 'تصحيح التاريخ الهجري',
   defaultViewLabel: 'العرض عند فتح التطبيق',
   defaultViewAuto: 'تلقائي (حسب الشاشة)',
@@ -433,6 +436,9 @@ const en: Record<MessageKey, string> = {
   occArafah: 'Day of Arafah',
   occEidAdha: 'Eid al-Adha',
   occTashreeq: 'Days of Tashreeq',
+  upcomingOccasions: 'Upcoming occasions',
+  upcomingNote:
+    'Calculated from the Umm al-Qura calendar; in your country it may differ by a day. You can correct it in Settings.',
   hijriAdjustLabel: 'Hijri date correction',
   defaultViewLabel: 'View when the app opens',
   defaultViewAuto: 'Automatic (by screen)',

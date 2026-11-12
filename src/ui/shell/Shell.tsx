@@ -31,6 +31,7 @@ export interface ShellProps {
   readonly onOpenData?: (() => void) | undefined;
   readonly onOpenShortcuts?: (() => void) | undefined;
   readonly onOpenGoTo?: (() => void) | undefined;
+  readonly onOpenOccasions?: (() => void) | undefined;
   readonly onOpenAbout?: (() => void) | undefined;
   readonly mini?: SidebarProps['mini'];
   readonly onNewCalendar?: (() => void) | undefined;
@@ -63,6 +64,7 @@ export function Shell({
   onOpenData,
   onOpenShortcuts,
   onOpenGoTo,
+  onOpenOccasions,
   onOpenAbout,
   mini,
   onNewCalendar,
@@ -144,6 +146,7 @@ export function Shell({
           onOpenData={onOpenData}
           onOpenShortcuts={onOpenShortcuts}
           onOpenGoTo={onOpenGoTo}
+          onOpenOccasions={onOpenOccasions}
           onOpenAbout={onOpenAbout}
           mini={mini}
           onNewCalendar={onNewCalendar}

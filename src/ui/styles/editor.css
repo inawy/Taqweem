@@ -751,3 +751,36 @@ label {
     transform 200ms var(--nawy-ease),
     visibility 0s linear 200ms;
 }
+
+/* The upcoming occasions: one tappable row each, name and dates on a line, the rest muted. */
+.occasion-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.occasion-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 2px 12px;
+  inline-size: 100%;
+  min-block-size: 44px;
+  padding-block: 8px;
+  padding-inline: 4px;
+  text-align: start;
+  background: none;
+  border: 0;
+  border-block-end: 1px solid var(--nawy-color-border);
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.occasion-name {
+  font-weight: 600;
+}
+
+.occasion-date,
+.occasion-until {
+  text-align: end;
+}

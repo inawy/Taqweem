@@ -15,7 +15,7 @@ if (/<style\b/i.test(html)) fail.push('inline <style> element in index.html');
 if (/(?:src|href)="https?:\/\//.test(html)) fail.push('external resource referenced in index.html');
 if (/%[A-Z_]+%/.test(html)) fail.push('a placeholder was not replaced');
 if (!/name="theme-color"\s+content="#FFFFFF"/.test(html)) fail.push('light theme-color is not the top bar colour');
-if (!/name="theme-color"\s+content="#151A22"/.test(html)) fail.push('dark theme-color is not the top bar colour');
+if (!/name="theme-color"\s+content="#121212"/.test(html)) fail.push('dark theme-color is not the top bar colour');
 
 const css = readdirSync('dist/assets')
   .filter((f) => f.endsWith('.css'))

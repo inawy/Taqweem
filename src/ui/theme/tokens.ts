@@ -43,12 +43,13 @@ export const LIGHT: ThemeTokens = {
 
 export function darkTokens(brand: Brand): ThemeTokens {
   return {
-    bg: '#0F1319',
-    surface: '#151A22',
-    surface2: '#1C222C',
-    text: '#E8ECF2',
-    textMuted: '#A3ADBD',
-    border: '#262D39',
+    // Neutral black like Samsung's and Google's dark themes, not a blue-tinted slate (D-155).
+    bg: '#000000',
+    surface: '#121212',
+    surface2: '#1E1E1E',
+    text: '#E8EAED',
+    textMuted: '#A8ABB0',
+    border: '#2E2E2E',
     accent: '#6C9CFF',
     accentFill: brand.accent, // the exact brand blue, with dark text on it (white would be 3.8:1)
     onAccentFill: '#06122B',

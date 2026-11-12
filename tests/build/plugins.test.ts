@@ -49,7 +49,7 @@ describe('plugins', () => {
   it('injects the brand into the page, and the CSP in builds only', () => {
     const dev = html.transformIndexHtml.handler(page, {});
     expect(dev).toContain('content="#FFFFFF"');
-    expect(dev).toContain('content="#151A22"');
+    expect(dev).toContain('content="#121212"');
     expect(dev).not.toContain('Content-Security-Policy');
     const build = html.transformIndexHtml.handler(page, { bundle: {} });
     expect(build).toContain('http-equiv="Content-Security-Policy"');

@@ -64,13 +64,13 @@
 
 /* The two shortcuts under the small month (go to a date, upcoming occasions): each a full-width
    block of its own. As bare inline buttons they sat on one line and ran into each other (D-154). */
-.sidebar > .goto-btn {
+.sidebar-body > .goto-btn {
   display: block;
   inline-size: 100%;
   margin-block-start: 8px;
 }
 
-.sidebar > .goto-btn:last-of-type {
+.sidebar-body > .goto-btn:last-of-type {
   margin-block-end: 16px;
 }
 

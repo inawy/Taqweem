@@ -68,7 +68,7 @@ test.describe('backup file, in a real browser', () => {
     await import('node:fs/promises').then((fs) => fs.writeFile(bad, '{"hello":"world"}'));
     const dialog = await openData(page);
     await dialog.getByTestId('import-file').setInputFiles(bad);
-    await expect(dialog.getByText('This file is not a Nawy Calendar backup.')).toBeVisible();
+    await expect(dialog.getByText('This file is not a Taqweem backup.')).toBeVisible();
     await expect(dialog.getByText('Preview before applying')).toHaveCount(0);
     await dialog.getByRole('button', { name: 'Close' }).click();
     await expect(eventButton(page, 'Safe')).toBeVisible();

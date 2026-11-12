@@ -27,7 +27,7 @@ describe('about and privacy', () => {
   it('opens from the menu, says plainly what it cannot do, and closes with Escape', async () => {
     open();
     fireEvent.click(await screen.findByRole('button', { name: 'About and privacy' }));
-    const dialog = await screen.findByRole('dialog', { name: 'About Nawy Calendar' });
+    const dialog = await screen.findByRole('dialog', { name: 'About Taqweem' });
     expect(within(dialog).getByText(/No reminders and no notifications/)).toBeTruthy();
     expect(within(dialog).getByText(/we have no copy to give back/)).toBeTruthy();
     expect(within(dialog).getByText(/^Build:/)).toBeTruthy();
@@ -37,6 +37,6 @@ describe('about and privacy', () => {
     fireEvent.keyDown(window, { code: 'KeyC' });
     expect(screen.queryByRole('dialog', { name: 'New event' })).toBeNull();
     fireEvent.keyDown(dialog, { code: 'Escape' });
-    expect(screen.queryByRole('dialog', { name: 'About Nawy Calendar' })).toBeNull();
+    expect(screen.queryByRole('dialog', { name: 'About Taqweem' })).toBeNull();
   });
 });

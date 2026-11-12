@@ -2,6 +2,7 @@ import 'fake-indexeddb/auto';
 import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { App } from '@/app/App';
+import { localTimeZone } from '@/core/time';
 import { createDb, createStore } from '@/data';
 import type { NawyDb } from '@/data';
 import { SETTINGS_KEY } from '@/features/settings';
@@ -28,7 +29,9 @@ async function seed(): Promise<{ calendarId: string; db: NawyDb }> {
   const db = createDb(dbName);
   const store = createStore(db);
   const calendar = await store.createCalendar({ name: 'Personal', color: 'blue' });
-  await store.createEvent(makeNewEvent({ calendarId: calendar.id, title: 'Team sync' }));
+  await store.createEvent(
+    makeNewEvent({ calendarId: calendar.id, title: 'Team sync', tzid: localTimeZone() }),
+  );
   await store.createEvent(
     makeNewAllDayEvent({
       calendarId: calendar.id,

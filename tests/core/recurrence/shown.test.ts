@@ -45,9 +45,9 @@ describe('expandEventsIn', () => {
   });
 
   it('leaves events in the person’s own zone, and all-day events, exactly as they are', () => {
-    const own = makeEvent({ tzid: 'Asia/Riyadh' });
+    const own = makeEvent({ id: 'own', tzid: 'Asia/Riyadh' });
     const day = makeAllDayEvent();
-    const events = [own, day, london()];
+    const events = [own, day, london({ id: 'abroad' })];
     const { occurrences } = expandEventsIn(events, '2026-10-13', '2026-10-14', 'Asia/Riyadh');
     const byId = new Map(occurrences.map((o) => [o.event.id, o]));
     expect(byId.get(own.id)?.shownStart).toBeUndefined();

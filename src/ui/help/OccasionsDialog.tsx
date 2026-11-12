@@ -39,9 +39,9 @@ export function OccasionsDialog({ today, fmt, adjust, onGo, onClose }: Occasions
     if (ref.current) trapTab(ref.current, event.nativeEvent);
   };
 
-  const rtf = new Intl.RelativeTimeFormat(fmt.locale, {
+  // The numbering system goes in the locale: this formatter takes no option for it.
+  const rtf = new Intl.RelativeTimeFormat(`${fmt.locale}-u-nu-${fmt.numerals ?? 'latn'}`, {
     numeric: 'auto',
-    numberingSystem: fmt.numerals ?? 'latn',
   });
   const todayDay = epochDayOf(today) ?? 0;
   const list = upcomingOccasions(today, adjust);

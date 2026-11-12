@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import type { CSSProperties, RefObject } from 'react';
 import { nowPosition } from '@/core/layout';
+import { shownEnd, shownStart } from '@/core/recurrence';
 import type { Occurrence } from '@/core/recurrence';
 import {
   formatDate,
@@ -416,7 +417,9 @@ function Block({
   readonly onKeyboardEdit: (eventId: string) => void;
 }) {
   const t = useT();
-  const { event, start, end } = block.occurrence;
+  const { event } = block.occurrence;
+  const start = shownStart(block.occurrence);
+  const end = shownEnd(block.occurrence);
   const title = event.title.trim() === '' ? t('untitled') : event.title;
   const sameDay = start.slice(0, 10) === end.slice(0, 10);
   const range = sameDay

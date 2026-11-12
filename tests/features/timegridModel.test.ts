@@ -169,3 +169,23 @@ describe('buildTimeGridModel: robustness', () => {
     expect(m.days.flatMap((d) => d.blocks)).toHaveLength(1);
   });
 });
+
+describe('buildTimeGridModel: an event kept in another time zone (D-147)', () => {
+  const london = makeEvent({
+    tzid: 'Europe/London',
+    start: '2026-10-13T10:00',
+    end: '2026-10-13T11:00',
+  });
+
+  it('is drawn where it falls on the person’s own clock, and still edited in its own', () => {
+    const m = buildTimeGridModel(input({ events: [london], timeZone: 'Asia/Riyadh' }));
+    const block = m.days[1]?.blocks[0];
+    expect(block?.top).toBe(720 / 1440); // 12:00 here, not 10:00
+    expect(block?.occurrence.start).toBe('2026-10-13T10:00');
+  });
+
+  it('is drawn at its own wall time when no zone is given', () => {
+    const m = buildTimeGridModel(input({ events: [london] }));
+    expect(m.days[1]?.blocks[0]?.top).toBe(600 / 1440);
+  });
+});

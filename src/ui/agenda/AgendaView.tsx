@@ -2,6 +2,7 @@ import type { CSSProperties, ReactNode } from 'react';
 import { ErrorBoundary } from '@/lib/ErrorBoundary';
 import { formatTime } from '@/core/time';
 import type { FormatOptions, PlainDateTime, TimeFormatOptions } from '@/core/time';
+import { shownEnd, shownStart } from '@/core/recurrence';
 import type { Occurrence } from '@/core/recurrence';
 import { minuteOfNow, nextItemKey, progressOf, untilLabel } from '@/features/agenda';
 import type { AgendaItem, AgendaModel } from '@/features/agenda';
@@ -97,7 +98,9 @@ function Row({
   readonly isNext: boolean;
 }) {
   const t = useT();
-  const { event, start, end } = item.occurrence;
+  const { event } = item.occurrence;
+  const start = shownStart(item.occurrence);
+  const end = shownEnd(item.occurrence);
   const title = event.title.trim() === '' ? t('untitled') : event.title;
   const color = calendarColorVars(item.calendarColor);
   const sameDay = start.slice(0, 10) === end.slice(0, 10);

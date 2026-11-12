@@ -1,5 +1,14 @@
 import type { CalEvent, Id } from '@/core/model';
-import { epochDayOf, isoDateOfEpochDay, isoOfEpochMinute, toEpochMinute } from '@/core/time';
+import {
+  addDays,
+  epochDayOf,
+  fromInstantMs,
+  isTimeZone,
+  isoDateOfEpochDay,
+  isoOfEpochMinute,
+  toEpochMinute,
+  toInstantMs,
+} from '@/core/time';
 import { expandRule, DEFAULT_LIMIT } from './expand';
 import type { Rule } from './rule';
 import { MAX_COUNT, formatRule, parseRule } from './rule';
@@ -28,7 +37,19 @@ export interface Occurrence {
   readonly originalStart?: string;
   readonly recurring: boolean;
   readonly override: boolean;
+  /**
+   * Set only when the event's own time zone is not the person's: the same times on the person's
+   * wall clock (D-147). `start`/`end` stay in the event's zone, because editing and the series
+   * rules work in it; views place the occurrence by `shownStart`/`shownEnd`.
+   */
+  readonly shownStart?: string;
+  readonly shownEnd?: string;
 }
+
+/** Where a view draws the occurrence's start: on the person's own clock. */
+export const shownStart = (o: Occurrence): string => o.shownStart ?? o.start;
+/** Where a view draws the occurrence's end: on the person's own clock. */
+export const shownEnd = (o: Occurrence): string => o.shownEnd ?? o.end;
 
 export type SeriesProblem =
   | { kind: 'invalid-rrule'; eventId: Id; detail: string }
@@ -247,4 +268,57 @@ export function splitSeries(
     ok: true,
     plan: { headRule, headExdates, tailRule: formatRule(tail), tailExdates, movedOverrideIds },
   };
+}
+
+const PAD_DAYS = 2;
+
+/**
+ * Like `expandEvents`, but for the person's own clock (D-147): a timed event kept in another time
+ * zone is moved to `localZone` for drawing (`shownStart`/`shownEnd`), and the window is the
+ * person's, so an event that is "tomorrow" in London but "today" here lands on the right day.
+ * With no event in another zone this is exactly `expandEvents`.
+ */
+export function expandEventsIn(
+  events: readonly CalEvent[],
+  from: string,
+  to: string,
+  localZone: string | undefined,
+  options: ExpandEventsOptions = {},
+): ExpandResult {
+  const foreign = (e: CalEvent): boolean =>
+    localZone !== undefined &&
+    !e.allDay &&
+    e.deletedAt === undefined &&
+    e.tzid !== undefined &&
+    e.tzid !== localZone &&
+    isTimeZone(e.tzid);
+  if (localZone === undefined || !events.some(foreign)) return expandEvents(events, from, to, options);
+
+  const padded = expandEvents(
+    events,
+    addDays(from.slice(0, 10), -PAD_DAYS),
+    addDays(to.slice(0, 10), PAD_DAYS),
+    options,
+  );
+  const fromN = normalize(from);
+  const toN = normalize(to);
+  const shown = (o: Occurrence): Occurrence => {
+    const tz = o.event.tzid;
+    if (!foreign(o.event) || tz === undefined) return o;
+    return {
+      ...o,
+      shownStart: fromInstantMs(toInstantMs(o.start, tz), localZone),
+      shownEnd: fromInstantMs(toInstantMs(o.end, tz), localZone),
+    };
+  };
+  const occurrences = padded.occurrences
+    .map(shown)
+    .filter((o) => overlaps(shownStart(o), shownEnd(o), fromN, toN));
+  occurrences.sort((a, b) => {
+    const s = shownStart(a).localeCompare(shownStart(b));
+    if (s !== 0) return s;
+    const e = shownEnd(a).localeCompare(shownEnd(b));
+    return e !== 0 ? e : a.key.localeCompare(b.key);
+  });
+  return { occurrences, problems: padded.problems };
 }

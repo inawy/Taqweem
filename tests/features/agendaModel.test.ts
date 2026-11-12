@@ -82,3 +82,18 @@ describe('buildAgendaModel', () => {
     expect(m.skipped).toBe(1);
   });
 });
+
+describe('an event kept in another time zone (D-147)', () => {
+  it('is placed by the person’s own clock', () => {
+    const model = buildAgendaModel({
+      calendars: [makeCalendar()],
+      events: [
+        makeEvent({ tzid: 'Europe/London', start: '2026-10-13T10:00', end: '2026-10-13T11:00' }),
+      ],
+      date: '2026-10-13',
+      nowLocal: '2026-10-13T08:00',
+      timeZone: 'Asia/Riyadh',
+    });
+    expect(model.items.map((i) => [i.startMin, i.endMin])).toEqual([[720, 780]]);
+  });
+});

@@ -1,5 +1,5 @@
 import { clipToDay } from '@/core/layout';
-import { expandEvents } from '@/core/recurrence';
+import { expandEventsIn, shownEnd, shownStart } from '@/core/recurrence';
 import type { Occurrence, SeriesProblem } from '@/core/recurrence';
 import { addDays } from '@/core/time';
 import type { PlainDate, PlainDateTime } from '@/core/time';
@@ -36,6 +36,8 @@ export interface AgendaInput {
   readonly events: readonly unknown[];
   readonly date: PlainDate;
   readonly nowLocal: PlainDateTime;
+  /** The person's own zone: events kept in another zone are drawn on this clock (D-147). */
+  readonly timeZone?: string | undefined;
 }
 
 function statusOf(date: PlainDate, nowLocal: PlainDateTime, startMin: number, endMin: number) {
@@ -51,7 +53,12 @@ function statusOf(date: PlainDate, nowLocal: PlainDateTime, startMin: number, en
 
 export function buildAgendaModel(input: AgendaInput): AgendaModel {
   const { calendars, events, skipped } = prepareData(input.calendars, input.events);
-  const { occurrences, problems } = expandEvents(events, input.date, addDays(input.date, 1));
+  const { occurrences, problems } = expandEventsIn(
+    events,
+    input.date,
+    addDays(input.date, 1),
+    input.timeZone,
+  );
 
   const allDay: AgendaItem[] = [];
   const timed: AgendaItem[] = [];
@@ -69,7 +76,7 @@ export function buildAgendaModel(input: AgendaInput): AgendaModel {
       });
       continue;
     }
-    const span = clipToDay(o.start, o.end, input.date);
+    const span = clipToDay(shownStart(o), shownEnd(o), input.date);
     if (!span) continue;
     timed.push({
       key: o.key,

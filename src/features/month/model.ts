@@ -1,7 +1,7 @@
 import { colorOf, prepareData } from '@/features/common/prepare';
 import { layoutWeekRow } from '@/core/layout';
 import type { BarSegment } from '@/core/layout';
-import { expandEvents } from '@/core/recurrence';
+import { expandEventsIn, shownEnd, shownStart } from '@/core/recurrence';
 import type { Occurrence, SeriesProblem } from '@/core/recurrence';
 import { addDays, epochDayOf, monthGrid } from '@/core/time';
 import type { IsoWeekday, PlainDate } from '@/core/time';
@@ -40,17 +40,21 @@ export interface MonthInput {
   readonly month: number;
   readonly weekStart: IsoWeekday;
   readonly maxLanes: number;
+  /** The person's own zone: events kept in another zone are drawn on this clock (D-147). */
+  readonly timeZone?: string | undefined;
 }
 
 /** First and last day (inclusive, epoch days) an occurrence is drawn on, or undefined if malformed. */
 export function daySpan(o: Occurrence): { startDay: number; endDay: number } | undefined {
-  const startDay = epochDayOf(o.start.slice(0, 10));
-  const rawEnd = epochDayOf(o.end.slice(0, 10));
+  const start = shownStart(o);
+  const end = shownEnd(o);
+  const startDay = epochDayOf(start.slice(0, 10));
+  const rawEnd = epochDayOf(end.slice(0, 10));
   if (startDay === undefined || rawEnd === undefined) return undefined;
   let endDay = rawEnd;
   if (o.event.allDay)
     endDay -= 1; // exclusive end
-  else if (o.end.slice(11, 16) === '00:00' && o.end > o.start) endDay -= 1; // ends at midnight
+  else if (end.slice(11, 16) === '00:00' && end > start) endDay -= 1; // ends at midnight
   return { startDay, endDay: Math.max(endDay, startDay) };
 }
 
@@ -60,7 +64,12 @@ export function buildMonthModel(input: MonthInput): MonthModel {
   const grid = monthGrid(input.year, input.month, input.weekStart);
   const first = grid[0]?.[0] as PlainDate;
   const last = grid[5]?.[6] as PlainDate;
-  const { occurrences, problems } = expandEvents(events, first, addDays(last, 1));
+  const { occurrences, problems } = expandEventsIn(
+    events,
+    first,
+    addDays(last, 1),
+    input.timeZone,
+  );
 
   const byKey = new Map(occurrences.map((o) => [o.key, o]));
   const items = occurrences.flatMap((o) => {

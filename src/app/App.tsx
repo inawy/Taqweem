@@ -229,6 +229,8 @@ function Calendar({
   const monthEvents = monthOn ? calendarData.events : NO_EVENTS;
   const agendaEvents = agendaOn ? calendarData.events : NO_EVENTS;
   const gridEvents = gridOn ? calendarData.events : NO_EVENTS;
+  // Events kept in another time zone are drawn on this clock (D-147).
+  const zone = useMemo(() => localTimeZone(), []);
 
   const monthModel = useMemo(() => {
     const { year, month } = monthOf(anchor);
@@ -239,8 +241,9 @@ function Calendar({
       month,
       weekStart: settings.weekStart,
       maxLanes: MAX_LANES,
+      timeZone: zone,
     });
-  }, [calendarData.calendars, monthEvents, anchor, settings.weekStart]);
+  }, [calendarData.calendars, monthEvents, anchor, settings.weekStart, zone]);
 
   // Twelve months are only expanded while the year is on screen.
   const yearModel = useMemo(
@@ -251,9 +254,10 @@ function Calendar({
             events: calendarData.events,
             year: dateParts(anchor).year,
             weekStart: settings.weekStart,
+            timeZone: zone,
           })
         : undefined,
-    [view, calendarData.calendars, calendarData.events, anchor, settings.weekStart],
+    [view, calendarData.calendars, calendarData.events, anchor, settings.weekStart, zone],
   );
 
   const gridModel = useMemo(
@@ -266,8 +270,17 @@ function Calendar({
             ? visibleDays(view, anchor, settings.weekStart, hiddenWeekdays(settings.hideWeekend))
             : [],
         maxAllDayLanes: MAX_ALL_DAY_LANES,
+        timeZone: zone,
       }),
-    [calendarData.calendars, gridEvents, view, anchor, settings.weekStart, settings.hideWeekend],
+    [
+      calendarData.calendars,
+      gridEvents,
+      view,
+      anchor,
+      settings.weekStart,
+      settings.hideWeekend,
+      zone,
+    ],
   );
 
   // Events on the days the week view leaves out: counted so they are not lost without a word (D-121).
@@ -283,13 +296,22 @@ function Calendar({
       events: gridEvents,
       days,
       maxAllDayLanes: MAX_ALL_DAY_LANES,
+      timeZone: zone,
     });
     return (
       model.days.reduce((sum, d) => sum + d.blocks.length, 0) +
       model.allDay.bars.length +
       model.allDay.hidden.reduce((sum, n) => sum + n, 0)
     );
-  }, [view, settings.hideWeekend, settings.weekStart, anchor, calendarData.calendars, gridEvents]);
+  }, [
+    view,
+    settings.hideWeekend,
+    settings.weekStart,
+    anchor,
+    calendarData.calendars,
+    gridEvents,
+    zone,
+  ]);
 
   const agendaModel = useMemo(
     () =>
@@ -298,8 +320,9 @@ function Calendar({
         events: agendaEvents,
         date: anchor,
         nowLocal,
+        timeZone: zone,
       }),
-    [calendarData.calendars, agendaEvents, anchor, nowLocal],
+    [calendarData.calendars, agendaEvents, anchor, nowLocal, zone],
   );
 
   // Built when the panel opens (and when data changes under it), not on every render.

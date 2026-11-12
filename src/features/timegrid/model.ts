@@ -1,6 +1,6 @@
 import { blockPosition, clipToDay, layoutColumns, layoutWeekRow } from '@/core/layout';
 import type { BarSegment } from '@/core/layout';
-import { expandEvents } from '@/core/recurrence';
+import { expandEventsIn, shownEnd, shownStart } from '@/core/recurrence';
 import type { Occurrence, SeriesProblem } from '@/core/recurrence';
 import { addDays, epochDayOf, toEpochMinute } from '@/core/time';
 import type { PlainDate } from '@/core/time';
@@ -52,6 +52,8 @@ export interface TimeGridInput {
   readonly events: readonly unknown[];
   /** Consecutive days: 1 for the day view, 7 for the week view. */
   readonly days: readonly PlainDate[];
+  /** The person's own zone: events kept in another zone are drawn on this clock (D-147). */
+  readonly timeZone?: string | undefined;
   readonly maxAllDayLanes: number;
 }
 
@@ -63,7 +65,12 @@ export function buildTimeGridModel(input: TimeGridInput): TimeGridModel {
     return { days: [], allDay: { bars: [], hidden: [] }, skipped, problems: [] };
   }
 
-  const { occurrences, problems } = expandEvents(events, first, addDays(last, 1));
+  const { occurrences, problems } = expandEventsIn(
+    events,
+    first,
+    addDays(last, 1),
+    input.timeZone,
+  );
   const timed = occurrences.filter((o) => !o.event.allDay);
   const allDay = occurrences.filter((o) => o.event.allDay);
 
@@ -72,15 +79,15 @@ export function buildTimeGridModel(input: TimeGridInput): TimeGridModel {
     const itemById = new Map<string, { id: string; startMin: number; endMin: number }>();
     const byKey = new Map<string, { o: Occurrence; startsBefore: boolean; endsAfter: boolean }>();
     for (const o of timed) {
-      const span = clipToDay(o.start, o.end, date);
+      const span = clipToDay(shownStart(o), shownEnd(o), date);
       if (!span) continue;
       const item = { id: o.key, startMin: span.startMin, endMin: span.endMin };
       items.push(item);
       itemById.set(o.key, item);
       byKey.set(o.key, {
         o,
-        startsBefore: o.start.slice(0, 10) < date,
-        endsAfter: (toEpochMinute(o.end) ?? 0) > ((epochDayOf(date) ?? 0) + 1) * 1440,
+        startsBefore: shownStart(o).slice(0, 10) < date,
+        endsAfter: (toEpochMinute(shownEnd(o)) ?? 0) > ((epochDayOf(date) ?? 0) + 1) * 1440,
       });
     }
     const placed = layoutColumns(items);

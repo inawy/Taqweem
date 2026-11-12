@@ -1,6 +1,6 @@
 import { prepareData } from '@/features/common/prepare';
 import { daySpan } from '@/features/month';
-import { expandEvents } from '@/core/recurrence';
+import { expandEventsIn } from '@/core/recurrence';
 import type { SeriesProblem } from '@/core/recurrence';
 import { dateParts, epochDayOf, firstOfMonth, monthGrid } from '@/core/time';
 import type { IsoWeekday, PlainDate } from '@/core/time';
@@ -36,13 +36,15 @@ export interface YearInput {
   readonly events: readonly unknown[];
   readonly year: number;
   readonly weekStart: IsoWeekday;
+  /** The person's own zone: events kept in another zone are drawn on this clock (D-147). */
+  readonly timeZone?: string | undefined;
 }
 
 export function buildYearModel(input: YearInput): YearModel {
   const { events, skipped } = prepareData(input.calendars, input.events);
   const jan1 = firstOfMonth(input.year, 1);
   const nextJan1 = firstOfMonth(input.year + 1, 1);
-  const { occurrences, problems } = expandEvents(events, jan1, nextJan1);
+  const { occurrences, problems } = expandEventsIn(events, jan1, nextJan1, input.timeZone);
 
   const from = epochDayOf(jan1) as number;
   const to = (epochDayOf(nextJan1) as number) - 1;

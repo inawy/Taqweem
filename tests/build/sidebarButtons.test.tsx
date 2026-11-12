@@ -33,4 +33,11 @@ describe('sidebar shortcut buttons (D-154)', () => {
     expect(rule).toContain('inline-size: 100%');
     expect(rule).toMatch(/margin-block-start: \d+px/);
   });
+
+  it('the add-calendar button has the width of the other buttons, its label centred (D-156)', () => {
+    const rule = /\.calendar-add \{([^}]*)\}/.exec(css)?.[1] ?? '';
+    expect(rule).toContain('inline-size: 100%');
+    expect(rule).toContain('justify-content: center');
+    expect(rule).not.toContain('inline-flex');
+  });
 });

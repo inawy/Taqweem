@@ -121,8 +121,10 @@
 
 .calendar-add {
   margin-block-start: 8px;
-  display: inline-flex;
+  display: flex;
+  inline-size: 100%;
   align-items: center;
+  justify-content: center;
   gap: 8px;
 }
 

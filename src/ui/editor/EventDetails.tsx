@@ -89,7 +89,9 @@ export function EventDetails({
             <dt>{t('when')}</dt>
             <dd>
               {when}
-              {whenHere && <span className="details-here">{t('whenHere', { when: whenHere })}</span>}
+              {whenHere && (
+                <span className="details-here">{t('whenHere', { when: whenHere })}</span>
+              )}
               {recurring && <span className="details-chip">{t('detailsRepeats')}</span>}
             </dd>
           </div>

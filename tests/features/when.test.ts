@@ -74,7 +74,9 @@ describe('describeWhenHere (D-148)', () => {
   it('says nothing for the person’s own zone, a missing or unknown zone, or an all-day event', () => {
     expect(describeWhenHere({ ...london, tzid: 'Asia/Riyadh' }, en, 'Asia/Riyadh')).toBeUndefined();
     expect(describeWhenHere({ ...london, tzid: undefined }, en, 'Asia/Riyadh')).toBeUndefined();
-    expect(describeWhenHere({ ...london, tzid: 'Mars/Olympus' }, en, 'Asia/Riyadh')).toBeUndefined();
+    expect(
+      describeWhenHere({ ...london, tzid: 'Mars/Olympus' }, en, 'Asia/Riyadh'),
+    ).toBeUndefined();
     expect(
       describeWhenHere(
         { start: '2026-10-20', end: '2026-10-21', allDay: true, tzid: 'Europe/London' },

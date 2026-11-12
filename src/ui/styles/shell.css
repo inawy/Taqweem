@@ -62,6 +62,18 @@
   flex-direction: column;
 }
 
+/* The two shortcuts under the small month (go to a date, upcoming occasions): each a full-width
+   block of its own. As bare inline buttons they sat on one line and ran into each other (D-154). */
+.sidebar > .goto-btn {
+  display: block;
+  inline-size: 100%;
+  margin-block-start: 8px;
+}
+
+.sidebar > .goto-btn:last-of-type {
+  margin-block-end: 16px;
+}
+
 .sidebar-heading {
   font-size: 0.875rem;
   font-weight: 600;

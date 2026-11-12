@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { addDays } from '@/core/time';
+import { addDays, epochDayOf } from '@/core/time';
 import type { PlainDate } from '@/core/time';
 import { islamicOccasion, upcomingOccasions } from '@/features/view';
 
@@ -101,10 +101,8 @@ describe('Ramadan as a whole month (D-152)', () => {
     const list = upcomingOccasions('2026-01-01' as PlainDate, 0, 40);
     const ramadan = list.find((o) => o.key === 'occRamadan');
     const fitr = list.find((o) => o.key === 'occEidFitr');
-    const days = Number(
-      (new Date(`${ramadan?.end}T00:00Z`).getTime() - new Date(`${ramadan?.start}T00:00Z`).getTime()) /
-        86_400_000,
-    );
+    const last = epochDayOf(ramadan?.end as PlainDate) ?? 0;
+    const days = last - (epochDayOf(ramadan?.start as PlainDate) ?? 0);
     expect([28, 29]).toContain(days);
     expect(ramadan && fitr && addDays(ramadan.end, 1)).toBe(fitr?.start);
   });

@@ -39,6 +39,7 @@ describe('parseSettings is lenient field by field', () => {
       weekStart: 7,
       hour12: false,
       hijri: true,
+      hijriAdjust: -1,
       weekNumbers: true,
       numerals: 'arab',
       defaultView: 'week',
@@ -225,10 +226,10 @@ describe('hijriAdjust (D-150)', () => {
   it('is 0 by default, kept when it is one of -2…2, and ignored when it is anything else', () => {
     expect(defaultSettings('ar').hijriAdjust).toBe(0);
     for (const n of [-2, -1, 0, 1, 2]) {
-      expect(parseSettings(JSON.stringify({ hijriAdjust: n }), 'ar').hijriAdjust).toBe(n);
+      expect(parseSettings({ hijriAdjust: n }, 'ar').hijriAdjust).toBe(n);
     }
     for (const bad of [3, -3, 0.5, '1', null]) {
-      expect(parseSettings(JSON.stringify({ hijriAdjust: bad }), 'ar').hijriAdjust).toBe(0);
+      expect(parseSettings({ hijriAdjust: bad }, 'ar').hijriAdjust).toBe(0);
     }
   });
 });

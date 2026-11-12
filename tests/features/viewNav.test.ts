@@ -205,6 +205,7 @@ describe('isWeekend (D-136)', () => {
 
 describe('hijriSubtitle with a correction (D-150)', () => {
   it('shows the Hijri date of the corrected day', () => {
+    const ar = { locale: 'ar' };
     const plain = hijriSubtitle('day', '2026-10-13', 6, ar);
     expect(hijriSubtitle('day', '2026-10-13', 6, ar, [], 1)).toBe(
       hijriSubtitle('day', '2026-10-14', 6, ar),

@@ -1,12 +1,6 @@
 import { useEffect, useId, useRef } from 'react';
 import type { KeyboardEvent } from 'react';
-import {
-  addDays,
-  epochDayOf,
-  formatDate,
-  formatDateRange,
-  formatHijriDate,
-} from '@/core/time';
+import { addDays, epochDayOf, formatDate, formatDateRange, formatHijriDate } from '@/core/time';
 import type { FormatOptions, PlainDate } from '@/core/time';
 import { useT } from '@/features/i18n';
 import { upcomingOccasions } from '@/features/view';

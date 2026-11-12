@@ -29,9 +29,9 @@ describe('upcoming occasions (D-151)', () => {
     await screen.findByRole('heading', { level: 1, name: 'October 2026' });
     fireEvent.click(screen.getAllByRole('button', { name: 'Upcoming occasions' })[0]!);
     const dialog = await screen.findByRole('dialog', { name: 'Upcoming occasions' });
-    const rows = within(dialog).getAllByRole('button', { name: /./ }).filter((b) =>
-      b.classList.contains('occasion-row'),
-    );
+    const rows = within(dialog)
+      .getAllByRole('button', { name: /./ })
+      .filter((b) => b.classList.contains('occasion-row'));
     expect(rows.length).toBeGreaterThan(5);
     expect(within(dialog).getByText(/Umm al-Qura/)).toBeTruthy();
     fireEvent.click(rows[0]!);

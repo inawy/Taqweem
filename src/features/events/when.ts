@@ -56,3 +56,16 @@ export function describeWhenHere(
   const end = fromInstantMs(toInstantMs(input.end as PlainDateTime, tz), localTz);
   return describeWhen({ start, end, allDay: false }, fmt, localTz);
 }
+
+/**
+ * A time kept in `tzid` on the person's own clock (D-149); the time itself when it is already in
+ * that zone, has no zone, or the zone is not one the platform knows.
+ */
+export function inLocalClock(
+  value: PlainDateTime,
+  tzid: string | undefined,
+  localTz: string,
+): PlainDateTime {
+  if (tzid === undefined || tzid === localTz || !isTimeZone(tzid)) return value;
+  return fromInstantMs(toInstantMs(value, tzid), localTz);
+}

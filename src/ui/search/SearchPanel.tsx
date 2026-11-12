@@ -1,8 +1,9 @@
 import { useDeferredValue, useEffect, useId, useMemo, useRef, useState } from 'react';
 import type { CSSProperties, KeyboardEvent } from 'react';
-import { formatDate, formatTime } from '@/core/time';
+import { formatDate, formatTime, localTimeZone } from '@/core/time';
 import type { FormatOptions, PlainDate, TimeFormatOptions } from '@/core/time';
 import type { Occurrence } from '@/core/recurrence';
+import { inLocalClock } from '@/features/events';
 import { searchEvents } from '@/features/search';
 import type { SearchIndex, SearchResult } from '@/features/search';
 import { useT } from '@/features/i18n';
@@ -165,7 +166,11 @@ function Row({
 }) {
   const t = useT();
   const { occurrence } = result;
-  const { event, start } = occurrence;
+  const { event } = occurrence;
+  // A timed event kept in another zone is listed at the time it is on this clock (D-149).
+  const start = event.allDay
+    ? occurrence.start
+    : inLocalClock(occurrence.start, event.tzid, localTimeZone());
   const color = calendarColorVars(result.calendarColor);
   const title = event.title.trim() === '' ? t('untitled') : event.title;
   const when = event.allDay

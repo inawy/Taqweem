@@ -64,7 +64,7 @@ describe('upcomingOccasions (D-151)', () => {
     // A Hijri year has nine of them (new year to Tashreeq); 400 days reach a few more.
     expect(list.length).toBeGreaterThanOrEqual(9);
     expect(list.length).toBeLessThanOrEqual(12);
-    expect(list[0]?.start ?? '').toBeGreaterThanOrEqual('2026-10-13');
+    expect((list[0]?.start ?? '') >= '2026-10-13').toBe(true);
     const starts = list.map((o) => o.start);
     expect([...starts].sort()).toEqual(starts);
   });

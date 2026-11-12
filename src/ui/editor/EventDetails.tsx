@@ -13,6 +13,8 @@ export interface EventDetailsProps {
   readonly calendar: Calendar | undefined;
   /** Already formatted: "Tuesday, October 20, 2026 · 9:00 AM – 10:00 AM". */
   readonly when: string;
+  /** The same time on the person's own clock, when the event is kept in another zone (D-148). */
+  readonly whenHere?: string | undefined;
   readonly recurring: boolean;
   readonly onEdit: () => void;
   readonly onDuplicate: () => void;
@@ -25,6 +27,7 @@ export function EventDetails({
   event,
   calendar,
   when,
+  whenHere,
   recurring,
   onEdit,
   onDuplicate,
@@ -86,6 +89,7 @@ export function EventDetails({
             <dt>{t('when')}</dt>
             <dd>
               {when}
+              {whenHere && <span className="details-here">{t('whenHere', { when: whenHere })}</span>}
               {recurring && <span className="details-chip">{t('detailsRepeats')}</span>}
             </dd>
           </div>

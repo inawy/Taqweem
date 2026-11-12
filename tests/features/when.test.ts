@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { describeWhen } from '@/features/events';
+import { describeWhen, describeWhenHere } from '@/features/events';
 
 const en = { locale: 'en', hour12: false };
 
@@ -47,5 +47,40 @@ describe('describeWhen', () => {
     );
     expect(text).toContain('October 20');
     expect(text).toContain('October 21');
+  });
+});
+
+describe('describeWhenHere (D-148)', () => {
+  const london = {
+    start: '2026-10-13T10:00',
+    end: '2026-10-13T11:00',
+    allDay: false,
+    tzid: 'Europe/London',
+  };
+
+  it('gives the same moment on the person’s own clock', () => {
+    expect(describeWhenHere(london, en, 'Asia/Riyadh')).toBe(
+      'Tuesday, October 13, 2026 · 12:00 – 13:00',
+    );
+  });
+
+  it('carries the date over midnight', () => {
+    const late = { ...london, start: '2026-10-13T23:00', end: '2026-10-14T00:30' };
+    expect(describeWhenHere(late, en, 'Asia/Riyadh')).toBe(
+      'Wednesday, October 14, 2026 · 01:00 – 02:30',
+    );
+  });
+
+  it('says nothing for the person’s own zone, a missing or unknown zone, or an all-day event', () => {
+    expect(describeWhenHere({ ...london, tzid: 'Asia/Riyadh' }, en, 'Asia/Riyadh')).toBeUndefined();
+    expect(describeWhenHere({ ...london, tzid: undefined }, en, 'Asia/Riyadh')).toBeUndefined();
+    expect(describeWhenHere({ ...london, tzid: 'Mars/Olympus' }, en, 'Asia/Riyadh')).toBeUndefined();
+    expect(
+      describeWhenHere(
+        { start: '2026-10-20', end: '2026-10-21', allDay: true, tzid: 'Europe/London' },
+        en,
+        'Asia/Riyadh',
+      ),
+    ).toBeUndefined();
   });
 });

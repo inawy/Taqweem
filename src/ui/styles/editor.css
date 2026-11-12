@@ -625,6 +625,13 @@ label {
   white-space: pre-wrap;
 }
 
+.details-here {
+  display: block;
+  margin-block-start: 4px;
+  font-size: 0.875rem;
+  color: var(--nawy-color-text-muted);
+}
+
 .details-chip {
   display: inline-block;
   margin-inline-start: 8px;

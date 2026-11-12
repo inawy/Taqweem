@@ -1,4 +1,13 @@
-import { addDays, compareDates, datePart, formatDate, formatTime } from '@/core/time';
+import {
+  addDays,
+  compareDates,
+  datePart,
+  formatDate,
+  formatTime,
+  fromInstantMs,
+  isTimeZone,
+  toInstantMs,
+} from '@/core/time';
 import type { PlainDate, PlainDateTime, TimeFormatOptions } from '@/core/time';
 
 export interface WhenInput {
@@ -30,4 +39,20 @@ export function describeWhen(input: WhenInput, fmt: TimeFormatOptions, localTz: 
     return `${formatDate(sd, fmt, 'full')} · ${formatTime(start, fmt)} – ${formatTime(end, fmt)}${zone}`;
   }
   return `${formatDate(sd, fmt, 'full')} ${formatTime(start, fmt)} – ${formatDate(ed, fmt, 'full')} ${formatTime(end, fmt)}${zone}`;
+}
+
+/**
+ * The same moment on the person's own clock, for a timed event kept in another zone (D-148);
+ * undefined when there is nothing to add: all-day, the person's own zone, or a zone not known.
+ */
+export function describeWhenHere(
+  input: WhenInput,
+  fmt: TimeFormatOptions,
+  localTz: string,
+): string | undefined {
+  const tz = input.tzid;
+  if (input.allDay || tz === undefined || tz === localTz || !isTimeZone(tz)) return undefined;
+  const start = fromInstantMs(toInstantMs(input.start as PlainDateTime, tz), localTz);
+  const end = fromInstantMs(toInstantMs(input.end as PlainDateTime, tz), localTz);
+  return describeWhen({ start, end, allDay: false }, fmt, localTz);
 }

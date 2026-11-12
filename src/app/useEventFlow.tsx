@@ -10,6 +10,7 @@ import {
   draftForNew,
   draftFromEvent,
   describeWhen,
+  describeWhenHere,
   draftToFields,
   moveDraft,
   resizeDraft,
@@ -442,6 +443,16 @@ export function useEventFlow({
             event={viewing.event}
             calendar={calendar}
             when={describeWhen(
+              {
+                start: viewing.start,
+                end: viewing.end,
+                allDay: viewing.event.allDay,
+                tzid: viewing.event.tzid,
+              },
+              timeFmt,
+              tz,
+            )}
+            whenHere={describeWhenHere(
               {
                 start: viewing.start,
                 end: viewing.end,

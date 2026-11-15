@@ -18,6 +18,6 @@ if (!root) throw new Error('#root element not found');
 
 createRoot(root).render(
   <StrictMode>
-    <App />
+    <App welcome />
   </StrictMode>,
 );

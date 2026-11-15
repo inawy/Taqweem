@@ -18,6 +18,17 @@ export default defineConfig({
     // Colour transitions would make contrast checks sample a half-way colour (the app honours
     // prefers-reduced-motion by switching them off).
     reducedMotion: 'reduce',
+    // The first-run card (D-158) would sit over every test's first screen: they start as someone
+    // who has already seen it. The one test about the card itself clears this.
+    storageState: {
+      cookies: [],
+      origins: [
+        {
+          origin: 'http://localhost:4173',
+          localStorage: [{ name: 'nawy-today:welcome:v1', value: '1' }],
+        },
+      ],
+    },
   },
   webServer: {
     command: 'npm run preview -- --port 4173 --strictPort',

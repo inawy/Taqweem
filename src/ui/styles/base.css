@@ -202,6 +202,20 @@ input:not([type='checkbox']) {
   }
 }
 
+.welcome-title {
+  margin: 0 0 4px;
+  font-size: 1rem;
+}
+
+.welcome-list {
+  margin: 0 0 8px;
+  padding-inline-start: 20px;
+}
+
+.welcome-list li {
+  margin-block-end: 2px;
+}
+
 .banner-action {
   display: flex;
   flex-wrap: wrap;

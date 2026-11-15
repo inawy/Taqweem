@@ -17,6 +17,7 @@ import { DataProvider, useCalendarData, useData } from '@/features/data';
 import { useT } from '@/features/i18n';
 import { buildAgendaModel } from '@/features/agenda';
 import { createDataTools, latestSnapshotFile, useBackupReminder } from '@/features/backup';
+import { useWelcome } from '@/features/welcome';
 import {
   installHelpFor,
   readInstallEnvironment,
@@ -80,6 +81,8 @@ export interface AppProps {
   readonly saveFile?: (file: FileToSave) => void;
   readonly now?: () => number;
   readonly storage?: (ReadableStorage & WritableStorage) | undefined;
+  /** Greet a first-time person with a short card (D-158). Off unless asked, so tests stay quiet. */
+  readonly welcome?: boolean;
   /** The service worker container; injectable for tests. Off in development. */
   readonly serviceWorker?: WorkerContainer | undefined;
 }
@@ -120,6 +123,7 @@ export function App({
   saveFile,
   now = nowMs,
   storage,
+  welcome = false,
   serviceWorker,
 }: AppProps) {
   const worker = useMemo(() => serviceWorker ?? browserWorkerContainer(), [serviceWorker]);
@@ -143,6 +147,7 @@ export function App({
             worker={worker}
             storage={storage ?? browserStorage()}
             saveFile={saveFile}
+            welcome={welcome}
           />
         </DataProvider>
       </ErrorBoundary>
@@ -155,11 +160,13 @@ function Calendar({
   worker,
   storage,
   saveFile,
+  welcome: greet,
 }: {
   readonly now: () => number;
   readonly worker: WorkerContainer | undefined;
   readonly storage: (ReadableStorage & WritableStorage) | undefined;
   readonly saveFile: ((file: FileToSave) => void) | undefined;
+  readonly welcome: boolean;
 }) {
   const t = useT();
   const { settings } = useSettings();
@@ -196,6 +203,11 @@ function Calendar({
     persistence: data.status === 'ready' ? data.persistence : undefined,
   });
   const { markBackedUp } = reminder;
+  const welcome = useWelcome({
+    storage,
+    enabled: greet && data.status === 'ready' && calendarData.status === 'ready',
+    eventCount: calendarData.events.length,
+  });
   const tools = useMemo(
     () =>
       data.status === 'ready'
@@ -535,6 +547,19 @@ function Calendar({
           onDismiss={pwa.dismissOfflineReady}
           action={{ label: t('dismiss'), run: pwa.dismissOfflineReady }}
         />
+      )}
+      {welcome.show && !flow.dialogOpen && !searchOpen && !dataOpen && (
+        <section role="region" aria-label={t('welcomeTitle')} className="banner welcome">
+          <h2 className="welcome-title">{t('welcomeTitle')}</h2>
+          <ul className="welcome-list">
+            <li>{t('welcomeAdd')}</li>
+            <li>{t('welcomeDrag')}</li>
+            <li>{t('welcomeData')}</li>
+          </ul>
+          <button type="button" className="btn" onClick={welcome.dismiss}>
+            {t('welcomeStart')}
+          </button>
+        </section>
       )}
       {reminder.show && !flow.dialogOpen && !searchOpen && !dataOpen && (
         <p role="status" className="banner banner-action">

@@ -35,7 +35,38 @@ async function seed(): Promise<void> {
   db.close();
 }
 
-const open = () => render(<App create={() => createDb(dbName)} now={NOW} storage={storage()} />);
+const open = (saveFile?: (file: { name: string; text: string }) => void) =>
+  render(
+    <App
+      create={() => createDb(dbName)}
+      now={NOW}
+      storage={storage()}
+      {...(saveFile ? { saveFile } : {})}
+    />,
+  );
+
+describe('the event card: send to the phone (D-159)', () => {
+  it('downloads a file with the chosen alarm and says who carries it out', async () => {
+    await seed();
+    const saved: { name: string; text: string }[] = [];
+    open((f) => saved.push(f));
+    fireEvent.click(await screen.findByRole('button', { name: /Team sync/ }));
+    const card = await screen.findByRole('dialog', { name: 'Team sync' });
+    expect(
+      within(card).getByText(/carried out by the calendar app that opens the file/),
+    ).toBeTruthy();
+    fireEvent.click(within(card).getByRole('button', { name: 'Download a file with an alert' }));
+    expect(saved).toHaveLength(1);
+    expect(saved[0]?.name).toBe('nawy-today-event.ics');
+    expect(saved[0]?.text).toContain('SUMMARY:Team sync');
+    expect(saved[0]?.text).toContain('TRIGGER:-PT10M');
+
+    fireEvent.change(within(card).getByLabelText('Alert'), { target: { value: '60' } });
+    fireEvent.click(within(card).getByRole('button', { name: 'Download a file with an alert' }));
+    expect(saved[1]?.text).toContain('TRIGGER:-PT60M');
+    expect(saved[1]?.text.match(/BEGIN:VEVENT/g)).toHaveLength(1);
+  });
+});
 
 describe('the event card', () => {
   it('shows what the event is before anything can be changed', async () => {

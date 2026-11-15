@@ -29,6 +29,9 @@ import type { Draft, Scope, Target } from '@/features/events';
 import { useT } from '@/features/i18n';
 import type { MessageKey } from '@/features/i18n';
 import { EventDetails } from '@/ui/editor/EventDetails';
+import { downloadFile } from '@/ui/backup/download';
+import type { FileToSave } from '@/features/backup';
+import { ICS_EVENT_FILE_NAME, eventToIcsWithAlarm } from '@/features/ics';
 import { EventEditor } from '@/ui/editor/EventEditor';
 import { QuickAdd } from '@/ui/editor/QuickAdd';
 import type { SaveOutcome } from '@/ui/editor/EventEditor';
@@ -67,6 +70,8 @@ export interface EventFlowInput {
   readonly today: PlainDate;
   /** How long a new timed event lasts, in minutes (D-134). */
   readonly defaultMinutes: number;
+  /** Hands a produced file to the person (default: the browser's own download). */
+  readonly save?: ((file: FileToSave) => void) | undefined;
 }
 
 export interface EventFlow {
@@ -114,6 +119,7 @@ export function useEventFlow({
   weekStart,
   today,
   defaultMinutes,
+  save = downloadFile,
 }: EventFlowInput): EventFlow {
   const t = useT();
   const [editing, setEditing] = useState<Editing | null>(null);
@@ -463,6 +469,12 @@ export function useEventFlow({
               tz,
             )}
             recurring={viewing.recurring}
+            onSendToPhone={(minutes) =>
+              save({
+                name: ICS_EVENT_FILE_NAME,
+                text: eventToIcsWithAlarm(calendars, events, viewing.event, minutes),
+              })
+            }
             onEdit={() => openEvent(viewing)}
             onDuplicate={() => duplicateEvent(viewing)}
             onDelete={() => {

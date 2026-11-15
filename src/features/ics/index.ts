@@ -1,4 +1,6 @@
 export {
+  ICS_EVENT_FILE_NAME,
+  eventToIcsWithAlarm,
   eventsToIcs,
   icsFileName,
   icsToEnvelope,

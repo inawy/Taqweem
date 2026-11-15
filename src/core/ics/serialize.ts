@@ -2,7 +2,8 @@ import { fromInstantMs, isValidDate } from '@/core/time';
 import type { CalEvent, Calendar } from '@/core/model';
 import { escapeText, foldLine } from './text';
 
-// Events → an .ics file (RFC 5545). No alarms are written: this app does not remind (D-002).
+// Events → an .ics file (RFC 5545). No alarms are written unless one is asked for (D-159): this app
+// does not remind (D-002); an alarm in the file is carried out by whatever opens the file.
 
 export const PRODID = '-//Nawy Today//AR//EN';
 
@@ -22,10 +23,27 @@ function when(name: string, value: string, tzid: string | undefined): string {
     : `${name};TZID=${tzid}:${icsLocal(value)}`;
 }
 
+/** The 09:00 an all-day event's alarm counts from: it starts at midnight, a bad hour to ring. */
+const ALL_DAY_ALARM_MINUTE = 9 * 60;
+const MAX_ALARM_MINUTES = 7 * 24 * 60;
+
+/** RFC 5545 `TRIGGER` value, or `undefined` for a number that is no sensible offset. */
+export function alarmTrigger(minutes: number, allDay: boolean): string | undefined {
+  if (!Number.isInteger(minutes) || minutes < 0 || minutes > MAX_ALARM_MINUTES) return undefined;
+  const total = allDay ? ALL_DAY_ALARM_MINUTE - minutes : -minutes;
+  if (total === 0) return 'PT0S';
+  const abs = Math.abs(total);
+  const h = Math.floor(abs / 60);
+  const m = abs % 60;
+  return `${total < 0 ? '-' : ''}PT${h > 0 ? `${h}H` : ''}${m > 0 ? `${m}M` : ''}`;
+}
+
 export interface IcsInput {
   readonly calendars: readonly Calendar[];
   readonly events: readonly CalEvent[];
   readonly name?: string;
+  /** Minutes before the start that the program opening the file should alert (D-159). */
+  readonly alarmMinutes?: number;
 }
 
 export function serializeIcs(input: IcsInput): string {
@@ -69,6 +87,17 @@ export function serializeIcs(input: IcsInput): string {
     if (e.rrule?.includes('X-HIJRI')) lines.push(`X-NAWY-HIJRI-RULE:${e.rrule}`);
     else if (e.rrule) lines.push(`RRULE:${e.rrule}`);
     for (const x of e.exdates ?? []) lines.push(when('EXDATE', x, tz));
+    const trigger =
+      input.alarmMinutes === undefined ? undefined : alarmTrigger(input.alarmMinutes, e.allDay);
+    if (trigger !== undefined) {
+      lines.push(
+        'BEGIN:VALARM',
+        'ACTION:DISPLAY',
+        `DESCRIPTION:${escapeText(e.title)}`,
+        `TRIGGER:${trigger}`,
+        'END:VALARM',
+      );
+    }
     lines.push('END:VEVENT');
   }
   lines.push('END:VCALENDAR');

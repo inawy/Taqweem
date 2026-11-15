@@ -120,3 +120,25 @@ export function icsFileName(epochMs: number, zone: TimeZoneId): string {
 export function eventsToIcs(calendars: readonly Calendar[], events: readonly CalEvent[]): string {
   return serializeIcs({ calendars, events, name: 'Taqweem' });
 }
+
+/**
+ * One event (a whole series with its changed occurrences) as a file with an alarm that the
+ * program opening it carries out (D-159). The app itself never rings.
+ */
+export function eventToIcsWithAlarm(
+  calendars: readonly Calendar[],
+  events: readonly CalEvent[],
+  event: CalEvent,
+  alarmMinutes: number,
+): string {
+  const base = event.seriesId ?? event.id;
+  const part = events.filter((e) => e.id === base || e.seriesId === base);
+  return serializeIcs({
+    calendars,
+    events: part.length > 0 ? part : [event],
+    name: 'Taqweem',
+    alarmMinutes,
+  });
+}
+
+export const ICS_EVENT_FILE_NAME = 'nawy-today-event.ics';

@@ -1,7 +1,8 @@
-import { useEffect, useId, useRef } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import type { KeyboardEvent } from 'react';
 import type { Calendar, CalEvent } from '@/core/model';
 import { useT } from '@/features/i18n';
+import type { MessageKey } from '@/features/i18n';
 import { trapTab } from '@/lib/focusTrap';
 import { useRestoreFocus } from '@/ui/shell/useRestoreFocus';
 import { CloseIcon } from '@/ui/shell/Icons';
@@ -16,11 +17,20 @@ export interface EventDetailsProps {
   /** The same time on the person's own clock, when the event is kept in another zone (D-148). */
   readonly whenHere?: string | undefined;
   readonly recurring: boolean;
+  /** Hands the event to the phone's own calendar as a file, with an alarm that many minutes early. */
+  readonly onSendToPhone?: ((minutes: number) => void) | undefined;
   readonly onEdit: () => void;
   readonly onDuplicate: () => void;
   readonly onDelete: () => void;
   readonly onClose: () => void;
 }
+
+const ALARM_CHOICES: readonly (readonly [number, MessageKey])[] = [
+  [0, 'icsAlarm0'],
+  [10, 'icsAlarm10'],
+  [60, 'icsAlarm60'],
+  [1440, 'icsAlarm1440'],
+];
 
 /** What an event is, at a glance, before deciding to change it. Text only: never parsed as HTML. */
 export function EventDetails({
@@ -29,6 +39,7 @@ export function EventDetails({
   when,
   whenHere,
   recurring,
+  onSendToPhone,
   onEdit,
   onDuplicate,
   onDelete,
@@ -39,6 +50,8 @@ export function EventDetails({
   const titleId = useId();
   const ref = useRef<HTMLDivElement>(null);
   const editRef = useRef<HTMLButtonElement>(null);
+  const [alarm, setAlarm] = useState(10);
+  const alarmId = useId();
   const title = event.title.trim() === '' ? t('untitled') : event.title;
 
   useEffect(() => {
@@ -114,6 +127,30 @@ export function EventDetails({
             </div>
           )}
         </dl>
+        {onSendToPhone && (
+          <section className="details-alarm" aria-labelledby={`${alarmId}-h`}>
+            <h3 id={`${alarmId}-h`} className="details-alarm-head">
+              {t('icsAlarmHead')}
+            </h3>
+            <label className="field">
+              <span>{t('icsAlarmWhen')}</span>
+              <select value={alarm} onChange={(e) => setAlarm(Number(e.currentTarget.value))}>
+                {ALARM_CHOICES.map(([minutes, key]) => (
+                  <option key={minutes} value={minutes}>
+                    {t(key)}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <button type="button" className="btn" onClick={() => onSendToPhone(alarm)}>
+              {t('icsAlarmButton')}
+            </button>
+            <p className="muted details-alarm-note">
+              {t('icsAlarmNote')}
+              {event.allDay && ` ${t('icsAlarmAllDay')}`}
+            </p>
+          </section>
+        )}
         <footer className="ed-foot">
           <button ref={editRef} type="button" className="btn btn-primary" onClick={onEdit}>
             {t('editEvent')}

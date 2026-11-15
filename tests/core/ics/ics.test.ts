@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { parseIcs, serializeIcs } from '@/core/ics';
+import { alarmTrigger, parseIcs, serializeIcs } from '@/core/ics';
 import { makeAllDayEvent, makeCalendar, makeEvent } from '../../helpers/factories';
 
 const file = (...lines: string[]) =>
@@ -298,5 +298,45 @@ describe('serializeIcs', () => {
       originalStart: '2026-10-27T09:00',
       start: '2026-10-27T11:00',
     });
+  });
+});
+
+describe('an alarm asked for in the file (D-159)', () => {
+  const calendars = [makeCalendar({ id: 'c', name: 'Home' })];
+
+  it('computes the trigger: before a timed start, from 09:00 for an all-day one', () => {
+    expect(alarmTrigger(0, false)).toBe('PT0S');
+    expect(alarmTrigger(10, false)).toBe('-PT10M');
+    expect(alarmTrigger(60, false)).toBe('-PT60M');
+    expect(alarmTrigger(1440, false)).toBe('-PT1440M');
+    expect(alarmTrigger(0, true)).toBe('PT9H');
+    expect(alarmTrigger(60, true)).toBe('PT8H');
+    expect(alarmTrigger(1440, true)).toBe('-PT15H');
+    expect(alarmTrigger(30, true)).toBe('PT8H30M');
+  });
+
+  it('refuses offsets that make no sense', () => {
+    for (const bad of [-1, 1.5, Number.NaN, 7 * 24 * 60 + 1]) {
+      expect(alarmTrigger(bad, false)).toBeUndefined();
+    }
+  });
+
+  it('writes a display alarm in every event, and none unless asked', () => {
+    const e = makeEvent({ id: 'a', calendarId: 'c', title: 'Dentist; today' });
+    const asked = serializeIcs({ calendars, events: [e], alarmMinutes: 10 });
+    expect(asked).toContain(
+      'BEGIN:VALARM\r\nACTION:DISPLAY\r\nDESCRIPTION:Dentist\\; today\r\nTRIGGER:-PT10M\r\nEND:VALARM',
+    );
+    expect(serializeIcs({ calendars, events: [e] })).not.toContain('VALARM');
+    expect(serializeIcs({ calendars, events: [e], alarmMinutes: -5 })).not.toContain('VALARM');
+  });
+
+  it('still reads back as the same event', () => {
+    const e = makeEvent({ id: 'a', calendarId: 'c', title: 'Dentist' });
+    const back = parseIcs(serializeIcs({ calendars, events: [e], alarmMinutes: 60 }), {
+      zone: ZONE,
+    });
+    expect(back.events).toHaveLength(1);
+    expect(back.events[0]?.title).toBe('Dentist');
   });
 });

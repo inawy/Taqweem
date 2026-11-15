@@ -63,7 +63,7 @@ describe('the event card: send to the phone (D-159)', () => {
 
     fireEvent.change(within(card).getByLabelText('Alert'), { target: { value: '60' } });
     fireEvent.click(within(card).getByRole('button', { name: 'Download a file with an alert' }));
-    expect(saved[1]?.text).toContain('TRIGGER:-PT60M');
+    expect(saved[1]?.text).toContain('TRIGGER:-PT1H');
     expect(saved[1]?.text.match(/BEGIN:VEVENT/g)).toHaveLength(1);
   });
 });

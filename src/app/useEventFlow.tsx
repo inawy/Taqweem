@@ -71,7 +71,7 @@ export interface EventFlowInput {
   /** How long a new timed event lasts, in minutes (D-134). */
   readonly defaultMinutes: number;
   /** Hands a produced file to the person (default: the browser's own download). */
-  readonly save?: ((file: FileToSave) => void) | undefined;
+  readonly saveFile?: ((file: FileToSave) => void) | undefined;
 }
 
 export interface EventFlow {
@@ -119,7 +119,7 @@ export function useEventFlow({
   weekStart,
   today,
   defaultMinutes,
-  save = downloadFile,
+  saveFile = downloadFile,
 }: EventFlowInput): EventFlow {
   const t = useT();
   const [editing, setEditing] = useState<Editing | null>(null);
@@ -470,7 +470,7 @@ export function useEventFlow({
             )}
             recurring={viewing.recurring}
             onSendToPhone={(minutes) =>
-              save({
+              saveFile({
                 name: ICS_EVENT_FILE_NAME,
                 text: eventToIcsWithAlarm(calendars, events, viewing.event, minutes),
               })

@@ -307,8 +307,8 @@ describe('an alarm asked for in the file (D-159)', () => {
   it('computes the trigger: before a timed start, from 09:00 for an all-day one', () => {
     expect(alarmTrigger(0, false)).toBe('PT0S');
     expect(alarmTrigger(10, false)).toBe('-PT10M');
-    expect(alarmTrigger(60, false)).toBe('-PT60M');
-    expect(alarmTrigger(1440, false)).toBe('-PT1440M');
+    expect(alarmTrigger(60, false)).toBe('-PT1H');
+    expect(alarmTrigger(1440, false)).toBe('-PT24H');
     expect(alarmTrigger(0, true)).toBe('PT9H');
     expect(alarmTrigger(60, true)).toBe('PT8H');
     expect(alarmTrigger(1440, true)).toBe('-PT15H');

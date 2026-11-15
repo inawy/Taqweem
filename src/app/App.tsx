@@ -233,7 +233,7 @@ function Calendar({
     weekStart: settings.weekStart,
     today,
     defaultMinutes: settings.defaultDuration,
-    save: saveFile,
+    saveFile,
   });
 
   // Only the views on screen are computed: each one scans every event, so building all of them on

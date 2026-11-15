@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import type { KeyboardEvent } from 'react';
 import type { IsoWeekday, Numerals } from '@/core/time';
 import { useT } from '@/features/i18n';
@@ -88,6 +88,8 @@ export function SettingsDialog({ onClose }: SettingsDialogProps) {
   useRestoreFocus();
   const titleId = useId();
   const ref = useRef<HTMLDivElement>(null);
+  const [advanced, setAdvanced] = useState(false);
+  const advancedId = useId();
 
   useEffect(() => {
     ref.current?.focus();
@@ -173,121 +175,6 @@ export function SettingsDialog({ onClose }: SettingsDialogProps) {
               ))}
             </select>
           </label>
-          <label className="field">
-            <span>{t('hideWeekendLabel')}</span>
-            <select
-              value={settings.hideWeekend}
-              onChange={(e) => update({ hideWeekend: e.currentTarget.value as WeekendHiding })}
-            >
-              {WEEKEND_HIDING.map((value) => (
-                <option key={value} value={value}>
-                  {t(WEEKEND_LABELS[value])}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label className="field">
-            <span>{t('weekendLabel')}</span>
-            <select
-              value={settings.weekend}
-              onChange={(e) => update({ weekend: e.currentTarget.value as WeekendHiding })}
-            >
-              {WEEKEND_HIDING.map((value) => (
-                <option key={value} value={value}>
-                  {value === 'none' ? t('weekendNone') : t(WEEKEND_LABELS[value])}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label className="field">
-            <span>{t('secondZoneLabel')}</span>
-            <select
-              value={settings.secondZone}
-              onChange={(e) => update({ secondZone: e.currentTarget.value })}
-            >
-              <option value="">{t('secondZoneNone')}</option>
-              {[...new Set([settings.secondZone, ...SECOND_ZONES])]
-                .filter((zone) => zone !== '')
-                .map((zone) => (
-                  <option key={zone} value={zone}>
-                    {zoneName(zone)}
-                  </option>
-                ))}
-            </select>
-          </label>
-          <label className="field">
-            <span>{t('defaultDurationLabel')}</span>
-            <select
-              value={settings.defaultDuration}
-              onChange={(e) =>
-                update({ defaultDuration: Number(e.currentTarget.value) as DefaultDuration })
-              }
-            >
-              {DEFAULT_DURATIONS.map((m) => (
-                <option key={m} value={m}>
-                  {durationText(m, settings.locale, settings.numerals)}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label className="field">
-            <span>{t('workHoursLabel')}</span>
-            <select
-              value={work ? String(work.start) : 'off'}
-              onChange={(e) => {
-                const v = e.currentTarget.value;
-                const start = Number(v);
-                if (v === 'off') {
-                  update({ workHours: 'off' });
-                } else {
-                  const end = work && work.end > start ? work.end : Math.min(24, start + 8);
-                  update({ workHours: `${start}-${end}` });
-                }
-              }}
-            >
-              <option value="off">{t('workHoursOff')}</option>
-              {range(0, 23).map((h) => (
-                <option key={h} value={h}>
-                  {hourText(h)}
-                </option>
-              ))}
-            </select>
-          </label>
-          {work && (
-            <label className="field">
-              <span>{t('workHoursTo')}</span>
-              <select
-                value={work.end}
-                onChange={(e) => update({ workHours: `${work.start}-${e.currentTarget.value}` })}
-              >
-                {range(work.start + 1, 24).map((h) => (
-                  <option key={h} value={h}>
-                    {hourText(h)}
-                  </option>
-                ))}
-              </select>
-            </label>
-          )}
-          <label className="field">
-            <span>{t('timeFormat')}</span>
-            <select
-              value={settings.hour12 ? '12' : '24'}
-              onChange={(e) => update({ hour12: e.currentTarget.value === '12' })}
-            >
-              <option value="12">{t('time12')}</option>
-              <option value="24">{t('time24')}</option>
-            </select>
-          </label>
-          <label className="field">
-            <span>{t('numeralsLabel')}</span>
-            <select
-              value={settings.numerals}
-              onChange={(e) => update({ numerals: e.currentTarget.value as Numerals })}
-            >
-              <option value="latn">{t('numeralsLatin')}</option>
-              <option value="arab">{t('numeralsArabic')}</option>
-            </select>
-          </label>
           <label className="ed-check">
             <input
               type="checkbox"
@@ -313,14 +200,144 @@ export function SettingsDialog({ onClose }: SettingsDialogProps) {
               </select>
             </label>
           )}
-          <label className="ed-check">
-            <input
-              type="checkbox"
-              checked={settings.weekNumbers}
-              onChange={(e) => update({ weekNumbers: e.currentTarget.checked })}
-            />
-            <span>{t('weekNumbersLabel')}</span>
-          </label>
+          <button
+            type="button"
+            className="btn settings-advanced-toggle"
+            aria-expanded={advanced}
+            aria-controls={advancedId}
+            onClick={() => setAdvanced(!advanced)}
+          >
+            {t('settingsAdvanced')}
+          </button>
+          {advanced && (
+            <div id={advancedId} className="settings-advanced">
+              <label className="field">
+                <span>{t('hideWeekendLabel')}</span>
+                <select
+                  value={settings.hideWeekend}
+                  onChange={(e) => update({ hideWeekend: e.currentTarget.value as WeekendHiding })}
+                >
+                  {WEEKEND_HIDING.map((value) => (
+                    <option key={value} value={value}>
+                      {t(WEEKEND_LABELS[value])}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="field">
+                <span>{t('weekendLabel')}</span>
+                <select
+                  value={settings.weekend}
+                  onChange={(e) => update({ weekend: e.currentTarget.value as WeekendHiding })}
+                >
+                  {WEEKEND_HIDING.map((value) => (
+                    <option key={value} value={value}>
+                      {value === 'none' ? t('weekendNone') : t(WEEKEND_LABELS[value])}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="field">
+                <span>{t('secondZoneLabel')}</span>
+                <select
+                  value={settings.secondZone}
+                  onChange={(e) => update({ secondZone: e.currentTarget.value })}
+                >
+                  <option value="">{t('secondZoneNone')}</option>
+                  {[...new Set([settings.secondZone, ...SECOND_ZONES])]
+                    .filter((zone) => zone !== '')
+                    .map((zone) => (
+                      <option key={zone} value={zone}>
+                        {zoneName(zone)}
+                      </option>
+                    ))}
+                </select>
+              </label>
+              <label className="field">
+                <span>{t('defaultDurationLabel')}</span>
+                <select
+                  value={settings.defaultDuration}
+                  onChange={(e) =>
+                    update({ defaultDuration: Number(e.currentTarget.value) as DefaultDuration })
+                  }
+                >
+                  {DEFAULT_DURATIONS.map((m) => (
+                    <option key={m} value={m}>
+                      {durationText(m, settings.locale, settings.numerals)}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="field">
+                <span>{t('workHoursLabel')}</span>
+                <select
+                  value={work ? String(work.start) : 'off'}
+                  onChange={(e) => {
+                    const v = e.currentTarget.value;
+                    const start = Number(v);
+                    if (v === 'off') {
+                      update({ workHours: 'off' });
+                    } else {
+                      const end = work && work.end > start ? work.end : Math.min(24, start + 8);
+                      update({ workHours: `${start}-${end}` });
+                    }
+                  }}
+                >
+                  <option value="off">{t('workHoursOff')}</option>
+                  {range(0, 23).map((h) => (
+                    <option key={h} value={h}>
+                      {hourText(h)}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              {work && (
+                <label className="field">
+                  <span>{t('workHoursTo')}</span>
+                  <select
+                    value={work.end}
+                    onChange={(e) =>
+                      update({ workHours: `${work.start}-${e.currentTarget.value}` })
+                    }
+                  >
+                    {range(work.start + 1, 24).map((h) => (
+                      <option key={h} value={h}>
+                        {hourText(h)}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              )}
+              <label className="field">
+                <span>{t('timeFormat')}</span>
+                <select
+                  value={settings.hour12 ? '12' : '24'}
+                  onChange={(e) => update({ hour12: e.currentTarget.value === '12' })}
+                >
+                  <option value="12">{t('time12')}</option>
+                  <option value="24">{t('time24')}</option>
+                </select>
+              </label>
+              <label className="field">
+                <span>{t('numeralsLabel')}</span>
+                <select
+                  value={settings.numerals}
+                  onChange={(e) => update({ numerals: e.currentTarget.value as Numerals })}
+                >
+                  <option value="latn">{t('numeralsLatin')}</option>
+                  <option value="arab">{t('numeralsArabic')}</option>
+                </select>
+              </label>
+              <label className="ed-check">
+                <input
+                  type="checkbox"
+                  checked={settings.weekNumbers}
+                  onChange={(e) => update({ weekNumbers: e.currentTarget.checked })}
+                />
+                <span>{t('weekNumbersLabel')}</span>
+              </label>
+            </div>
+          )}
           {!persisted && (
             <p role="status" className="muted">
               {t('notSaved')}

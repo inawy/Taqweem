@@ -14,19 +14,21 @@ export interface AgendaViewProps {
   readonly model: AgendaModel;
   readonly nowLocal: PlainDateTime;
   readonly onOpenEvent: (occurrence: Occurrence) => void;
+  /** When given, an empty day offers a button that starts a new event for it. */
+  readonly onAdd?: (() => void) | undefined;
 }
 
 type Vars = CSSProperties & Record<`--${string}`, string | number>;
 
 /** The phone's main screen: one day as a plain vertical list, with a marker for "now". */
-export function AgendaView({ model, nowLocal, onOpenEvent }: AgendaViewProps) {
+export function AgendaView({ model, nowLocal, onOpenEvent, onAdd }: AgendaViewProps) {
   const t = useT();
   const { settings } = useSettings();
   const fmt: FormatOptions = { locale: settings.locale, numerals: settings.numerals };
   const timeFmt: TimeFormatOptions = { ...fmt, hour12: settings.hour12 };
 
   if (model.items.length === 0 && model.nowIndex === null) {
-    return <p className="agenda-empty muted">{t('agendaEmpty')}</p>;
+    return <EmptyDay onAdd={onAdd} />;
   }
 
   const nowMin = minuteOfNow(nowLocal);
@@ -59,8 +61,23 @@ export function AgendaView({ model, nowLocal, onOpenEvent }: AgendaViewProps) {
   }
   return (
     <div className="agenda">
-      {model.items.length === 0 && <p className="agenda-empty muted">{t('agendaEmpty')}</p>}
+      {model.items.length === 0 && <EmptyDay onAdd={onAdd} />}
       <ul className="agenda-list">{rows}</ul>
+    </div>
+  );
+}
+
+/** An empty day says so and, where it can, offers the first step instead of leaving a blank. */
+function EmptyDay({ onAdd }: { readonly onAdd: (() => void) | undefined }) {
+  const t = useT();
+  return (
+    <div className="agenda-empty">
+      <p className="muted">{t('agendaEmpty')}</p>
+      {onAdd && (
+        <button type="button" className="btn agenda-empty-add" onClick={onAdd}>
+          {t('agendaEmptyAdd')}
+        </button>
+      )}
     </div>
   );
 }

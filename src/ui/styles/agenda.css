@@ -21,6 +21,10 @@
   text-align: center;
 }
 
+.agenda-empty-add {
+  margin-block-start: 8px;
+}
+
 .agenda-item {
   position: relative;
   overflow: hidden;

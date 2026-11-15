@@ -3,6 +3,7 @@ import { cleanup, fireEvent, render, screen, within } from '@testing-library/rea
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { App } from '@/app/App';
 import { createDb, createSnapshotDb } from '@/data';
+import { openMore } from '../helpers/sidebar';
 
 let dbName = '';
 let snapName = '';
@@ -27,6 +28,7 @@ describe('upcoming occasions (D-151)', () => {
   it('lists them from the menu and a tap goes to the day', async () => {
     open();
     await screen.findByRole('heading', { level: 1, name: 'October 2026' });
+    await openMore();
     fireEvent.click(screen.getAllByRole('button', { name: 'Upcoming occasions' })[0]!);
     const dialog = await screen.findByRole('dialog', { name: 'Upcoming occasions' });
     const rows = within(dialog)
@@ -43,6 +45,7 @@ describe('upcoming occasions (D-151)', () => {
   it('Escape closes it without moving', async () => {
     open();
     await screen.findByRole('heading', { level: 1, name: 'October 2026' });
+    await openMore();
     fireEvent.click(screen.getAllByRole('button', { name: 'Upcoming occasions' })[0]!);
     const dialog = await screen.findByRole('dialog', { name: 'Upcoming occasions' });
     fireEvent.keyDown(dialog, { code: 'Escape' });

@@ -62,18 +62,6 @@
   flex-direction: column;
 }
 
-/* The two shortcuts under the small month (go to a date, upcoming occasions): each a full-width
-   block of its own. As bare inline buttons they sat on one line and ran into each other (D-154). */
-.sidebar-body > .goto-btn {
-  display: block;
-  inline-size: 100%;
-  margin-block-start: 8px;
-}
-
-.sidebar-body > .goto-btn:last-of-type {
-  margin-block-end: 16px;
-}
-
 .sidebar-heading {
   font-size: 0.875rem;
   font-weight: 600;
@@ -86,10 +74,16 @@
 }
 
 /* The buttons under the settings share one width and one rhythm (D-056). */
-.sidebar-settings > .btn {
+.sidebar-settings > .btn,
+.more-tools > .btn {
   display: block;
   inline-size: 100%;
   margin-block-start: 8px;
+}
+
+/* The tools behind "More" sit in one block, set a little apart from the main buttons (D-157). */
+.more-tools {
+  margin-block-end: 8px;
 }
 
 /* Tighter than the editor's fields (D-094): the label sits closer to its box and the rows are

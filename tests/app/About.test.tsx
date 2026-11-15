@@ -3,6 +3,7 @@ import { cleanup, fireEvent, render, screen, within } from '@testing-library/rea
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { App } from '@/app/App';
 import { createDb, createSnapshotDb } from '@/data';
+import { openMore } from '../helpers/sidebar';
 
 let dbName = '';
 let snapName = '';
@@ -26,6 +27,7 @@ const open = () =>
 describe('about and privacy', () => {
   it('opens from the menu, says plainly what it cannot do, and closes with Escape', async () => {
     open();
+    await openMore();
     fireEvent.click(await screen.findByRole('button', { name: 'About and privacy' }));
     const dialog = await screen.findByRole('dialog', { name: 'About Taqweem' });
     expect(within(dialog).getByText(/No reminders and no notifications/)).toBeTruthy();

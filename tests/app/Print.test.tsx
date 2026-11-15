@@ -3,6 +3,7 @@ import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { App } from '@/app/App';
 import { createDb, createSnapshotDb } from '@/data';
+import { openMore } from '../helpers/sidebar';
 
 let dbName = '';
 let snapName = '';
@@ -27,6 +28,7 @@ describe('print (D-142)', () => {
         storage={{ getItem: () => null, setItem: () => undefined }}
       />,
     );
+    await openMore();
     fireEvent.click(await screen.findByRole('button', { name: 'Print this view' }));
     expect(print).toHaveBeenCalledTimes(1);
   });

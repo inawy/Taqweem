@@ -3,6 +3,7 @@ import { cleanup, fireEvent, render, screen, within } from '@testing-library/rea
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { App } from '@/app/App';
 import { createDb, createSnapshotDb } from '@/data';
+import { openMore } from '../helpers/sidebar';
 
 let dbName = '';
 let snapName = '';
@@ -42,6 +43,7 @@ describe('keyboard shortcuts help', () => {
 
   it('is also reachable from the menu', async () => {
     open();
+    await openMore();
     fireEvent.click(await screen.findByRole('button', { name: 'Keyboard shortcuts' }));
     expect(await screen.findByRole('dialog', { name: 'Keyboard shortcuts' })).toBeTruthy();
   });

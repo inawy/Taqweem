@@ -602,7 +602,12 @@ function Calendar({
             }}
           />
         ) : view === 'agenda' ? (
-          <AgendaView model={agendaModel} nowLocal={nowLocal} onOpenEvent={flow.showEvent} />
+          <AgendaView
+            model={agendaModel}
+            nowLocal={nowLocal}
+            onOpenEvent={flow.showEvent}
+            onAdd={() => flow.openNew(anchor)}
+          />
         ) : view === 'month' ? (
           <div className={phone ? 'month-split' : 'month-wrap'}>
             <MonthView
@@ -622,7 +627,12 @@ function Calendar({
                 <h2 id="month-day-title" className="month-day-title">
                   {formatDate(anchor, fmt, 'full')}
                 </h2>
-                <AgendaView model={agendaModel} nowLocal={nowLocal} onOpenEvent={flow.showEvent} />
+                <AgendaView
+                  model={agendaModel}
+                  nowLocal={nowLocal}
+                  onOpenEvent={flow.showEvent}
+                  onAdd={() => flow.openNew(anchor)}
+                />
               </section>
             )}
           </div>

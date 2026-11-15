@@ -210,6 +210,12 @@ button.block {
   inline-size: 5rem;
 }
 
+.settings-advanced-toggle {
+  display: block;
+  inline-size: 100%;
+  margin-block: 8px;
+}
+
 .ed-check {
   display: flex;
   align-items: center;
@@ -378,7 +384,7 @@ button.block {
 
 /* A phone has no keyboard to speak of: the entry in the menu is not offered. */
 @media (pointer: coarse) {
-  .sidebar-settings > .shortcuts-btn {
+  .more-tools > .shortcuts-btn {
     display: none;
   }
 }

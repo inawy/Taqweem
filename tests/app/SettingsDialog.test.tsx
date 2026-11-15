@@ -33,8 +33,30 @@ describe('settings live in their own dialog (D-095)', () => {
 
     fireEvent.click(within(panel).getByRole('button', { name: 'Settings' }));
     const dialog = screen.getByRole('dialog', { name: 'Settings' });
-    expect(within(dialog).getAllByRole('combobox')).toHaveLength(11);
     expect(within(dialog).getByLabelText('Show Hijri date')).toBeTruthy();
+  });
+
+  it('shows only the basics until "Advanced options" is opened (D-157)', async () => {
+    open();
+    await screen.findByRole('heading', { level: 1 });
+    fireEvent.click(screen.getByRole('button', { name: 'Settings' }));
+    const dialog = screen.getByRole('dialog', { name: 'Settings' });
+    // Language, theme, week start and the opening view: four boxes and the Hijri tick.
+    expect(within(dialog).getAllByRole('combobox')).toHaveLength(4);
+    for (const label of ['Time format', 'Numerals', 'Working hours from', 'Week numbers']) {
+      expect(within(dialog).queryByLabelText(new RegExp(`^${label}`))).toBeNull();
+    }
+
+    const toggle = within(dialog).getByRole('button', { name: 'Advanced options' });
+    expect(toggle.getAttribute('aria-expanded')).toBe('false');
+    fireEvent.click(toggle);
+    expect(toggle.getAttribute('aria-expanded')).toBe('true');
+    expect(within(dialog).getAllByRole('combobox')).toHaveLength(11);
+    expect(within(dialog).getByLabelText('Time format')).toBeTruthy();
+    expect(within(dialog).getByLabelText('Numerals')).toBeTruthy();
+
+    fireEvent.click(toggle);
+    expect(within(dialog).getAllByRole('combobox')).toHaveLength(4);
   });
 
   it('offers the Hijri correction only while the Hijri date is shown (D-150)', async () => {
@@ -55,6 +77,7 @@ describe('settings live in their own dialog (D-095)', () => {
     await screen.findByRole('heading', { level: 1 });
     fireEvent.click(screen.getByRole('button', { name: 'Settings' }));
     const dialog = screen.getByRole('dialog', { name: 'Settings' });
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Advanced options' }));
     expect(within(dialog).queryByLabelText('Working hours until')).toBeNull();
     fireEvent.change(within(dialog).getByLabelText(/^Working hours from/), {
       target: { value: '9' },

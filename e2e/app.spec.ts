@@ -1,5 +1,6 @@
 import { expect, test } from '@playwright/test';
 import type { Page } from '@playwright/test';
+import { openMore } from './sidebar';
 
 /** On a phone the views are in a menu: open it, then choose (D-079). */
 async function chooseView(page: Page, name: string): Promise<void> {
@@ -490,6 +491,7 @@ test.describe('on a phone', () => {
     await page.getByRole('button', { name: 'Menu' }).click();
     const sidebar = page.locator('.sidebar');
     await expect(sidebar).toBeVisible();
+    await openMore(page);
     const boxes = await page.evaluate(() => {
       const box = (el: Element) => {
         const r = el.getBoundingClientRect();
@@ -499,7 +501,7 @@ test.describe('on a phone', () => {
       return {
         side: side ? box(side) : null,
         // Hidden ones (the shortcuts button on a touch screen) have no box and are not measured.
-        buttons: [...document.querySelectorAll('.sidebar-settings > .btn')]
+        buttons: [...document.querySelectorAll('.sidebar-settings .btn')]
           .map(box)
           .filter((b) => b.width > 0),
         selects: [...document.querySelectorAll('.sidebar-settings select')].map(box),
@@ -619,6 +621,7 @@ test.describe('on a phone', () => {
     await expect(shell).toHaveAttribute('data-drawer', 'closed');
 
     await page.getByRole('button', { name: 'Menu', exact: true }).click();
+    await openMore(page);
     await page.getByRole('button', { name: 'About and privacy' }).click();
     const dialog = page.getByRole('dialog', { name: 'About Taqweem' });
     await expect(dialog).toBeVisible();
@@ -774,6 +777,7 @@ test.describe('on a phone', () => {
     };
     for (const direction of [-1, 1]) {
       await page.getByRole('button', { name: 'Menu', exact: true }).click();
+      await openMore(page);
       await page.getByRole('button', { name: 'About and privacy' }).click();
       const dialog = page.getByRole('dialog', { name: 'About Taqweem' });
       await expect(dialog).toBeVisible();
@@ -806,6 +810,7 @@ test.describe('on a phone', () => {
     await page.getByRole('button', { name: 'Menu', exact: true }).click();
     await expect(page.locator('.shell')).toHaveAttribute('data-drawer', 'open');
     expect(await behaviour()).toEqual({ root: 'contain', body: 'contain' });
+    await openMore(page);
     await page.getByRole('button', { name: 'About and privacy' }).click();
     await expect(page.getByRole('dialog', { name: 'About Taqweem' })).toBeVisible();
     expect(await behaviour()).toEqual({ root: 'contain', body: 'contain' });
@@ -820,6 +825,7 @@ test.describe('on a phone', () => {
     await page.goto('/');
     const cdp = await page.context().newCDPSession(page);
     await page.getByRole('button', { name: 'Menu', exact: true }).click();
+    await openMore(page);
     await page.getByRole('button', { name: 'About and privacy' }).click();
     const dialog = page.getByRole('dialog', { name: 'About Taqweem' });
     await expect(dialog).toBeVisible();

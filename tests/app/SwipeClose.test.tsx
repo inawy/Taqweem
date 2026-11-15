@@ -3,6 +3,7 @@ import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/re
 import { afterEach, describe, expect, it } from 'vitest';
 import { App } from '@/app/App';
 import { createDb } from '@/data';
+import { openMore } from '../helpers/sidebar';
 
 afterEach(cleanup);
 
@@ -39,6 +40,7 @@ describe('closing by swiping (D-063)', () => {
     open();
     for (const where of ['.sheet-grip', '.about-text']) {
       fireEvent.click(await screen.findByRole('button', { name: 'Menu' }));
+      await openMore();
       fireEvent.click(await screen.findByRole('button', { name: 'About and privacy' }));
       const dialog = await screen.findByRole('dialog', { name: 'About Taqweem' });
       swipe(dialog.querySelector(where) as Element, 0, 15); // too short, even as a flick: it stays
@@ -56,6 +58,7 @@ describe('closing by swiping (D-063)', () => {
   it('pulling down on text that is scrolled away from its top scrolls it, it does not close', async () => {
     open();
     fireEvent.click(await screen.findByRole('button', { name: 'Menu' }));
+    await openMore();
     fireEvent.click(await screen.findByRole('button', { name: 'About and privacy' }));
     const dialog = await screen.findByRole('dialog', { name: 'About Taqweem' });
     const body = dialog.querySelector('.ed-body') as HTMLElement;
@@ -71,6 +74,7 @@ describe('closing by swiping (D-063)', () => {
     open();
     for (const dx of [-120, 120]) {
       fireEvent.click(await screen.findByRole('button', { name: 'Menu' }));
+      await openMore();
       fireEvent.click(await screen.findByRole('button', { name: 'About and privacy' }));
       const dialog = await screen.findByRole('dialog', { name: 'About Taqweem' });
       swipe(dialog.querySelector('.about-text') as Element, 15, 0); // too short, even as a flick: stays
@@ -144,6 +148,7 @@ describe('closing by swiping (D-063)', () => {
   it('a sheet moves down with the finger from its header and springs back when let go early', async () => {
     open();
     fireEvent.click(await screen.findByRole('button', { name: 'Menu' }));
+    await openMore();
     fireEvent.click(await screen.findByRole('button', { name: 'About and privacy' }));
     const dialog = await screen.findByRole('dialog', { name: 'About Taqweem' });
     const grip = dialog.querySelector('.sheet-grip') as HTMLElement;

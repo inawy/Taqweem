@@ -32,6 +32,7 @@ describe('display settings', () => {
     );
     fireEvent.click(await screen.findByRole('button', { name: 'Settings' }));
     fireEvent.change(await screen.findByLabelText('Week starts on'), { target: { value: '7' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Advanced options' }));
     fireEvent.change(screen.getByLabelText('Time format'), { target: { value: '24' } });
     fireEvent.change(screen.getByLabelText('Numerals'), { target: { value: 'arab' } });
     const saved = JSON.parse(m.get(SETTINGS_KEY) ?? '{}') as Record<string, unknown>;

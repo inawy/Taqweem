@@ -87,6 +87,20 @@ describe('Today (agenda) view', () => {
     );
   });
 
+  it('an empty day offers a button that starts an event for that day (D-157)', async () => {
+    phone(true);
+    open();
+    await screen.findByRole('button', { name: 'Agenda' });
+    fireEvent.click(await screen.findByRole('button', { name: 'Next day' }));
+    fireEvent.click(
+      await screen.findByRole('button', { name: 'Add your first event for this day' }),
+    );
+    const dialog = await screen.findByRole('dialog', { name: 'New event' });
+    expect((within(dialog).getByLabelText('Starts · Date') as HTMLInputElement).value).toBe(
+      '2026-10-14',
+    );
+  });
+
   it('tapping an item opens the editor, and Back saves and closes it', async () => {
     phone(true);
     await seed();

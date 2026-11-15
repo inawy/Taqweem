@@ -1,6 +1,7 @@
 import { expect, test } from '@playwright/test';
 import type { Page } from '@playwright/test';
 import { readFile } from 'node:fs/promises';
+import { openMore } from './sidebar';
 
 async function addEvent(page: Page, title: string): Promise<void> {
   await page.getByRole('button', { name: 'Add event' }).click();
@@ -11,6 +12,7 @@ async function addEvent(page: Page, title: string): Promise<void> {
 }
 
 async function openData(page: Page) {
+  await openMore(page);
   await page.getByRole('button', { name: 'Data & backups' }).click();
   const dialog = page.getByRole('dialog', { name: 'Data & backups' });
   await expect(dialog).toBeVisible();

@@ -1,3 +1,4 @@
+import { useId, useState } from 'react';
 import type { Calendar } from '@/core/model';
 import { useT } from '@/features/i18n';
 import { useSettings } from '@/features/settings';
@@ -49,20 +50,12 @@ export function Sidebar({
 }: SidebarProps) {
   const t = useT();
   const { settings } = useSettings();
+  const [moreOpen, setMoreOpen] = useState(false);
+  const moreId = useId();
 
   return (
     <div className="sidebar-body">
       {mini && <MiniMonth {...mini} weekStart={settings.weekStart} weekend={settings.weekend} />}
-      {onOpenOccasions && (
-        <button type="button" className="btn goto-btn" onClick={onOpenOccasions}>
-          {t('upcomingOccasions')}
-        </button>
-      )}
-      {onOpenGoTo && (
-        <button type="button" className="btn goto-btn" onClick={onOpenGoTo}>
-          {t('goToDate')}
-        </button>
-      )}
       <section aria-labelledby="calendars-heading">
         <h2 id="calendars-heading" className="sidebar-heading">
           {t('calendars')}
@@ -113,23 +106,46 @@ export function Sidebar({
             {t('settings')}
           </button>
         )}
-        {onOpenData && (
-          <button type="button" className="btn" onClick={onOpenData}>
-            {t('dataTitle')}
-          </button>
-        )}
-        <button type="button" className="btn" onClick={() => window.print()}>
-          {t('printView')}
+        <button
+          type="button"
+          className="btn more-toggle"
+          aria-expanded={moreOpen}
+          aria-controls={moreId}
+          onClick={() => setMoreOpen(!moreOpen)}
+        >
+          {t('moreTools')}
         </button>
-        {onOpenShortcuts && (
-          <button type="button" className="btn shortcuts-btn" onClick={onOpenShortcuts}>
-            {t('shortcutsOpen')}
-          </button>
-        )}
-        {onOpenAbout && (
-          <button type="button" className="btn" onClick={onOpenAbout}>
-            {t('aboutOpen')}
-          </button>
+        {moreOpen && (
+          <div id={moreId} className="more-tools">
+            {onOpenOccasions && (
+              <button type="button" className="btn" onClick={onOpenOccasions}>
+                {t('upcomingOccasions')}
+              </button>
+            )}
+            {onOpenGoTo && (
+              <button type="button" className="btn" onClick={onOpenGoTo}>
+                {t('goToDate')}
+              </button>
+            )}
+            {onOpenData && (
+              <button type="button" className="btn" onClick={onOpenData}>
+                {t('dataTitle')}
+              </button>
+            )}
+            <button type="button" className="btn" onClick={() => window.print()}>
+              {t('printView')}
+            </button>
+            {onOpenShortcuts && (
+              <button type="button" className="btn shortcuts-btn" onClick={onOpenShortcuts}>
+                {t('shortcutsOpen')}
+              </button>
+            )}
+            {onOpenAbout && (
+              <button type="button" className="btn" onClick={onOpenAbout}>
+                {t('aboutOpen')}
+              </button>
+            )}
+          </div>
         )}
         {onInstall && (
           <button type="button" className="btn" onClick={onInstall}>

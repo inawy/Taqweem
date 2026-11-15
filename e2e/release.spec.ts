@@ -1,6 +1,7 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
 import type { Page } from '@playwright/test';
+import { openMore } from './sidebar';
 
 // Release gate (PRODUCT_SPEC section 5): performance with 5000 events, keyboard navigation and
 // focus in dialogs, and automated accessibility checks on the real built app.
@@ -133,6 +134,7 @@ test.describe('keyboard and focus', () => {
   }) => {
     await page.goto('/');
     await addEvent(page, 'Mouse test');
+    await openMore(page);
     const opened: [string, string][] = [
       ['Add event', 'New event'],
       ['Search', 'Search'],
@@ -238,6 +240,7 @@ test.describe('automated accessibility checks (axe, WCAG 2.0/2.1 A and AA)', () 
     await expect(page.getByRole('dialog', { name: 'Search' })).toBeHidden();
     expect(page.url()).toContain('localhost:4173'); // Back/Escape never leaves the app
 
+    await openMore(page);
     await page.getByRole('button', { name: 'Data & backups' }).click();
     await expect(page.getByRole('dialog', { name: 'Data & backups' })).toBeVisible();
     await expectNoViolations(page, 'data');

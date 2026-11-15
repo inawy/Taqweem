@@ -6,6 +6,7 @@ import { BACKUP_STATE_KEY } from '@/features/backup';
 import type { FileToSave } from '@/features/backup';
 import { createDb, createSnapshotDb, createStore } from '@/data';
 import { DAY, makeNewEvent } from '../helpers/factories';
+import { openMore } from '../helpers/sidebar';
 
 const NOW_MS = Date.UTC(2026, 9, 13, 12, 0);
 const NOW = () => NOW_MS;
@@ -51,6 +52,7 @@ const open = (storage = memoryStorage(), create = () => createDb(dbName)) =>
   );
 
 const openData = async () => {
+  await openMore();
   fireEvent.click(await screen.findByRole('button', { name: 'Data & backups' }));
   return screen.findByRole('dialog', { name: 'Data & backups' });
 };
@@ -102,6 +104,7 @@ describe('data dialog', () => {
     expect(await within(dialog).findByText(/^Done\./)).toBeTruthy();
 
     fireEvent.click(within(dialog).getByRole('button', { name: 'Close' }));
+    await openMore();
     fireEvent.click(await screen.findByRole('button', { name: 'Data & backups' }));
     const again = await screen.findByRole('dialog', { name: 'Data & backups' });
     expect(await within(again).findByText(/Before an import/)).toBeTruthy();

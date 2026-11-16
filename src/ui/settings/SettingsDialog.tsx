@@ -41,6 +41,7 @@ const VIEW_LABELS: Record<DefaultView, MessageKey> = {
 
 const WEEKEND_LABELS: Record<WeekendHiding, MessageKey> = {
   none: 'hideWeekendNone',
+  fri: 'hideWeekendFri',
   'fri-sat': 'hideWeekendFriSat',
   'sat-sun': 'hideWeekendSatSun',
 };

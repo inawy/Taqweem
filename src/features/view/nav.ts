@@ -33,12 +33,26 @@ export function shiftAnchor(view: ViewKind, anchor: PlainDate, delta: number): P
 }
 
 /** The weekdays a "hide the weekend" choice leaves out of the week view (D-120). */
-export function hiddenWeekdays(choice: 'none' | 'fri-sat' | 'sat-sun'): readonly IsoWeekday[] {
-  return choice === 'fri-sat' ? [5, 6] : choice === 'sat-sun' ? [6, 7] : [];
+export function hiddenWeekdays(
+  choice: 'none' | 'fri' | 'fri-sat' | 'sat-sun',
+): readonly IsoWeekday[] {
+  switch (choice) {
+    case 'fri':
+      return [5];
+    case 'fri-sat':
+      return [5, 6];
+    case 'sat-sun':
+      return [6, 7];
+    case 'none':
+      return [];
+  }
 }
 
 /** Whether this date falls on the weekend the person chose (D-136). */
-export function isWeekend(date: PlainDate, choice: 'none' | 'fri-sat' | 'sat-sun'): boolean {
+export function isWeekend(
+  date: PlainDate,
+  choice: 'none' | 'fri' | 'fri-sat' | 'sat-sun',
+): boolean {
   return hiddenWeekdays(choice).includes(weekdayOf(date));
 }
 

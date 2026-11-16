@@ -50,10 +50,15 @@ const view = (m: MonthModel, locale: 'ar' | 'en' = 'en', extra: object = {}) =>
 
 describe('MonthView weekend tint (D-136)', () => {
   const tinted = (c: HTMLElement) => c.querySelectorAll('.day[data-weekend="true"]').length;
-  it('tints the two weekend days of every row (six rows here)', () => {
+  it('tints the weekend days of every row (six rows here)', () => {
     expect(tinted(view(model([])).container)).toBe(12); // English: Saturday and Sunday
     cleanup();
-    expect(tinted(view(model([]), 'ar').container)).toBe(12); // Arabic: Friday and Saturday
+    expect(tinted(view(model([]), 'ar').container)).toBe(6); // Arabic: Friday alone (D-160)
+  });
+  it('can tint Friday and Saturday, or Friday alone, when chosen', () => {
+    expect(tinted(view(model([]), 'ar', { weekend: 'fri-sat' }).container)).toBe(12);
+    cleanup();
+    expect(tinted(view(model([]), 'en', { weekend: 'fri' }).container)).toBe(6);
   });
   it('tints nothing when the choice is none', () => {
     expect(tinted(view(model([]), 'en', { weekend: 'none' }).container)).toBe(0);

@@ -176,11 +176,13 @@ describe('secondZone (D-122)', () => {
 });
 
 describe('weekend (D-136)', () => {
-  it('follows the language until chosen, and accepts only the three choices', () => {
-    expect(defaultSettings('ar').weekend).toBe('fri-sat');
+  it('follows the language until chosen, and accepts only the known choices', () => {
+    expect(defaultSettings('ar').weekend).toBe('fri'); // Friday alone (D-160)
     expect(defaultSettings('en').weekend).toBe('sat-sun');
     expect(parseSettings({ weekend: 'none' }, 'ar').weekend).toBe('none');
-    expect(parseSettings({ weekend: 'sun-mon' }, 'ar').weekend).toBe('fri-sat');
+    expect(parseSettings({ weekend: 'fri-sat' }, 'ar').weekend).toBe('fri-sat');
+    expect(parseSettings({ weekend: 'fri' }, 'en').weekend).toBe('fri');
+    expect(parseSettings({ weekend: 'sun-mon' }, 'ar').weekend).toBe('fri');
     expect(parseSettings({ weekend: 6 }, 'en').weekend).toBe('sat-sun');
   });
 });

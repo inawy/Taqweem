@@ -19,8 +19,8 @@ export const DEFAULT_VIEWS: readonly DefaultView[] = [
 ];
 
 /** Days the week view leaves out: none, Friday + Saturday, or Saturday + Sunday (D-120). */
-export type WeekendHiding = 'none' | 'fri-sat' | 'sat-sun';
-export const WEEKEND_HIDING: readonly WeekendHiding[] = ['none', 'fri-sat', 'sat-sun'];
+export type WeekendHiding = 'none' | 'fri' | 'fri-sat' | 'sat-sun';
+export const WEEKEND_HIDING: readonly WeekendHiding[] = ['none', 'fri', 'fri-sat', 'sat-sun'];
 
 /** Working hours shaded in the day and week views: `off`, or `start-end` in whole hours (D-127, D-129). */
 export type WorkHours = string;
@@ -58,7 +58,7 @@ export interface Settings {
   readonly numerals: Numerals;
   readonly defaultView: DefaultView;
   readonly hideWeekend: WeekendHiding;
-  /** Which weekdays are tinted as the weekend (D-136); the same three choices. */
+  /** Which weekdays are tinted as the weekend (D-136); the same choices (Friday alone: D-160). */
   readonly weekend: WeekendHiding;
   /** A second clock beside the hours of the day and week views: an IANA zone, or '' for none. */
   readonly secondZone: string;
@@ -87,7 +87,7 @@ export function defaultSettings(locale: Locale): Settings {
     numerals: 'latn',
     defaultView: 'auto',
     hideWeekend: 'none',
-    weekend: locale === 'ar' ? 'fri-sat' : 'sat-sun', // Friday–Saturday in the Arab region
+    weekend: locale === 'ar' ? 'fri' : 'sat-sun', // Friday alone in Arabic, by default (D-160)
     secondZone: '',
     workHours: 'off',
     defaultDuration: 60,

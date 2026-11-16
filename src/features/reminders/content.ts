@@ -24,7 +24,7 @@ function hash31(text: string): number {
     h ^= text.charCodeAt(i);
     h = Math.imul(h, 0x01000193) >>> 0;
   }
-  return (h & 0x7fffffff) || 1;
+  return h & 0x7fffffff || 1;
 }
 
 /**

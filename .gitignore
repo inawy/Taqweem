@@ -9,4 +9,4 @@ test-results/
 .env.*
 __pycache__/
 .venv/
-android/
+/android/

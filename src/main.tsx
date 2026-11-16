@@ -1,6 +1,7 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { App } from '@/app/App';
+import { isNativeApp } from '@/app/native/env';
 import 'virtual:theme.css';
 import '@/ui/styles/base.css';
 import '@/ui/styles/shell.css';
@@ -18,6 +19,6 @@ if (!root) throw new Error('#root element not found');
 
 createRoot(root).render(
   <StrictMode>
-    <App welcome />
+    <App welcome reminders={isNativeApp()} />
   </StrictMode>,
 );

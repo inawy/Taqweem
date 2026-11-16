@@ -18,6 +18,8 @@
     "e2e": "playwright test"
   },
   "dependencies": {
+    "@capacitor/core": "^8.0.0",
+    "@capacitor/local-notifications": "^8.0.0",
     "dexie": "^4.4.6",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
@@ -25,6 +27,8 @@
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.10.0",
+    "@capacitor/android": "^8.0.0",
+    "@capacitor/cli": "^8.0.0",
     "@eslint/js": "^10.0.0",
     "@playwright/test": "^1.56.0",
     "@testing-library/dom": "^10.4.0",

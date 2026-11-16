@@ -1,0 +1,8 @@
+{
+  "appId": "app.nawy.taqweem",
+  "appName": "تقويم",
+  "webDir": "dist",
+  "android": {
+    "allowMixedContent": false
+  }
+}

@@ -5,4 +5,6 @@ export {
   planReminders,
   reminderOf,
 } from './plan';
+export { toScheduled } from './content';
+export type { ReminderLabels, ScheduledReminder } from './content';
 export type { PlanOptions, PlannedReminder } from './plan';

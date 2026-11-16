@@ -86,6 +86,11 @@ export function isTimeZone(id: string): boolean {
   }
 }
 
+/** A `Date` for an instant, for the few platform APIs that take one (e.g. a native scheduler). */
+export function dateOfInstantMs(epochMs: number): Date {
+  return new Date(epochMs);
+}
+
 /** The wall-clock time in `timeZone` at the given instant. */
 export function fromInstantMs(epochMs: number, timeZone: TimeZoneId): PlainDateTime {
   return Temporal.Instant.fromEpochMilliseconds(epochMs)

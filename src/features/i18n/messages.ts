@@ -158,6 +158,7 @@ const ar = {
   icsAlarmAllDay: 'الحدث طوال اليوم يُحسب تنبيهه من الساعة 9 صباحًا.',
   reminderLabel: 'تذكير',
   reminderNone: 'بلا تذكير',
+  remindersBlocked: 'إشعارات تقويم مغلقة في إعدادات الهاتف، فلن تصلك التذكيرات. فعّلها من هناك.',
   moreTools: 'المزيد',
   settingsAdvanced: 'خيارات متقدمة',
   agendaNow: 'الآن',
@@ -525,6 +526,8 @@ const en: Record<MessageKey, string> = {
   icsAlarmAllDay: 'An all-day event’s alert counts from 9:00 AM.',
   reminderLabel: 'Reminder',
   reminderNone: 'No reminder',
+  remindersBlocked:
+    'Notifications for Taqweem are off in the phone’s settings, so reminders will not arrive. Turn them on there.',
   moreTools: 'More',
   settingsAdvanced: 'Advanced options',
   agendaNow: 'Now',

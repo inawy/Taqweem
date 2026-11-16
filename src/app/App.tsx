@@ -18,6 +18,10 @@ import { useT } from '@/features/i18n';
 import { buildAgendaModel } from '@/features/agenda';
 import { createDataTools, latestSnapshotFile, useBackupReminder } from '@/features/backup';
 import { useWelcome } from '@/features/welcome';
+import { isNativeApp } from './native/env';
+import { capacitorScheduler } from './native/scheduler';
+import type { ReminderScheduler } from './native/scheduler';
+import { useReminderSync } from './native/useReminderSync';
 import {
   installHelpFor,
   readInstallEnvironment,
@@ -85,6 +89,8 @@ export interface AppProps {
   readonly welcome?: boolean;
   /** The phone can ring (the native app, D-161): events may carry a reminder. Off in the browser. */
   readonly reminders?: boolean;
+  /** What rings them; the phone's own in the native app, injectable for tests (D-161). */
+  readonly reminderScheduler?: ReminderScheduler | undefined;
   /** The service worker container; injectable for tests. Off in development. */
   readonly serviceWorker?: WorkerContainer | undefined;
 }
@@ -105,9 +111,19 @@ function initialView(preferred: DefaultView): ViewKind {
   }
 }
 
+function phoneScheduler(
+  reminders: boolean,
+  injected: ReminderScheduler | undefined,
+): ReminderScheduler | undefined {
+  if (!reminders) return undefined;
+  if (injected) return injected;
+  return isNativeApp() ? capacitorScheduler() : undefined;
+}
+
 function browserWorkerContainer(): WorkerContainer | undefined {
   // Development has no worker (it would cache the dev server); builds do.
-  if (!import.meta.env.PROD) return undefined;
+  // Inside the APK the app's own files are already local: no worker there either.
+  if (!import.meta.env.PROD || isNativeApp()) return undefined;
   return 'serviceWorker' in navigator ? (navigator.serviceWorker as WorkerContainer) : undefined;
 }
 
@@ -127,6 +143,7 @@ export function App({
   storage,
   welcome = false,
   reminders = false,
+  reminderScheduler,
   serviceWorker,
 }: AppProps) {
   const worker = useMemo(() => serviceWorker ?? browserWorkerContainer(), [serviceWorker]);
@@ -152,6 +169,7 @@ export function App({
             saveFile={saveFile}
             welcome={welcome}
             reminders={reminders}
+            reminderScheduler={reminderScheduler}
           />
         </DataProvider>
       </ErrorBoundary>
@@ -166,6 +184,7 @@ function Calendar({
   saveFile,
   welcome: greet,
   reminders,
+  reminderScheduler,
 }: {
   readonly now: () => number;
   readonly worker: WorkerContainer | undefined;
@@ -173,6 +192,7 @@ function Calendar({
   readonly saveFile: ((file: FileToSave) => void) | undefined;
   readonly welcome: boolean;
   readonly reminders: boolean;
+  readonly reminderScheduler: ReminderScheduler | undefined;
 }) {
   const t = useT();
   const { settings } = useSettings();
@@ -253,6 +273,21 @@ function Calendar({
   const gridEvents = gridOn ? calendarData.events : NO_EVENTS;
   // Events kept in another time zone are drawn on this clock (D-147).
   const zone = useMemo(() => localTimeZone(), []);
+
+  // Reminders ring only where the phone can ring them (D-161): the scheduler is the phone's own.
+  const scheduler = useMemo(
+    () => phoneScheduler(reminders, reminderScheduler),
+    [reminders, reminderScheduler],
+  );
+  const remindersSync = useReminderSync({
+    scheduler,
+    events: calendarData.events,
+    ready: data.status === 'ready' && calendarData.status === 'ready',
+    now,
+    zone,
+    fmt: { ...fmt, hour12: settings.hour12 },
+    labels: { untitled: t('untitled'), allDay: t('allDay') },
+  });
 
   const monthModel = useMemo(() => {
     const { year, month } = monthOf(anchor);
@@ -568,6 +603,11 @@ function Calendar({
             {t('welcomeStart')}
           </button>
         </section>
+      )}
+      {remindersSync.blocked && (
+        <p role="status" className="banner reminders-blocked">
+          {t('remindersBlocked')}
+        </p>
       )}
       {reminder.show && !flow.dialogOpen && !searchOpen && !dataOpen && (
         <p role="status" className="banner banner-action">

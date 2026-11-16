@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { planReminders, reminderOf } from '@/features/reminders';
+import { planReminders, reminderOf, toScheduled } from '@/features/reminders';
+import type { PlannedReminder } from '@/features/reminders';
 import type { CalEvent } from '@/core/model';
 import { toInstantMs } from '@/core/time';
 import { makeAllDayEvent, makeEvent } from '../helpers/factories';
@@ -117,5 +118,46 @@ describe('reminderOf (D-161)', () => {
     expect(of(bare)).toBeUndefined();
     expect(of(inherits)).toBe(60);
     expect(of(own)).toBe(0);
+  });
+});
+
+describe('toScheduled (D-161)', () => {
+  const fmt = { locale: 'en', hour12: false };
+  const labels = { untitled: '(untitled)', allDay: 'All day' };
+  const one = (over: Partial<PlannedReminder> = {}): PlannedReminder => ({
+    key: 'a|2026-10-14T09:00@10',
+    eventId: 'a',
+    title: 'Dentist',
+    atMs: toInstantMs('2026-10-14T08:50', ZONE),
+    startMs: toInstantMs('2026-10-14T09:00', ZONE),
+    minutesBefore: 10,
+    allDay: false,
+    ...over,
+  });
+
+  it('writes the title and when the event is, in the person’s own clock', () => {
+    const [r] = toScheduled([one()], ZONE, fmt, labels);
+    expect(r?.title).toBe('Dentist');
+    expect(r?.body).toBe('Oct 14, 2026 · 09:00');
+    expect(r?.atMs).toBe(toInstantMs('2026-10-14T08:50', ZONE));
+  });
+
+  it('says "All day" for an all-day event and names an untitled one', () => {
+    const [r] = toScheduled([one({ allDay: true, title: '' })], ZONE, fmt, labels);
+    expect(r?.title).toBe('(untitled)');
+    expect(r?.body).toBe('Oct 14, 2026 · All day');
+  });
+
+  it('gives the same reminder the same number, always a positive 32-bit one', () => {
+    const a = toScheduled([one()], ZONE, fmt, labels)[0]?.id;
+    const b = toScheduled([one()], ZONE, fmt, labels)[0]?.id;
+    expect(a).toBe(b);
+    expect(Number.isInteger(a) && (a ?? 0) > 0 && (a ?? 0) <= 0x7fffffff).toBe(true);
+  });
+
+  it('never gives two reminders the same number', () => {
+    const many = Array.from({ length: 300 }, (_, i) => one({ key: `k${i}` }));
+    const ids = toScheduled(many, ZONE, fmt, labels).map((r) => r.id);
+    expect(new Set(ids).size).toBe(300);
   });
 });

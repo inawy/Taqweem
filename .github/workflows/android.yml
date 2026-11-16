@@ -9,7 +9,7 @@ on:
     branches: ['native-*']
 
 permissions:
-  contents: read
+  contents: write # to publish the APK as a release (below)
 
 jobs:
   apk:
@@ -44,3 +44,14 @@ jobs:
           name: taqweem-debug-apk
           path: android/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
+      - name: Publish it as a pre-release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cp android/app/build/outputs/apk/debug/app-debug.apk taqweem-debug.apk
+          gh release delete android-debug --cleanup-tag --yes || true
+          gh release create android-debug taqweem-debug.apk \
+            --prerelease \
+            --target "$GITHUB_SHA" \
+            --title "Taqweem debug APK" \
+            --notes "A debug build for trying reminders on a phone (D-162), built from $GITHUB_SHA. Signed with a debug key: for testing only, not for the Play Store. Replaced by the next build."

@@ -1,0 +1,34 @@
+name: lockfile-sync
+
+# Dependencies are added from an environment with no npm access (D-015). On branches named native-*
+# this regenerates package-lock.json from package.json and commits it back, so the exact patch need
+# not travel through annotations. The push made with GITHUB_TOKEN does not start other workflows:
+# push again (an empty commit is enough) to run the normal CI on the result.
+on:
+  push:
+    branches: ['native-*']
+
+permissions:
+  contents: write
+
+jobs:
+  lock:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Regenerate the lockfile
+        run: npm install --package-lock-only --ignore-scripts --no-audit --no-fund
+      - name: Commit it if it changed
+        run: |
+          if git diff --quiet -- package-lock.json; then
+            echo "lockfile already in sync"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add package-lock.json
+          git commit -m "chore: sync package-lock.json with package.json"
+          git push

@@ -56,6 +56,7 @@ function fieldsPatch(fields: NewEvent): EventPatch {
     end: fields.end,
     tzid: fields.tzid,
     color: fields.color,
+    reminderMinutes: fields.reminderMinutes,
     rrule: fields.rrule,
   };
 }
@@ -174,6 +175,7 @@ function planOverrideEdit(target: Target, fields: NewEvent): Plan {
     ...(fields.location !== undefined && { location: fields.location }),
     ...(fields.tzid !== undefined && { tzid: fields.tzid }),
     ...(fields.color !== undefined && { color: fields.color }),
+    ...(fields.reminderMinutes !== undefined && { reminderMinutes: fields.reminderMinutes }),
   };
   return ok([{ kind: 'create', event: created }]);
 }
@@ -241,6 +243,7 @@ function planFollowing(target: Target, fields: NewEvent, newId: () => string): P
     ...(fields.location !== undefined && { location: fields.location }),
     ...(fields.tzid !== undefined && { tzid: fields.tzid }),
     ...(fields.color !== undefined && { color: fields.color }),
+    ...(fields.reminderMinutes !== undefined && { reminderMinutes: fields.reminderMinutes }),
     ...(tailRule !== undefined && { rrule: tailRule }),
     ...(tailRule !== undefined &&
       !changedRule &&

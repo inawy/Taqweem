@@ -80,6 +80,16 @@ function optTimestamp(o: Rec, key: string): number | undefined {
   return o[key] === undefined ? undefined : reqTimestamp(o, key);
 }
 
+/** A whole number of minutes: a reminder is at most a week before the start (D-161). */
+function optReminder(o: Rec, key: string): number | undefined {
+  const v = o[key];
+  if (v === undefined) return undefined;
+  if (typeof v !== 'number' || !Number.isInteger(v) || v < 0 || v > 7 * 24 * 60) {
+    fail(`${key} must be a whole number of minutes from 0 to 10080`);
+  }
+  return v;
+}
+
 function reqColor(o: Rec, key: string): string {
   const v = reqString(o, key, 32);
   if (!COLOR_RE.test(v)) fail(`${key} must be a palette token or #rrggbb`);
@@ -127,6 +137,7 @@ export function parseEvent(value: unknown): Result<CalEvent> {
     const seriesId = optId(o, 'seriesId');
     const originalStart = optString(o, 'originalStart', 32);
     const color = optColor(o, 'color');
+    const reminderMinutes = optReminder(o, 'reminderMinutes');
     const createdAt = reqTimestamp(o, 'createdAt');
     const updatedAt = reqTimestamp(o, 'updatedAt');
     const deletedAt = optTimestamp(o, 'deletedAt');
@@ -174,7 +185,7 @@ export function parseEvent(value: unknown): Result<CalEvent> {
     if (deletedAt !== undefined) {
       const keepsContent =
         title !== '' ||
-        [notes, location, rrule, exdates, seriesId, originalStart, color].some(
+        [notes, location, rrule, exdates, seriesId, originalStart, color, reminderMinutes].some(
           (v) => v !== undefined,
         );
       if (keepsContent) fail('a deleted event must not keep content');
@@ -195,6 +206,7 @@ export function parseEvent(value: unknown): Result<CalEvent> {
       seriesId,
       originalStart,
       color,
+      reminderMinutes,
       createdAt,
       updatedAt,
       deletedAt,

@@ -70,6 +70,8 @@ export interface EventFlowInput {
   readonly today: PlainDate;
   /** How long a new timed event lasts, in minutes (D-134). */
   readonly defaultMinutes: number;
+  /** The phone can ring: the editor offers a reminder (D-161). */
+  readonly canRemind?: boolean | undefined;
   /** Hands a produced file to the person (default: the browser's own download). */
   readonly saveFile?: ((file: FileToSave) => void) | undefined;
 }
@@ -119,6 +121,7 @@ export function useEventFlow({
   weekStart,
   today,
   defaultMinutes,
+  canRemind,
   saveFile = downloadFile,
 }: EventFlowInput): EventFlow {
   const t = useT();
@@ -522,6 +525,7 @@ export function useEventFlow({
           weekStart={weekStart}
           today={editing.mode === 'new' ? today : undefined}
           defaultMinutes={defaultMinutes}
+          canRemind={canRemind}
           onSave={save}
           onDelete={editing.mode === 'edit' ? () => void remove() : undefined}
           onClose={closeEditor}

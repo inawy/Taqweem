@@ -76,3 +76,14 @@ export function planReminders(
   out.sort((a, b) => a.atMs - b.atMs || (a.key < b.key ? -1 : a.key > b.key ? 1 : 0));
   return out.slice(0, limit);
 }
+
+/**
+ * The reminder an occurrence rings with: its own, and for a changed occurrence of a series with
+ * none of its own, the series'. (One occurrence cannot be made silent while the series rings.)
+ */
+export function reminderOf(events: readonly CalEvent[]): (event: CalEvent) => number | undefined {
+  const byId = new Map(events.map((e) => [e.id, e]));
+  return (event) =>
+    event.reminderMinutes ??
+    (event.seriesId === undefined ? undefined : byId.get(event.seriesId)?.reminderMinutes);
+}

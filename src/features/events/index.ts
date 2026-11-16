@@ -7,6 +7,7 @@ export {
   draftToFields,
   isDirty,
   withColor,
+  withReminder,
   withStart,
   repeatFromRule,
   repeatToRule,

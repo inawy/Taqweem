@@ -36,6 +36,11 @@ export interface CalEvent {
   seriesId?: Id;
   originalStart?: string;
   color?: string;
+  /**
+   * Minutes before the start that the phone should ring (0…10080), set only in the native app
+   * (D-161). Absent = no reminder. On an override, its own value, else the series'.
+   */
+  reminderMinutes?: number;
   createdAt: number;
   updatedAt: number;
   deletedAt?: number;

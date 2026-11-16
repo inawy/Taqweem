@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { planReminders } from '@/features/reminders';
+import { planReminders, reminderOf } from '@/features/reminders';
 import type { CalEvent } from '@/core/model';
 import { toInstantMs } from '@/core/time';
 import { makeAllDayEvent, makeEvent } from '../helpers/factories';
@@ -96,5 +96,26 @@ describe('planReminders (D-161)', () => {
   it('gives the same plan for the same input', () => {
     const e = makeEvent({ id: 'a', start: '2026-10-14T09:00', end: '2026-10-14T10:00' });
     expect(plan([e])).toEqual(plan([e]));
+  });
+});
+
+describe('reminderOf (D-161)', () => {
+  it('takes an occurrence’s own reminder, else its series’, else none', () => {
+    const master = makeEvent({ id: 'm', rrule: 'FREQ=DAILY', reminderMinutes: 60 });
+    const plain = makeEvent({ id: 'p', reminderMinutes: 5 });
+    const bare = makeEvent({ id: 'b' });
+    const inherits = makeEvent({ id: 'o1', seriesId: 'm', originalStart: '2026-10-14T09:00' });
+    const own = makeEvent({
+      id: 'o2',
+      seriesId: 'm',
+      originalStart: '2026-10-15T09:00',
+      reminderMinutes: 0,
+    });
+    const of = reminderOf([master, plain, bare, inherits, own]);
+    expect(of(master)).toBe(60);
+    expect(of(plain)).toBe(5);
+    expect(of(bare)).toBeUndefined();
+    expect(of(inherits)).toBe(60);
+    expect(of(own)).toBe(0);
   });
 });

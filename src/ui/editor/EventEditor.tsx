@@ -9,6 +9,7 @@ import {
   isDirty,
   parseQuickText,
   withColor,
+  withReminder,
   withStart,
 } from '@/features/events';
 import type { Draft, DraftError } from '@/features/events';
@@ -36,6 +37,8 @@ export interface EventEditorProps {
   readonly today?: PlainDate | undefined;
   /** How long a typed time makes an all-day draft (D-134); an hour when omitted. */
   readonly defaultMinutes?: number | undefined;
+  /** Offer a reminder: only where the phone can really ring (the native app, D-161). */
+  readonly canRemind?: boolean | undefined;
   /** Called with a draft that already passed `draftToFields`. `null` message = user cancelled. */
   readonly onSave: (draft: Draft) => Promise<SaveOutcome>;
   readonly onDelete?: (() => void) | undefined;
@@ -58,6 +61,25 @@ const ERROR_KEY: Record<DraftError, MessageKey> = {
   'repeat-count': 'errCount',
   'repeat-until': 'errUntil',
 };
+
+const REMINDER_CHOICES: readonly (readonly [number, MessageKey])[] = [
+  [0, 'icsAlarm0'],
+  [10, 'icsAlarm10'],
+  [60, 'icsAlarm60'],
+  [1440, 'icsAlarm1440'],
+];
+
+/** The usual choices, plus the event's own value when it is none of them (never lose it silently). */
+function reminderChoices(
+  current: number | undefined,
+  locale: string,
+  t: (key: MessageKey) => string,
+): [number, string][] {
+  const choices = REMINDER_CHOICES.map(([minutes, key]): [number, string] => [minutes, t(key)]);
+  if (current === undefined || choices.some(([m]) => m === current)) return choices;
+  const custom = new Intl.NumberFormat(locale, { style: 'unit', unit: 'minute' }).format(current);
+  return [...choices, [current, custom] as [number, string]].sort((x, y) => x[0] - y[0]);
+}
 
 let allZones: string[] | null = null;
 
@@ -96,6 +118,7 @@ export function EventEditor({
   weekStart,
   today,
   defaultMinutes,
+  canRemind = false,
   onSave,
   onDelete,
   onClose,
@@ -349,6 +372,27 @@ export function EventEditor({
               fmt={fmt}
               weekStart={weekStart}
             />
+
+            {canRemind && (
+              <label className="ed-field">
+                <span>{t('reminderLabel')}</span>
+                <select
+                  value={draft.reminder === undefined ? '' : String(draft.reminder)}
+                  onChange={(e) => {
+                    setError(null);
+                    const v = e.currentTarget.value;
+                    setDraft((d) => withReminder(d, v === '' ? undefined : Number(v)));
+                  }}
+                >
+                  <option value="">{t('reminderNone')}</option>
+                  {reminderChoices(draft.reminder, fmt.locale, t).map(([minutes, label]) => (
+                    <option key={minutes} value={minutes}>
+                      {label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            )}
 
             <label className="ed-field">
               <span>{t('calendar')}</span>

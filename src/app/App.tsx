@@ -83,6 +83,8 @@ export interface AppProps {
   readonly storage?: (ReadableStorage & WritableStorage) | undefined;
   /** Greet a first-time person with a short card (D-158). Off unless asked, so tests stay quiet. */
   readonly welcome?: boolean;
+  /** The phone can ring (the native app, D-161): events may carry a reminder. Off in the browser. */
+  readonly reminders?: boolean;
   /** The service worker container; injectable for tests. Off in development. */
   readonly serviceWorker?: WorkerContainer | undefined;
 }
@@ -124,6 +126,7 @@ export function App({
   now = nowMs,
   storage,
   welcome = false,
+  reminders = false,
   serviceWorker,
 }: AppProps) {
   const worker = useMemo(() => serviceWorker ?? browserWorkerContainer(), [serviceWorker]);
@@ -148,6 +151,7 @@ export function App({
             storage={storage ?? browserStorage()}
             saveFile={saveFile}
             welcome={welcome}
+            reminders={reminders}
           />
         </DataProvider>
       </ErrorBoundary>
@@ -161,12 +165,14 @@ function Calendar({
   storage,
   saveFile,
   welcome: greet,
+  reminders,
 }: {
   readonly now: () => number;
   readonly worker: WorkerContainer | undefined;
   readonly storage: (ReadableStorage & WritableStorage) | undefined;
   readonly saveFile: ((file: FileToSave) => void) | undefined;
   readonly welcome: boolean;
+  readonly reminders: boolean;
 }) {
   const t = useT();
   const { settings } = useSettings();
@@ -233,6 +239,7 @@ function Calendar({
     weekStart: settings.weekStart,
     today,
     defaultMinutes: settings.defaultDuration,
+    canRemind: reminders,
     saveFile,
   });
 

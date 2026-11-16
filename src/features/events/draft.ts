@@ -52,6 +52,8 @@ export interface Draft {
   tzid: string;
   /** Kept through edits; the form does not offer it yet. */
   color?: string;
+  /** Minutes before the start to ring, in the native app only (D-161). */
+  reminder?: number;
   repeat: RepeatDraft;
 }
 
@@ -247,6 +249,7 @@ export function draftFromEvent(
     endTime: allDay ? '10:00' : timePart(occurrence.end),
     tzid: event.tzid ?? fallbackTzid,
     ...(event.color !== undefined && { color: event.color }),
+    ...(event.reminderMinutes !== undefined && { reminder: event.reminderMinutes }),
     repeat: repeatFromRule(rrule, startDate),
   };
 }
@@ -261,6 +264,14 @@ export function withColor(draft: Draft, color: string | undefined): Draft {
   const next: Draft = { ...draft };
   if (color === undefined) delete next.color;
   else next.color = color;
+  return next;
+}
+
+/** The draft with this reminder (minutes before the start), or none. */
+export function withReminder(draft: Draft, minutes: number | undefined): Draft {
+  const next: Draft = { ...draft };
+  if (minutes === undefined) delete next.reminder;
+  else next.reminder = minutes;
   return next;
 }
 
@@ -309,6 +320,7 @@ export function draftToFields(draft: Draft): FieldsResult {
       ...(location !== '' && { location }),
       ...(!draft.allDay && { tzid: draft.tzid }),
       ...(draft.color !== undefined && { color: draft.color }),
+      ...(draft.reminder !== undefined && { reminderMinutes: draft.reminder }),
       ...(rule.rrule !== undefined && { rrule: rule.rrule }),
     },
   };

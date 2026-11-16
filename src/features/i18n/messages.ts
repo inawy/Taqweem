@@ -156,6 +156,8 @@ const ar = {
   icsAlarmButton: 'نزّل ملفًا مع تنبيه',
   icsAlarmNote: 'التنبيه يتولاه تطبيق التقويم الذي تفتح به الملف، وليس تقويم؛ هو لا يرسل إشعارات.',
   icsAlarmAllDay: 'الحدث طوال اليوم يُحسب تنبيهه من الساعة 9 صباحًا.',
+  reminderLabel: 'تذكير',
+  reminderNone: 'بلا تذكير',
   moreTools: 'المزيد',
   settingsAdvanced: 'خيارات متقدمة',
   agendaNow: 'الآن',
@@ -521,6 +523,8 @@ const en: Record<MessageKey, string> = {
   icsAlarmNote:
     'The alert is carried out by the calendar app that opens the file, not by Taqweem; it sends no notifications.',
   icsAlarmAllDay: 'An all-day event’s alert counts from 9:00 AM.',
+  reminderLabel: 'Reminder',
+  reminderNone: 'No reminder',
   moreTools: 'More',
   settingsAdvanced: 'Advanced options',
   agendaNow: 'Now',

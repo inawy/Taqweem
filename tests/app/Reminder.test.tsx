@@ -49,7 +49,28 @@ describe('the reminder field (D-161)', () => {
     expect(within(dialog).queryByLabelText('Reminder')).toBeNull();
   });
 
-  it('is offered in the native app, starts at the default and is saved with the event', async () => {
+  it('the event card offers no file to hand to another calendar app', async () => {
+    const db = createDb(dbName);
+    const store = createStore(db);
+    const cal = await store.createCalendar({ name: 'P', color: 'blue' });
+    await store.createEvent({
+      calendarId: cal.id,
+      title: 'Lunch',
+      allDay: false,
+      start: '2026-10-13T13:00',
+      end: '2026-10-13T14:00',
+      tzid: 'UTC',
+    });
+    db.close();
+    open(true);
+    fireEvent.click(await screen.findByRole('button', { name: /Lunch/ }));
+    const card = await screen.findByRole('dialog', { name: 'Lunch' });
+    expect(
+      within(card).queryByRole('button', { name: 'Download a file with an alert' }),
+    ).toBeNull();
+  });
+
+  it('is offered natively, starts at the default and is saved with the event', async () => {
     open(true);
     const dialog = await newEvent();
     const select = within(dialog).getByLabelText('Reminder') as HTMLSelectElement;

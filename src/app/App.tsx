@@ -635,6 +635,11 @@ function Calendar({
           {t('remindersBlocked')}
         </p>
       )}
+      {remindersSync.error !== null && (
+        <p role="status" className="banner reminders-blocked">
+          {t('remindersFailed')} {remindersSync.error}
+        </p>
+      )}
       {reminder.show && !flow.dialogOpen && !searchOpen && !dataOpen && (
         <p role="status" className="banner banner-action">
           <span>{t('reminderText', { days: count(reminder.days) })}</span>

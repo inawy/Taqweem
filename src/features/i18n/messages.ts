@@ -175,6 +175,7 @@ const ar = {
   diagTestDenied: 'إذن الإشعارات غير ممنوح، فلا يمكن إرسال التجربة.',
   diagOpenExact: 'افتح إعدادات المنبّه الدقيق',
   diagFailed: 'تعذّر:',
+  remindersFailed: 'تعذّر ضبط التذكيرات على الهاتف:',
   diagTestTitle: 'تجربة تقويم',
   diagTestBody: 'التذكيرات تعمل على هذا الهاتف.',
   remindersBlocked: 'إشعارات تقويم مغلقة في إعدادات الهاتف، فلن تصلك التذكيرات. فعّلها من هناك.',
@@ -562,6 +563,7 @@ const en: Record<MessageKey, string> = {
   diagTestDenied: 'Notification permission is not granted, so the test cannot be sent.',
   diagOpenExact: 'Open the exact-alarm settings',
   diagFailed: 'Failed:',
+  remindersFailed: 'Could not set the reminders on this phone:',
   diagTestTitle: 'Taqweem test',
   diagTestBody: 'Reminders work on this phone.',
   remindersBlocked:

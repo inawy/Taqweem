@@ -478,11 +478,15 @@ export function useEventFlow({
               tz,
             )}
             recurring={viewing.recurring}
-            onSendToPhone={(minutes) =>
-              saveFile({
-                name: ICS_EVENT_FILE_NAME,
-                text: eventToIcsWithAlarm(calendars, events, viewing.event, minutes),
-              })
+            // In the native app the app rings the reminder itself: no file to hand to another app.
+            onSendToPhone={
+              canRemind
+                ? undefined
+                : (minutes) =>
+                    saveFile({
+                      name: ICS_EVENT_FILE_NAME,
+                      text: eventToIcsWithAlarm(calendars, events, viewing.event, minutes),
+                    })
             }
             onEdit={() => openEvent(viewing)}
             onDuplicate={() => duplicateEvent(viewing)}

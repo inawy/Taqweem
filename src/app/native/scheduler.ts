@@ -78,6 +78,11 @@ export function capacitorScheduler(channelName: string, nowMs: () => number): Re
           schedule: { at: dateOfInstantMs(i.atMs), allowWhileIdle: true },
         })),
       });
+      // Trust, but check: if the phone did not keep them, say so instead of failing silently.
+      const kept = (await notifications.getPending()).notifications.length;
+      if (kept < items.length) {
+        throw new Error(`${kept}/${items.length}`);
+      }
     },
     async status() {
       const notifications = await plugin();

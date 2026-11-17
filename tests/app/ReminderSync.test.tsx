@@ -107,6 +107,19 @@ describe('keeping the phone’s reminders in step (D-161)', () => {
     expect(calls.replaced).toEqual([]);
   });
 
+  it('shows the phone’s own words when scheduling fails', async () => {
+    await seed(10);
+    const [scheduler] = fakeScheduler('granted');
+    const failing: ReminderScheduler = {
+      ...scheduler,
+      replaceAll: () => Promise.reject(new Error('plugin missing')),
+    };
+    open(true, failing);
+    expect(
+      await screen.findByText(/Could not set the reminders on this phone: plugin missing/),
+    ).toBeTruthy();
+  });
+
   it('does nothing at all in the browser, where nothing could ring', async () => {
     await seed(10);
     const [scheduler, calls] = fakeScheduler('granted');

@@ -22,11 +22,14 @@ export interface ReminderSyncInput {
 export interface ReminderSync {
   /** A reminder is due but the person has switched notifications off for this app. */
   readonly blocked: boolean;
+  /** The phone refused to schedule them: its own words, so the person is never left guessing. */
+  readonly error: string | null;
 }
 
 export function useReminderSync(input: ReminderSyncInput): ReminderSync {
   const { scheduler, events, ready, now, zone, fmt, labels } = input;
   const [blocked, setBlocked] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const last = useRef('');
   const { locale, numerals, hour12 } = fmt;
   const { untitled, allDay } = labels;
@@ -60,9 +63,11 @@ export function useReminderSync(input: ReminderSyncInput): ReminderSync {
         }
         await scheduler.replaceAll(items);
         last.current = signature;
-      } catch {
-        // The phone refused or the plugin is missing: try again at the next change or return.
+        if (!cancelled) setError(null);
+      } catch (failure) {
+        // The phone refused or the plugin is missing: say so, and try again at the next change or return.
         last.current = '';
+        if (!cancelled) setError(failure instanceof Error ? failure.message : String(failure));
       }
     };
 
@@ -77,5 +82,5 @@ export function useReminderSync(input: ReminderSyncInput): ReminderSync {
     };
   }, [scheduler, ready, events, now, zone, locale, numerals, hour12, untitled, allDay]);
 
-  return { blocked };
+  return { blocked, error };
 }

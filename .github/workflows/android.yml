@@ -35,6 +35,8 @@ jobs:
         run: python3 tools/android/patch_manifest.py android/app/src/main/AndroidManifest.xml
       - name: Copy the web app into it
         run: npx cap sync android
+      - name: Use the fixed debug key so each build updates the last one (D-164)
+        run: mkdir -p ~/.android && cp tools/android/debug.keystore ~/.android/debug.keystore
       - name: Build the debug APK
         working-directory: android
         run: ./gradlew assembleDebug --no-daemon --stacktrace

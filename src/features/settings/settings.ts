@@ -132,8 +132,7 @@ export function parseSettings(raw: unknown, fallbackLocale: Locale): Settings {
         ? o['secondZone']
         : d.secondZone,
     defaultDuration: DEFAULT_DURATIONS.find((m) => m === o['defaultDuration']) ?? d.defaultDuration,
-    defaultReminder:
-      DEFAULT_REMINDERS.find((m) => m === o['defaultReminder']) ?? d.defaultReminder,
+    defaultReminder: DEFAULT_REMINDERS.find((m) => m === o['defaultReminder']) ?? d.defaultReminder,
     workHours:
       typeof o['workHours'] === 'string' &&
       (o['workHours'] === 'off' || workHoursRange(o['workHours']) !== undefined)

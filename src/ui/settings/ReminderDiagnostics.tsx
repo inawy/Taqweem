@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
+import { BUILD_INFO } from '@/lib/buildInfo';
 import { useT } from '@/features/i18n';
 import type { MessageKey } from '@/features/i18n';
 
@@ -18,6 +19,9 @@ export interface ReminderTools {
   openExactAlarmSettings(): Promise<void>;
 }
 
+/** The phone must answer within this; a call that never returns is shown, not waited on forever. */
+const ANSWER_MS = 10_000;
+
 const STATE_KEY: Record<string, MessageKey> = {
   granted: 'diagGranted',
   denied: 'diagDenied',
@@ -30,16 +34,26 @@ export function ReminderDiagnostics({ tools }: { readonly tools: ReminderTools }
   const [state, setState] = useState<ReminderState | null>(null);
   const [note, setNote] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const end = useRef<HTMLDivElement>(null);
 
   const run = async (job: () => Promise<void>): Promise<void> => {
     setBusy(true);
     setNote(null);
+    let timer: ReturnType<typeof setTimeout> | undefined;
     try {
-      await job();
+      await Promise.race([
+        job(),
+        new Promise<never>((_, reject) => {
+          timer = setTimeout(() => reject(new Error(t('diagTimeout'))), ANSWER_MS);
+        }),
+      ]);
     } catch (error) {
       setNote(`${t('diagFailed')} ${error instanceof Error ? error.message : String(error)}`);
     } finally {
+      clearTimeout(timer);
       setBusy(false);
+      // The section sits at the bottom of a long form: bring the answer into view.
+      setTimeout(() => end.current?.scrollIntoView?.({ block: 'nearest' }), 50);
     }
   };
 
@@ -70,6 +84,7 @@ export function ReminderDiagnostics({ tools }: { readonly tools: ReminderTools }
       >
         {t('diagTest')}
       </button>
+      {busy && <p className="muted">{t('diagBusy')}</p>}
       {state && (
         <ul className="reminder-diag-list" role="status">
           <li>
@@ -94,6 +109,10 @@ export function ReminderDiagnostics({ tools }: { readonly tools: ReminderTools }
         </button>
       )}
       {note && <p className="muted">{note}</p>}
+      <p className="muted">
+        {t('diagBuild')}: {BUILD_INFO.sha}
+      </p>
+      <div ref={end} />
     </section>
   );
 }

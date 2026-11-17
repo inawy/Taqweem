@@ -34,11 +34,17 @@ const TEST_DELAY_MS = 10_000;
 
 /** `channelName` is what the phone's own notification settings call these reminders. */
 export function capacitorScheduler(channelName: string, nowMs: () => number): ReminderScheduler {
-  const plugin = () => import('@capacitor/local-notifications').then((m) => m.LocalNotifications);
+  // The plugin object must never be the value a promise resolves with: Capacitor's plugin proxy
+  // answers any property, `then` included, so the promise would call it and fail with "then() is not
+  // implemented on android". It is wrapped in a plain object for that reason.
+  const plugin = async () => {
+    const loaded = await import('@capacitor/local-notifications');
+    return { notifications: loaded.LocalNotifications };
+  };
   // Android 8+ files every notification in a channel; make ours loud enough to show on screen.
   const ensureChannel = async (): Promise<void> => {
     try {
-      const notifications = await plugin();
+      const { notifications } = await plugin();
       await notifications.createChannel({
         id: CHANNEL_ID,
         name: channelName,
@@ -52,7 +58,7 @@ export function capacitorScheduler(channelName: string, nowMs: () => number): Re
     }
   };
   const permission = async (ask: boolean): Promise<NotificationPermission> => {
-    const notifications = await plugin();
+    const { notifications } = await plugin();
     let state = (await notifications.checkPermissions()).display;
     if (state !== 'granted' && state !== 'denied' && ask) {
       state = (await notifications.requestPermissions()).display;
@@ -62,7 +68,7 @@ export function capacitorScheduler(channelName: string, nowMs: () => number): Re
   return {
     permission,
     async replaceAll(items) {
-      const notifications = await plugin();
+      const { notifications } = await plugin();
       const pending = await notifications.getPending();
       if (pending.notifications.length > 0) {
         await notifications.cancel({ notifications: pending.notifications });
@@ -85,7 +91,7 @@ export function capacitorScheduler(channelName: string, nowMs: () => number): Re
       }
     },
     async status() {
-      const notifications = await plugin();
+      const { notifications } = await plugin();
       const allowed = await permission(false);
       const pending = (await notifications.getPending()).notifications.length;
       let exactAlarm: ExactAlarm = 'unknown';
@@ -98,7 +104,7 @@ export function capacitorScheduler(channelName: string, nowMs: () => number): Re
       return { permission: allowed, exactAlarm, pending };
     },
     async sendTest(title, body) {
-      const notifications = await plugin();
+      const { notifications } = await plugin();
       await ensureChannel();
       await notifications.schedule({
         notifications: [
@@ -113,7 +119,7 @@ export function capacitorScheduler(channelName: string, nowMs: () => number): Re
       });
     },
     async openExactAlarmSettings() {
-      const notifications = await plugin();
+      const { notifications } = await plugin();
       await notifications.changeExactNotificationSetting();
     },
   };

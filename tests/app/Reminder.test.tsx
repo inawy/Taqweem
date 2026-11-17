@@ -49,11 +49,11 @@ describe('the reminder field (D-161)', () => {
     expect(within(dialog).queryByLabelText('Reminder')).toBeNull();
   });
 
-  it('is offered in the native app, starts empty and is saved with the event', async () => {
+  it('is offered in the native app, starts at the default and is saved with the event', async () => {
     open(true);
     const dialog = await newEvent();
     const select = within(dialog).getByLabelText('Reminder') as HTMLSelectElement;
-    expect(select.value).toBe('');
+    expect(select.value).toBe('10');
     fireEvent.change(within(dialog).getByLabelText('Title'), { target: { value: 'Dentist' } });
     fireEvent.change(select, { target: { value: '60' } });
     fireEvent.click(within(dialog).getByRole('button', { name: 'Save' }));

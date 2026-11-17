@@ -72,6 +72,8 @@ export interface EventFlowInput {
   readonly defaultMinutes: number;
   /** The phone can ring: the editor offers a reminder (D-161). */
   readonly canRemind?: boolean | undefined;
+  /** Minutes before a new event starts; -1 or nothing for none (D-166). */
+  readonly defaultReminder?: number | undefined;
   /** Hands a produced file to the person (default: the browser's own download). */
   readonly saveFile?: ((file: FileToSave) => void) | undefined;
 }
@@ -122,6 +124,7 @@ export function useEventFlow({
   today,
   defaultMinutes,
   canRemind,
+  defaultReminder,
   saveFile = downloadFile,
 }: EventFlowInput): EventFlow {
   const t = useT();
@@ -193,6 +196,9 @@ export function useEventFlow({
           ...(time !== undefined && { time }),
           ...(options?.allDay && { allDay: true }),
           minutes: defaultMinutes,
+          ...(canRemind && defaultReminder !== undefined && defaultReminder >= 0
+            ? { reminder: defaultReminder }
+            : {}),
           calendarId: calendar.id,
           tzid: tz,
         });
@@ -204,7 +210,7 @@ export function useEventFlow({
         else setEditing({ mode: 'new', id: counter.current, draft });
       })();
     },
-    [store, calendars, t, notify, tz, defaultMinutes],
+    [store, calendars, t, notify, tz, defaultMinutes, canRemind, defaultReminder],
   );
 
   const openEvent = useCallback(

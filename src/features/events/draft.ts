@@ -205,6 +205,8 @@ export function draftForNew(input: {
   calendarId: string;
   tzid: string;
   allDay?: boolean;
+  /** Minutes before the start, when the new event should start with a reminder (D-166). */
+  reminder?: number;
 }): Draft {
   const time = input.time ?? '09:00';
   const startMinutes = Number(time.slice(0, 2)) * 60 + Number(time.slice(3, 5));
@@ -222,6 +224,7 @@ export function draftForNew(input: {
     endTime: `${pad(Math.floor(endMinutes / 60))}:${pad(endMinutes % 60)}`,
     tzid: input.tzid,
     repeat: NO_REPEAT,
+    ...(input.reminder !== undefined && { reminder: input.reminder }),
   };
 }
 

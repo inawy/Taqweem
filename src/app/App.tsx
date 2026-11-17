@@ -69,7 +69,6 @@ import { CALENDAR_COLOR_IDS } from '@/ui/theme/tokens';
 import { SearchPanel } from '@/ui/search/SearchPanel';
 import { TimeGrid } from '@/ui/timegrid/TimeGrid';
 import { YearView } from '@/ui/year/YearView';
-import { useHideOnScroll } from '@/ui/shell/useHideOnScroll';
 
 /** How many event rows fit under a day number before "+N" (responsive tuning comes with Phase 6). */
 /** Stands in for the events of a view that is not on screen, so its model stays empty and cheap. */
@@ -230,7 +229,6 @@ function Calendar({
   const [calendarDialog, setCalendarDialog] = useState<string | null>(null);
   const [searchOpen, setSearchOpen] = useState(false);
   const recentSearches = useRecentSearches(storage);
-  const fabShown = useHideOnScroll(phone);
   const [dataOpen, setDataOpen] = useState(false);
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
   const [goToOpen, setGoToOpen] = useState(false);
@@ -280,6 +278,7 @@ function Calendar({
     today,
     defaultMinutes: settings.defaultDuration,
     canRemind: reminders,
+    defaultReminder: settings.defaultReminder,
     saveFile,
   });
 
@@ -772,8 +771,6 @@ function Calendar({
       <button
         type="button"
         className="fab"
-        data-hidden={fabShown ? undefined : 'true'}
-        tabIndex={fabShown ? undefined : -1}
         aria-label={t('addEvent')}
         title={t('addEvent')}
         onClick={() => flow.openNew(anchor)}

@@ -6,6 +6,7 @@ import type { MessageKey } from '@/features/i18n';
 import { SECOND_ZONES, zoneName } from '@/features/timegrid';
 import {
   DEFAULT_DURATIONS,
+  DEFAULT_REMINDERS,
   DEFAULT_VIEWS,
   HIJRI_ADJUSTS,
   WEEKEND_HIDING,
@@ -14,6 +15,7 @@ import {
 } from '@/features/settings';
 import type {
   DefaultDuration,
+  DefaultReminder,
   DefaultView,
   HijriAdjust,
   Locale,
@@ -74,6 +76,14 @@ function adjustText(days: number, locale: string, numerals: string): string {
 const hourText = (h: number): string => `${String(h).padStart(2, '0')}:00`;
 const range = (from: number, to: number): number[] =>
   Array.from({ length: to - from + 1 }, (_, i) => from + i);
+
+const REMINDER_LABELS: Record<DefaultReminder, MessageKey> = {
+  [-1]: 'reminderNone',
+  0: 'icsAlarm0',
+  10: 'icsAlarm10',
+  60: 'icsAlarm60',
+  1440: 'icsAlarm1440',
+};
 
 const THEMES: readonly [ThemePreference, MessageKey][] = [
   ['auto', 'themeAuto'],
@@ -342,6 +352,23 @@ export function SettingsDialog({ onClose, reminderTools }: SettingsDialogProps) 
                 <span>{t('weekNumbersLabel')}</span>
               </label>
             </div>
+          )}
+          {reminderTools && (
+            <label className="field">
+              <span>{t('defaultReminderLabel')}</span>
+              <select
+                value={settings.defaultReminder}
+                onChange={(e) =>
+                  update({ defaultReminder: Number(e.currentTarget.value) as DefaultReminder })
+                }
+              >
+                {DEFAULT_REMINDERS.map((m) => (
+                  <option key={m} value={m}>
+                    {t(REMINDER_LABELS[m])}
+                  </option>
+                ))}
+              </select>
+            </label>
           )}
           {reminderTools && <ReminderDiagnostics tools={reminderTools} />}
           {!persisted && (

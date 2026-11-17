@@ -48,6 +48,7 @@ describe('parseSettings is lenient field by field', () => {
       secondZone: 'Africa/Cairo',
       workHours: '9-17',
       defaultDuration: 30,
+      defaultReminder: 60,
     };
     expect(parseSettings(s, 'ar')).toEqual(s);
   });
@@ -184,6 +185,17 @@ describe('weekend (D-136)', () => {
     expect(parseSettings({ weekend: 'fri' }, 'en').weekend).toBe('fri');
     expect(parseSettings({ weekend: 'sun-mon' }, 'ar').weekend).toBe('fri');
     expect(parseSettings({ weekend: 6 }, 'en').weekend).toBe('sat-sun');
+  });
+});
+
+describe('defaultReminder (D-166)', () => {
+  it('is ten minutes, and only the offered values are kept', () => {
+    expect(defaultSettings('ar').defaultReminder).toBe(10);
+    expect(parseSettings({ defaultReminder: -1 }, 'ar').defaultReminder).toBe(-1);
+    expect(parseSettings({ defaultReminder: 1440 }, 'ar').defaultReminder).toBe(1440);
+    for (const bad of [7, '10', null, 99999]) {
+      expect(parseSettings({ defaultReminder: bad }, 'ar').defaultReminder).toBe(10);
+    }
   });
 });
 

@@ -40,6 +40,10 @@ export function workHoursRange(w: WorkHours): { start: number; end: number } | u
 export const DEFAULT_DURATIONS = [15, 30, 45, 60, 90, 120] as const;
 export type DefaultDuration = (typeof DEFAULT_DURATIONS)[number];
 
+/** The reminder a new event starts with, in minutes before; -1 for none (D-166). */
+export const DEFAULT_REMINDERS = [-1, 0, 10, 60, 1440] as const;
+export type DefaultReminder = (typeof DEFAULT_REMINDERS)[number];
+
 /** Days the Hijri date is moved by, to follow the local moon-sighting announcement (D-150). */
 export const HIJRI_ADJUSTS = [-2, -1, 0, 1, 2] as const;
 export type HijriAdjust = (typeof HIJRI_ADJUSTS)[number];
@@ -65,6 +69,8 @@ export interface Settings {
   readonly workHours: WorkHours;
   /** How long a new timed event lasts, in minutes (D-134). */
   readonly defaultDuration: DefaultDuration;
+  /** The reminder a new event starts with; used only where the phone can ring (D-166). */
+  readonly defaultReminder: DefaultReminder;
 }
 
 export const SETTINGS_KEY = 'nawy-today:settings:v1';
@@ -91,6 +97,7 @@ export function defaultSettings(locale: Locale): Settings {
     secondZone: '',
     workHours: 'off',
     defaultDuration: 60,
+    defaultReminder: 10,
   };
 }
 
@@ -125,6 +132,8 @@ export function parseSettings(raw: unknown, fallbackLocale: Locale): Settings {
         ? o['secondZone']
         : d.secondZone,
     defaultDuration: DEFAULT_DURATIONS.find((m) => m === o['defaultDuration']) ?? d.defaultDuration,
+    defaultReminder:
+      DEFAULT_REMINDERS.find((m) => m === o['defaultReminder']) ?? d.defaultReminder,
     workHours:
       typeof o['workHours'] === 'string' &&
       (o['workHours'] === 'off' || workHoursRange(o['workHours']) !== undefined)

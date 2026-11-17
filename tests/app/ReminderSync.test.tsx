@@ -35,6 +35,9 @@ function fakeScheduler(state: NotificationPermission): [ReminderScheduler, Call]
         calls.replaced.push(items.map((i) => ({ id: i.id, atMs: i.atMs, title: i.title })));
         return Promise.resolve();
       },
+      status: () => Promise.resolve({ permission: state, exactAlarm: 'granted', pending: 0 }),
+      sendTest: () => Promise.resolve(),
+      openExactAlarmSettings: () => Promise.resolve(),
     },
     calls,
   ];

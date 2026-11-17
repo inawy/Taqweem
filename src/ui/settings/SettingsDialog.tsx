@@ -22,10 +22,14 @@ import type {
 } from '@/features/settings';
 import { trapTab } from '@/lib/focusTrap';
 import { CloseIcon } from '@/ui/shell/Icons';
+import { ReminderDiagnostics } from './ReminderDiagnostics';
+import type { ReminderTools } from './ReminderDiagnostics';
 import { useRestoreFocus } from '@/ui/shell/useRestoreFocus';
 import { useSwipeClose } from '@/ui/shell/useSwipeClose';
 
 export interface SettingsDialogProps {
+  /** Only in the native app: shows the phone's reminder state and rings a test (D-163). */
+  readonly reminderTools?: ReminderTools | undefined;
   readonly onClose: () => void;
 }
 
@@ -82,7 +86,7 @@ const THEMES: readonly [ThemePreference, MessageKey][] = [
  * be six full-width boxes at the bottom of the side panel; the panel now keeps only the month and
  * the calendars, and these live here (D-095). Each change applies and is saved at once.
  */
-export function SettingsDialog({ onClose }: SettingsDialogProps) {
+export function SettingsDialog({ onClose, reminderTools }: SettingsDialogProps) {
   const t = useT();
   const { settings, update, persisted } = useSettings();
   const work = workHoursRange(settings.workHours);
@@ -339,6 +343,7 @@ export function SettingsDialog({ onClose }: SettingsDialogProps) {
               </label>
             </div>
           )}
+          {reminderTools && <ReminderDiagnostics tools={reminderTools} />}
           {!persisted && (
             <p role="status" className="muted">
               {t('notSaved')}

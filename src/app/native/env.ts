@@ -5,11 +5,18 @@ interface CapacitorGlobal {
   readonly isNativePlatform?: () => boolean;
 }
 
+interface NativeWindow {
+  readonly Capacitor?: CapacitorGlobal;
+  /** Put in the page by the Android shell itself. */
+  readonly androidBridge?: unknown;
+}
+
 export function isNativeApp(): boolean {
   if (typeof window === 'undefined') return false;
-  const cap = (window as unknown as { Capacitor?: CapacitorGlobal }).Capacitor;
+  const w = window as unknown as NativeWindow;
   try {
-    return cap?.isNativePlatform?.() === true;
+    // Either sign is enough: the global's helper, or the bridge only the Android shell injects.
+    return w.Capacitor?.isNativePlatform?.() === true || w.androidBridge !== undefined;
   } catch {
     return false;
   }

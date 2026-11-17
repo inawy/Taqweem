@@ -22,6 +22,7 @@ import { isNativeApp } from './native/env';
 import { capacitorScheduler } from './native/scheduler';
 import type { ReminderScheduler } from './native/scheduler';
 import { useReminderSync } from './native/useReminderSync';
+import type { ReminderTools } from '@/ui/settings/ReminderDiagnostics';
 import {
   installHelpFor,
   readInstallEnvironment,
@@ -114,10 +115,29 @@ function initialView(preferred: DefaultView): ViewKind {
 function phoneScheduler(
   reminders: boolean,
   injected: ReminderScheduler | undefined,
+  channelName: string,
+  now: () => number,
 ): ReminderScheduler | undefined {
   if (!reminders) return undefined;
   if (injected) return injected;
-  return isNativeApp() ? capacitorScheduler() : undefined;
+  return isNativeApp() ? capacitorScheduler(channelName, now) : undefined;
+}
+
+function reminderToolsOf(
+  scheduler: ReminderScheduler | undefined,
+  testTitle: string,
+  testBody: string,
+): ReminderTools | undefined {
+  if (!scheduler) return undefined;
+  return {
+    check: () => scheduler.status(),
+    test: async () => {
+      if ((await scheduler.permission(true)) !== 'granted') return 'denied';
+      await scheduler.sendTest(testTitle, testBody);
+      return 'sent';
+    },
+    openExactAlarmSettings: () => scheduler.openExactAlarmSettings(),
+  };
 }
 
 function browserWorkerContainer(): WorkerContainer | undefined {
@@ -275,9 +295,16 @@ function Calendar({
   const zone = useMemo(() => localTimeZone(), []);
 
   // Reminders ring only where the phone can ring them (D-161): the scheduler is the phone's own.
+  const channelName = t('reminderChannel');
+  const testTitle = t('diagTestTitle');
+  const testBody = t('diagTestBody');
   const scheduler = useMemo(
-    () => phoneScheduler(reminders, reminderScheduler),
-    [reminders, reminderScheduler],
+    () => phoneScheduler(reminders, reminderScheduler, channelName, now),
+    [reminders, reminderScheduler, channelName, now],
+  );
+  const reminderTools = useMemo(
+    () => reminderToolsOf(scheduler, testTitle, testBody),
+    [scheduler, testTitle, testBody],
   );
   const remindersSync = useReminderSync({
     scheduler,
@@ -791,7 +818,9 @@ function Calendar({
       )}
       {shortcutsOpen && <ShortcutsDialog onClose={() => setShortcutsOpen(false)} />}
       {aboutOpen && <AboutDialog onClose={() => setAboutOpen(false)} />}
-      {settingsOpen && <SettingsDialog onClose={() => setSettingsOpen(false)} />}
+      {settingsOpen && (
+        <SettingsDialog onClose={() => setSettingsOpen(false)} reminderTools={reminderTools} />
+      )}
       {dataOpen && tools && data.status === 'ready' && (
         <DataDialog
           tools={tools}

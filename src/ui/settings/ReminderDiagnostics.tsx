@@ -46,7 +46,10 @@ export function ReminderDiagnostics({ tools }: { readonly tools: ReminderTools }
       await Promise.race([
         job(),
         new Promise<never>((_, reject) => {
-          timer = setTimeout(() => reject(new Error(t('diagTimeout'))), tools.answerMs ?? ANSWER_MS);
+          timer = setTimeout(
+            () => reject(new Error(t('diagTimeout'))),
+            tools.answerMs ?? ANSWER_MS,
+          );
         }),
       ]);
     } catch (error) {

@@ -21,6 +21,7 @@ jobs:
       VERSION_CODE: ${{ github.run_number }}
       VERSION_NAME: '1.0.${{ github.run_number }}'
     steps:
+      - uses: actions/checkout@v4
       - name: The signing secrets must exist
         env:
           B64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
@@ -30,7 +31,6 @@ jobs:
             exit 1
           fi
           echo "$B64" | base64 -d > "$KEYSTORE_PATH"
-      - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: 22

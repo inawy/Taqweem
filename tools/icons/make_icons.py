@@ -5,48 +5,33 @@ Same 3x3 mark as every Nawy app, with the date "31" in the middle cell so the ca
 from the others (the way Google Calendar shows a date). The digits are drawn here as plain shapes, so
 no font is needed. Run: python3 tools/icons/make_icons.py  (needs Pillow and Playwright).
 """
-import math
 import os
 import sys
 
 TILE = '#111318'
 HERO, CORAL, LAV, SUN, MINT, BLUE = '#29CAC0', '#F5A5A2', '#D4BAF4', '#FCDB81', '#A5EBB8', '#709BD2'
-INK = '#FFFFFF'
 
+INK = '#E3E3E3'  # the digits: off-white, like the rest of Nawy's dark surfaces
 S = 12.0  # stroke
-R1, R2 = 15.0, 18.0  # radii of the two bowls of the 3
-H = 2 * R1 + 2 * R2 + S  # digit height
-
-
-def _pt(cx, cy, r, deg):
-    t = math.radians(deg)
-    return cx + r * math.cos(t), cy + r * math.sin(t)
+W3 = 32.0  # width of the 3
+H = 68.0  # digit height
 
 
 def digits() -> tuple[str, float, float]:
-    """The "31" as one SVG fragment, with its width and height, top-left at (0, 0)."""
-    cx = R2 + S / 2
-    c1 = S / 2 + R1
-    c2 = c1 + R1 + R2
-    a = _pt(cx, c1, R1, 200)
-    b = _pt(cx, c1, R1, 90)
-    c = _pt(cx, c2, R2, 270)
-    d = _pt(cx, c2, R2, 160)
-    three = (
-        f'<path d="M{a[0]:.2f} {a[1]:.2f} A{R1} {R1} 0 1 1 {b[0]:.2f} {b[1]:.2f}" />'
-        f'<path d="M{c[0]:.2f} {c[1]:.2f} A{R2} {R2} 0 1 1 {d[0]:.2f} {d[1]:.2f}" />'
+    """The "31" as blocky bars (sharp corners, like the cells), top-left at (0, 0)."""
+    mid = (H - S) / 2
+    bars = [
+        (0, 0, W3, S),  # top
+        (6, mid, W3 - 6, S),  # middle, shorter
+        (0, H - S, W3, S),  # bottom
+        (W3 - S, 0, S, H),  # the right side
+    ]
+    gap = 16.0
+    bars.append((W3 + gap, 0, S, H))  # the 1: a plain bar, no flag
+    frag = ''.join(
+        f'<rect x="{x}" y="{y}" width="{w}" height="{h}" fill="{INK}"/>' for x, y, w, h in bars
     )
-    w3 = 2 * (R2 + S / 2)
-    gap = 14.0
-    xb = w3 + gap + 17  # left edge of the stem of the 1 (the flag hangs to its left)
-    one = (
-        f'<path fill="{INK}" stroke="none" d="M{xb + S} 0 L{xb + S} {H} L{xb} {H} L{xb} 27 '
-        f'L{xb - 17} 36 L{xb - 17} 22 L{xb} 0 Z" />'
-    )
-    frag = (
-        f'<g fill="none" stroke="{INK}" stroke-width="{S}" stroke-linecap="butt">{three}</g>{one}'
-    )
-    return frag, xb + S, H
+    return frag, W3 + gap + S, H
 
 
 def mark(size: float, x: float, y: float, cell: float, digit_scale: float) -> str:

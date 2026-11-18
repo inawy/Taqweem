@@ -39,8 +39,9 @@ self.addEventListener('fetch', (event) => {
   if (request.method !== 'GET') return;
   if (new URL(request.url).origin !== self.location.origin) return;
 
-  if (request.mode === 'navigate') {
-    // One page app: every navigation inside the scope is the shell.
+  if (request.mode === 'navigate' && !new URL(request.url).pathname.endsWith('/privacy.html')) {
+    // One page app: every navigation inside the scope is the shell, except the privacy page, which
+    // is a document of its own that Google Play and visitors must be able to open (D-173).
     event.respondWith(
       caches
         .match('./index.html', { cacheName: CACHE, ignoreVary: true })

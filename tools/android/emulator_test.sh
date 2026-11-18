@@ -2,7 +2,7 @@
 # Runs inside an Android emulator (D-168): installs the APK, drives the real app and asks the phone
 # whether the reminder was scheduled and shown. Everything useful is printed to the job log.
 set -u
-PKG=app.nawy.taqweem
+PKG=taqweem.nawy.app
 APK=${1:?apk path}
 OUT=${2:-emulator-out}
 mkdir -p "$OUT"

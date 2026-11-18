@@ -212,6 +212,14 @@ describe('service worker', () => {
     expect(w.log.fetched).toEqual([]);
   });
 
+  it('serves the privacy page as itself, not as the app shell (D-173)', async () => {
+    const w = boot('abcdef012345', ['index.html', 'privacy.html']);
+    await w.waitable('install');
+    expect(
+      await w.respond({ url: 'https://app.test/today/privacy.html', mode: 'navigate' }),
+    ).toEqual({ body: 'cached:https://app.test/today/privacy.html' });
+  });
+
   it('falls back to the network only for what is not cached', async () => {
     const w = boot();
     await w.waitable('install');

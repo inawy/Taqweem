@@ -31,6 +31,12 @@ jobs:
         run: npm run build
       - name: Generate the Android project
         run: npx cap add android
+      - name: Taqweem icons (D-171)
+        run: |
+          res=android/app/src/main/res
+          find "$res" -name 'ic_launcher*' -delete
+          rm -f "$res/drawable/ic_launcher_background.xml" "$res/drawable-v24/ic_launcher_foreground.xml"
+          cp -r tools/android/res/. "$res/"
       - name: Reminder permissions
         run: python3 tools/android/patch_manifest.py android/app/src/main/AndroidManifest.xml
       - name: Copy the web app into it

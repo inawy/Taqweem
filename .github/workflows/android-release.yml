@@ -1,0 +1,75 @@
+name: android-release
+
+# Builds the signed Android App Bundle (.aab) to upload to Google Play (D-172). Run by hand. It needs
+# three repository secrets (Settings -> Secrets and variables -> Actions): ANDROID_KEYSTORE_BASE64,
+# ANDROID_KEYSTORE_PASSWORD, ANDROID_KEY_ALIAS. The key itself never lives in the repository.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write # to attach the bundle to a draft release
+
+jobs:
+  bundle:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      KEYSTORE_PATH: ${{ github.workspace }}/upload.p12
+      KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+      KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+      # Play needs a larger number with every upload; the run number only grows.
+      VERSION_CODE: ${{ github.run_number }}
+      VERSION_NAME: '1.0.${{ github.run_number }}'
+    steps:
+      - name: The signing secrets must exist
+        env:
+          B64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+        run: |
+          if [ -z "$B64" ] || [ -z "$KEYSTORE_PASSWORD" ] || [ -z "$KEY_ALIAS" ]; then
+            echo "::error::Add ANDROID_KEYSTORE_BASE64, ANDROID_KEYSTORE_PASSWORD and ANDROID_KEY_ALIAS as repository secrets (see docs/PLAY_LISTING.md)."
+            exit 1
+          fi
+          echo "$B64" | base64 -d > "$KEYSTORE_PATH"
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - name: Install
+        run: npm ci
+      - name: Build the web app
+        run: npm run build
+      - name: Generate the Android project
+        run: npx cap add android
+      - name: Taqweem icons (D-171)
+        run: |
+          res=android/app/src/main/res
+          find "$res" -name 'ic_launcher*' -delete
+          rm -f "$res/drawable/ic_launcher_background.xml" "$res/drawable-v24/ic_launcher_foreground.xml"
+          cp -r tools/android/res/. "$res/"
+      - name: Reminder permissions
+        run: python3 tools/android/patch_manifest.py android/app/src/main/AndroidManifest.xml
+      - name: Version and release signing
+        run: python3 tools/android/patch_gradle.py android/app/build.gradle
+      - name: Copy the web app into it
+        run: npx cap sync android
+      - name: Build the signed bundle
+        working-directory: android
+        run: ./gradlew bundleRelease --no-daemon --stacktrace
+      - name: Show who signed it
+        run: |
+          keytool -printcert -jarfile android/app/build/outputs/bundle/release/app-release.aab | grep -E "Owner|SHA256" || true
+      - name: Keep the bundle
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cp android/app/build/outputs/bundle/release/app-release.aab "taqweem-${VERSION_NAME}.aab"
+          gh release create "aab-${VERSION_NAME}" "taqweem-${VERSION_NAME}.aab" \
+            --draft \
+            --target "$GITHUB_SHA" \
+            --title "Play bundle ${VERSION_NAME}" \
+            --notes "Signed App Bundle for Google Play, built from $GITHUB_SHA. Upload it in Play Console."

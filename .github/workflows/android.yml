@@ -63,3 +63,17 @@ jobs:
             --target "$GITHUB_SHA" \
             --title "Taqweem debug APK" \
             --notes "A debug build for trying reminders on a phone (D-162), built from $GITHUB_SHA. Signed with a debug key: for testing only, not for the Play Store. Replaced by the next build."
+      - name: Dry run of the Play bundle with a throwaway key (D-172)
+        env:
+          KEYSTORE_PATH: ${{ github.workspace }}/throwaway.p12
+          KEYSTORE_PASSWORD: throwaway-pass
+          KEY_ALIAS: throwaway
+          VERSION_CODE: '1'
+          VERSION_NAME: '0.0.0-dryrun'
+        run: |
+          keytool -genkeypair -storetype PKCS12 -keystore "$KEYSTORE_PATH" -alias throwaway \
+            -storepass "$KEYSTORE_PASSWORD" -keypass "$KEYSTORE_PASSWORD" -keyalg RSA -keysize 2048 \
+            -validity 2 -dname "CN=Throwaway"
+          python3 tools/android/patch_gradle.py android/app/build.gradle
+          cd android && ./gradlew bundleRelease --no-daemon
+          ls -la app/build/outputs/bundle/release/

@@ -17,6 +17,8 @@ export interface ReminderTools {
   /** Asks for permission if needed, then schedules the test one. */
   test(): Promise<'sent' | 'denied'>;
   openExactAlarmSettings(): Promise<void>;
+  /** How long to wait for the phone; 10 seconds when not given. */
+  readonly answerMs?: number | undefined;
 }
 
 /** The phone must answer within this; a call that never returns is shown, not waited on forever. */
@@ -44,7 +46,7 @@ export function ReminderDiagnostics({ tools }: { readonly tools: ReminderTools }
       await Promise.race([
         job(),
         new Promise<never>((_, reject) => {
-          timer = setTimeout(() => reject(new Error(t('diagTimeout'))), ANSWER_MS);
+          timer = setTimeout(() => reject(new Error(t('diagTimeout'))), tools.answerMs ?? ANSWER_MS);
         }),
       ]);
     } catch (error) {

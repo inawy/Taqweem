@@ -1,9 +1,11 @@
 import 'fake-indexeddb/auto';
-import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { App } from '@/app/App';
 import type { ReminderScheduler, ReminderStatus } from '@/app/native/scheduler';
 import { createDb } from '@/data';
+import { SettingsProvider } from '@/features/settings';
+import { ReminderDiagnostics } from '@/ui/settings/ReminderDiagnostics';
 
 const NOW = () => Date.UTC(2026, 9, 13, 12, 0);
 
@@ -103,23 +105,21 @@ describe('the reminder check in Settings (D-163)', () => {
   });
 
   it('shows the app version, and says so when the phone never answers', async () => {
-    vi.useFakeTimers({ shouldAdvanceTime: true });
-    try {
-      const { scheduler } = fake({ permission: 'granted', exactAlarm: 'granted', pending: 0 });
-      const hanging: ReminderScheduler = {
-        ...scheduler,
-        status: () => new Promise(() => undefined),
-      };
-      const dialog = await openSettings(true, hanging);
-      expect(within(dialog).getByText(/App version: /)).toBeTruthy();
-      fireEvent.click(within(dialog).getByRole('button', { name: 'Check now' }));
-      expect(within(dialog).getByText('Checking…')).toBeTruthy();
-      await act(async () => {
-        await vi.advanceTimersByTimeAsync(10_500);
-      });
-      expect(within(dialog).getByText(/did not answer within 10 seconds/)).toBeTruthy();
-    } finally {
-      vi.useRealTimers();
-    }
+    render(
+      <SettingsProvider storage={memoryStorage()} languages={['en']}>
+        <ReminderDiagnostics
+          tools={{
+            check: () => new Promise(() => undefined),
+            test: () => Promise.resolve('sent'),
+            openExactAlarmSettings: () => Promise.resolve(),
+            answerMs: 50,
+          }}
+        />
+      </SettingsProvider>,
+    );
+    expect(screen.getByText(/App version: /)).toBeTruthy();
+    fireEvent.click(screen.getByRole('button', { name: 'Check now' }));
+    expect(screen.getByText('Checking…')).toBeTruthy();
+    expect(await screen.findByText(/did not answer within 10 seconds/)).toBeTruthy();
   });
 });

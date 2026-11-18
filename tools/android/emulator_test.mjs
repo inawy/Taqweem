@@ -92,6 +92,15 @@ log('diagnostics:', JSON.stringify(await ev(`${HELPERS}
   const check = [...document.querySelectorAll('button')].find((b) => /Check now|افحص الآن/.test(b.textContent));
   check?.click(); await wait(3000);
   return [...document.querySelectorAll('.reminder-diag-list li')].map((l) => l.textContent);`)));
+// The test reminder button, as the person presses it.
+log('test button:', JSON.stringify(await ev(`${HELPERS}
+  const btn = [...document.querySelectorAll('button')].find((b) => /Send a test reminder|أرسل تذكيرًا تجريبيًا/.test(b.textContent));
+  btn?.click(); await wait(3000);
+  return { found: !!btn, notes: [...document.querySelectorAll('.reminder-diag p, .muted')].map((p) => p.textContent) };`)));
+await sleep(15_000);
+const afterTest = execSync('adb shell dumpsys notification --noredact').toString();
+const testShown = /android\.title=String \((Taqweem test|تجربة تقويم)\)/.test(afterTest);
+log('test notification posted:', testShown);
 await ev(`document.querySelector('.modal [aria-label]')?.dispatchEvent(new KeyboardEvent('keydown', { code: 'Escape', bubbles: true }));`);
 
 log('waiting for the reminder to ring…');
@@ -99,4 +108,12 @@ await sleep(150_000);
 execSync('adb shell cmd statusbar expand-notifications');
 await sleep(2000);
 execSync(`adb exec-out screencap -p > ${out}/shade.png`);
+const finalDump = execSync('adb shell dumpsys notification --noredact').toString();
+const eventShown = /android\.title=String \(Emulator test\)/.test(finalDump);
+log('event reminder posted:', eventShown);
 ws.close();
+if (!testShown || !eventShown) {
+  log('FAILED: test notification =', testShown, ', event reminder =', eventShown);
+  process.exit(1);
+}
+log('OK: both notifications were posted');

@@ -172,16 +172,13 @@ await session('light', {}, async (page, shot) => {
   await shot('02-month');
   await chooseView(page, '3 أيام');
   await shot('03-days3');
-  await chooseView(page, 'سنة');
-  // November is the 11th month: bring it to the top instead of showing January.
-  await page.locator('.year-month').nth(10).evaluate((el) => el.scrollIntoView({ block: 'start' }));
-  await shot('04-year');
 });
 
+// The year view is left out too: it opens cut off in the middle of the previous month.
 await session('dark', { colorScheme: 'dark' }, async (page, shot) => {
-  await shot('05-agenda-dark');
+  await shot('04-agenda-dark');
   await chooseView(page, 'شهر');
-  await shot('06-month-dark');
+  await shot('05-month-dark');
 });
 
 await browser.close();

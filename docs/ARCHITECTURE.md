@@ -41,4 +41,4 @@ docs/          PRODUCT_SPEC · BUILD_PLAN · DECISIONS · ARCHITECTURE
 - لا `dangerouslySetInnerHTML` (قاعدة lint).
 
 ## مرجع النظام المشترك (D-080)
-المرجع المشترك `inawy/design-system` يحكم الأيقونات (Material Symbols Outlined، أصول محلية في `src/assets/icons/`) وتسمية الـtokens (`--nawy-*`). الاستثناءات المقصودة عنه موثقة في D-080 (خط IBM Plex، بلا Tailwind/Zod).
+المرجع المشترك `nawy-dev/design-system` يحكم الأيقونات (Material Symbols Outlined، أصول محلية في `src/assets/icons/`) وتسمية الـtokens (`--nawy-*`). الاستثناءات المقصودة عنه موثقة في D-080 (خط IBM Plex، بلا Tailwind/Zod).

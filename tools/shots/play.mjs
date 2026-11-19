@@ -4,7 +4,10 @@
 // most twice the short side, under 8 MB). Not a test: it only prints `[play] ...` lines.
 //
 // Limit: this is Chromium, not the installed app. Things that only exist in the Android app (the
-// reminder field, system bars) are not in these pictures.
+// reminder field, system bars) are not in these pictures. For the same reason the event card and
+// the editor are NOT taken here: the web build shows "send to your phone's calendar" with a line
+// saying the app sends no notifications, which is false in the Android app (D-166, D-167). Those two
+// screens must come from the emulator.
 import { chromium } from '@playwright/test';
 import { mkdirSync, statSync } from 'node:fs';
 
@@ -67,6 +70,18 @@ async function seed(page) {
       ev('e15', 'cal-work', 'مراجعة الميزانية', 13, '10:00', '11:00'),
       ev('e16', 'cal-personal', 'نادي رياضي', 15, '18:30', '19:30'),
       ev('e17', 'cal-family', 'غداء العائلة', 19, '13:00', '15:00'),
+      // Earlier in the month, so the month view is not empty before today.
+      ev('p1', 'cal-work', 'اجتماع الفريق', -20, '09:00', '10:00'),
+      ev('p2', 'cal-personal', 'نادي رياضي', -18, '18:30', '19:30'),
+      ev('p3', 'cal-family', 'عشاء العائلة', -16, '20:00', '22:00'),
+      ev('p4', 'cal-work', 'مراجعة المشروع', -14, '10:00', '11:30'),
+      ev('p5', 'cal-personal', 'غداء مع أحمد', -12, '13:00', '14:00'),
+      ev('p6', 'cal-work', 'اجتماع الفريق', -13, '09:00', '10:00'),
+      ev('p7', 'cal-family', 'زيارة الجدة', -9, '17:00', '19:00'),
+      ev('p8', 'cal-personal', 'قراءة', -7, '21:00', '22:00'),
+      ev('p9', 'cal-work', 'عرض تقديمي', -6, '11:00', '12:00'),
+      ev('p10', 'cal-personal', 'موعد الحلاق', -4, '16:00', '16:45'),
+      ev('p11', 'cal-family', 'أخذ الأولاد من المدرسة', -3, '15:30', '16:00'),
       allDay('a1', 'cal-family', 'إجازة المدرسة', 2, 3),
       allDay('a2', 'cal-personal', 'عيد ميلاد سارة', 5),
       allDay('a3', 'cal-work', 'مؤتمر', 12, 2),
@@ -115,8 +130,10 @@ function checkPlayRules(file, buffer) {
 
 async function session(name, contextOptions, steps) {
   const context = await browser.newContext({
-    viewport: { width: 360, height: 700 },
-    deviceScaleFactor: 3,
+    // 400 x 760 css px at 2.7x is about 1080 x 2052: a normal Android phone, and wide enough that
+    // the header date is not cut off (it is at 360).
+    viewport: { width: 400, height: 760 },
+    deviceScaleFactor: 2.7,
     isMobile: true,
     hasTouch: true,
     locale: 'ar-SA',
@@ -148,29 +165,23 @@ async function session(name, contextOptions, steps) {
   await context.close();
 }
 
+// The week view is left out: seven columns on a phone cut the titles into single letters.
 await session('light', {}, async (page, shot) => {
-  await shot('agenda');
-  await page.getByRole('button', { name: /اجتماع الفريق/ }).first().click();
-  await shot('card');
-  await page.keyboard.press('Escape');
+  await shot('01-agenda');
   await chooseView(page, 'شهر');
-  await shot('month');
-  await chooseView(page, 'أسبوع');
-  await shot('week');
+  await shot('02-month');
   await chooseView(page, '3 أيام');
-  await shot('days3');
+  await shot('03-days3');
   await chooseView(page, 'سنة');
-  await shot('year');
-  await chooseView(page, 'يوم');
-  await page.getByRole('button', { name: 'إضافة حدث' }).click();
-  await page.locator('input[type="text"], input:not([type])').first().fill('موعد الطبيب');
-  await shot('editor');
+  // November is the 11th month: bring it to the top instead of showing January.
+  await page.locator('.year-month').nth(10).evaluate((el) => el.scrollIntoView({ block: 'start' }));
+  await shot('04-year');
 });
 
 await session('dark', { colorScheme: 'dark' }, async (page, shot) => {
-  await shot('agenda-dark');
+  await shot('05-agenda-dark');
   await chooseView(page, 'شهر');
-  await shot('month-dark');
+  await shot('06-month-dark');
 });
 
 await browser.close();

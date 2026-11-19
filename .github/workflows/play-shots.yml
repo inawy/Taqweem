@@ -1,0 +1,41 @@
+name: play-shots
+
+# Google Play phone screenshots (D-176): builds the app, takes the store pictures of the real screens
+# (tools/shots/play.mjs) and pushes them to the `play-shots` branch (force-pushed; PNGs only) so they
+# can be looked at and copied into tools/android/play/screenshots.
+on:
+  push:
+    branches: ['play-screenshots']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  shots:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - run: npx playwright install --with-deps chromium
+      - name: Serve the build
+        run: |
+          nohup npx vite preview --port 4174 --strictPort > preview.log 2>&1 &
+          for i in $(seq 1 30); do curl -sf http://localhost:4174/ > /dev/null && break; sleep 1; done
+      - run: bash tools/ci-run.sh e2e node tools/shots/play.mjs
+      - name: Publish screenshots
+        if: always()
+        run: |
+          cd shots
+          git init -q
+          git config user.name "shots-bot"
+          git config user.email "shots-bot@users.noreply.github.com"
+          git checkout -q -b play-shots
+          git add -A
+          git commit -q -m "play screenshots of ${GITHUB_SHA}"
+          git push -q -f "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}" HEAD:refs/heads/play-shots
